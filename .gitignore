@@ -1,0 +1,8 @@
+# Exclude virtual environment folder
+venv/
+build/
+dist/
+__pycache__/
+
+# Exclude log files
+*.log
