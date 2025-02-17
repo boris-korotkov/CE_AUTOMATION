@@ -31,10 +31,20 @@ def load_instances(emulator_type="Nox"):
         logging.error(f"No '{section}' section found in INI file.")
         raise KeyError(f"Missing '{section}' section in INI file.")
     
-    instances = config[section]
-    if not instances:
-        logging.error(f"No {emulator_type} instances found in the INI file.")
-        raise ValueError(f"{section} section is empty or improperly configured.")
+    instances = {}
+    for key in config[section]:
+        if key.endswith('_command'):
+            instance_name = key.replace('_command', '')
+            command = config[section][key]
+            language_key = f"{instance_name}_language"
+            language = config[section].get(language_key, 'en')  # Default to 'en' if not specified
+            instances[instance_name] = {"command": command, "language": language}
+    
+
+    # instances = config[section]
+    # if not instances:
+    #     logging.error(f"No {emulator_type} instances found in the INI file.")
+    #     raise ValueError(f"{section} section is empty or improperly configured.")
     
     logging.info(f"Found {len(instances)} {emulator_type} instances.")
     return instances

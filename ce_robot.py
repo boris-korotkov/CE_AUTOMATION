@@ -9,6 +9,10 @@ def setup_logging():
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
+    # Remove all existing handlers
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+
     # Create a log file handler
     log_filename = f"logs/CE_robot_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
     file_handler = logging.FileHandler(log_filename)
@@ -46,15 +50,17 @@ def main():
         print(f"Using Emulator Type: {emulator_type}")
         
         # Load preferred language
-        language = load_language()
-        logging.info(f"Preferred language: {language}")
-        print(f"Selected Language: {language}")
+        # language = load_language()
+        # logging.info(f"Preferred language: {language}")
+        # print(f"Selected Language: {language}")
 
         # Load instances from the INI file
         instances = load_instances(emulator_type)
         
         # Process each instance
-        for name, command in instances.items():
+        for name, details in instances.items():
+            command = details["command"]
+            language = details["language"]
             process = None
             try:
                 logging.info(f"Using language: {language} for instance: {name}")
@@ -64,7 +70,7 @@ def main():
                 logging.error(f"Error with instance {name}: {e}")
             finally:
                 if process:
-                    terminate_instance(process,emulator_type)
+                    terminate_instance(process, emulator_type)
 
     except Exception as e:
         logging.critical(f"Critical error in automation: {e}")
