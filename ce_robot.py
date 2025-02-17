@@ -2,8 +2,7 @@ from ce_config import load_instances, load_language, load_emulator_type
 from ce_launcher import launch_instance, terminate_instance
 from datetime import datetime
 import logging
-
-import logging
+import time
 
 def setup_logging():
     # Create a logger
@@ -11,7 +10,7 @@ def setup_logging():
     logger.setLevel(logging.DEBUG)
 
     # Create a log file handler
-    log_filename = f"automation_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
+    log_filename = f"logs/CE_robot_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
     file_handler = logging.FileHandler(log_filename)
     file_handler.setLevel(logging.INFO)
 
