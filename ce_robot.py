@@ -1,77 +1,68 @@
-from ce_config import load_instances, load_language, load_emulator_type
+from ce_config import load_instances, load_emulator_type
 from ce_launcher import launch_instance, terminate_instance
-from datetime import datetime
 import logging
 import time
 
 def setup_logging():
-    # Create a logger
+    """Sets up logging for the script."""
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-
-    # Remove all existing handlers
+    
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)
-
-    # Create a log file handler
+    
     log_filename = f"logs/CE_robot_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
     file_handler = logging.FileHandler(log_filename)
     file_handler.setLevel(logging.INFO)
-
-    # Create a console (stream) handler
+    
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)  # Show DEBUG messages in the console
-
-    # Create a formatter and add it to both handlers
+    console_handler.setLevel(logging.DEBUG)
+    
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
-
-    # Add the handlers to the logger
+    
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
-
+    
     logging.info("Logging setup complete.")
 
-# Call setup_logging() at the beginning of your script
-setup_logging()
-
-
 def main():
-    """
-    Main function to execute emulator instance automation.
-    """
+    """Main function to execute emulator instance automation."""
     setup_logging()
-
+    
     try:
-        # User selects emulator type
         emulator_type = load_emulator_type()
         logging.info(f"Preferred emulator type: {emulator_type}")
         print(f"Using Emulator Type: {emulator_type}")
         
-        # Load preferred language
-        # language = load_language()
-        # logging.info(f"Preferred language: {language}")
-        # print(f"Selected Language: {language}")
-
-        # Load instances from the INI file
-        instances = load_instances(emulator_type)
+        instances = load_instances()
         
-        # Process each instance
         for name, details in instances.items():
-            command = details["command"]
-            language = details["language"]
+            command = details.get(f"{emulator_type}_command")
+            language = details.get("language", "en")
+            scenarios = details.get("scenario", [])
             process = None
+            
+            if not command:
+                logging.warning(f"Skipping instance {name} - No command found for {emulator_type}.")
+                continue
+            
             try:
-                logging.info(f"Using language: {language} for instance: {name}")
+                logging.info(f"Launching instance: {name} | Language: {language} | Scenarios: {', '.join(scenarios)}")
                 process = launch_instance(name, command)
+                
+                for scenario in scenarios:
+                    logging.info(f"Executing scenario: {scenario} for instance: {name}")
+                    # TODO: Implement scenario execution logic
+                    
                 input(f"Press Enter to close {name} and proceed to the next instance...")
             except Exception as e:
                 logging.error(f"Error with instance {name}: {e}")
             finally:
                 if process:
                     terminate_instance(process, emulator_type)
-
+    
     except Exception as e:
         logging.critical(f"Critical error in automation: {e}")
     finally:
