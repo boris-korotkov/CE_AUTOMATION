@@ -1,4 +1,4 @@
-from ce_config import load_instances, load_emulator_type
+from ce_config import load_instances, load_emulator_type, connect_adb_to_instance
 from ce_launcher import launch_instance, terminate_instance
 import logging
 import time
@@ -51,11 +51,18 @@ def main():
             try:
                 logging.info(f"Launching instance: {name} | Language: {language} | Scenarios: {', '.join(scenarios)}")
                 process = launch_instance(name, command)
-                
+
+                # Connect ADB to the emulator instance
+                adb_id = connect_adb_to_instance(name, logger=logging)
+                if adb_id:
+                    logging.info(f"ADB connected to {adb_id} for instance {name}.")
+                else:
+                    logging.warning(f"ADB connection failed for instance {name}.")
+
                 for scenario in scenarios:
                     logging.info(f"Executing scenario: {scenario} for instance: {name}")
                     # TODO: Implement scenario execution logic
-                    
+                
                 input(f"Press Enter to close {name} and proceed to the next instance...")
             except Exception as e:
                 logging.error(f"Error with instance {name}: {e}")
