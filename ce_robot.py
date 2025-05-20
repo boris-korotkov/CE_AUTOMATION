@@ -39,7 +39,7 @@ def main():
         instances = load_instances()
         
         for name, details in instances.items():
-            command = details.get(f"{emulator_type}_command")
+            command = details.get(f"{emulator_type.lower()}_command")
             language = details.get("language", "en")
             scenarios = details.get("scenario", [])
             process = None

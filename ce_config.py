@@ -7,9 +7,9 @@ def load_emulator_type():
     """
     logging.info("Loading preferred emulator type from the INI file.")
     config = configparser.ConfigParser()
-    config.read("instances.ini")
+    config.read("workflow.ini")
     
-    return config.get("EmulatorType", "Preferred", fallback="Nox").strip()
+    return config.get("EmulatorType", "Preferred", fallback="BlueStacks").strip()
 
 def load_instances():
     """
@@ -18,7 +18,7 @@ def load_instances():
     """
     logging.info("Loading instances from the INI file.")
     config = configparser.ConfigParser()
-    config.read("instances.ini")
+    config.read("workflow.ini")
     
     instances = {}
     emulator_type = load_emulator_type().lower()
@@ -32,6 +32,7 @@ def load_instances():
         
         for key, value in config[section].items():
             key_lower = key.lower()
+            print(f"Processing key: {key_lower} with value: {value}")
             if key_lower in ["nox_command", "bluestacks_command"]:
                 instances[instance_name][key_lower] = value.strip()
             elif key_lower == "language":
