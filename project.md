@@ -1,20 +1,18 @@
-Project Name: CE_AUTOMATION
+  Project Name: CE_AUTOMATION
 
 Product Requirements Document
 
 Purpose: 
 I want to automate daily routine and weekly event playing in Clone Evolution mobile game.
-Th automation is to work on a regular computer with Windows 11 OS and with an Android Emulator installed.
-The program has to by in Python and is to support BlueStacks and Nox emulators  as well as  multiple languages available in my game interface.
+Th automation is to work on a regular computer with Windows 10 or Windows 11 OS and with an Android Emulator installed (Bluestacks or NOX).
+The program has to by in Python and is to support multiple languages available in my game interface.
 
 Product overview:
-The product should allow me to run the different workflows. Each workflow represents an INI file with Emulator instances list and scenario items. A separate scenario list is to reside in the resources folder under a sub-folder which represent a language.
-I plan to create a final executable file and run it with a workflow name as an argument.
-The program is to start Emulator instances and execute the defined scenarios.
-All events are to be logged and each run is to create a log file with the timestamp in the logs sub-folder.
+The program should allow me to run the different workflows. Each workflow represents an element of daily routine like buying resources in the store, collect resources from campaign, send flowers to friends, etc. Each emulator instance may have different workflows. The workflows definition and emulator instance configuration is to be store externally in either INI, CFG, or JSON file. Since a workflow depend on game interfacee language (labels and images) it makes sense to keep workflows and respective language depended resources in a folder with language abbreviation. E.g., "resources\en", ""resources\ru" , etc. The emulator instance configuration should have a reference to the languge used by emulator instance. As soon as program is strated it should scan emulator instance configuration file, start the instances from the file one by one and execure workflows defined for each instance. 
+All events are to be logged and each program run is to create a log file with the timestamp in the logs sub-folder.
 
 Stakeholders / Users: 
-Myself or/nad users from the game community
+Myself or/and users from the game community
 
 Assumptions and Constraints :
 The game UI remains relatively static between versions.
@@ -22,8 +20,8 @@ Outlook must be installed and configured on the system.
 
 In-Scope Must Features:
 1. The program shouldn't impact the user's work at the computer.
-Thus, the interaction with running emulator isntance is to be done via  (Android Debug Bridge) ADB protocol. The port number for each instance as well as instance start command with instance name will be defined in the workflow.ini for each instance
-An exanple of workflow.ini file is below.
+Thus, the interaction with running emulator isntance is to be done via  (Android Debug Bridge) ADB protocol. The port number for each instance as well as instance start command with instance name will be defined in the emulator instance configuration file.
+Here is an example:
 [EmulatorType]
 Preferred = bluestacks
 [CE_2024_5]
@@ -31,15 +29,15 @@ nox_command = "C:\Program Files\Nox\bin\Nox.exe" -clone:Nox_15 -startPackage:com
 bluestacks_command = "C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Rvc64_14 --cmd launchAppWithBsx --package "com.feelingtouch.clonewar"
 adb_port = 5695
 language = en
-scenario = Supply_Depot_Farming, Guild_Event_Check
+workflows = Supply_Depot_Farming, Guild_Event_Check
 [Adidas]
 nox_command = "C:\Program Files\Nox\bin\Nox.exe" -clone:Nox_1 -startPackage:com.feelingtouch.clonewar
 bluestacks_command = "C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Rvc64_5 --cmd launchAppWithBsx --package "com.feelingtouch.clonewar"
 adb_port = 5605
 language = ru
-scenario = Supply_Depot_Farming, Guild_Event_Check
-2. After instance is started is has to run a series of clicks, screen area captures, and captured areas assessment described in the scenarios file which can can either INI, YAML, or JSON. 
-3. The commands should follow a pre-defined patterns and should allow new commands if needed. The command examples with expected actions are below. All coordinates are to be relative to the emulator window. 
+workflows = Supply_Depot_Farming, Guild_Event_Check
+2. After an instance is started is has to run a series of clicks, screen area captures, and captured areas assessment described in the workflow file which can can either INI, YAML, or JSON. 
+3. The commands should follow a pre-defined patterns and should allow new commands to be added if needed. The command examples with expected actions are below. All coordinates are to be relative to the emulator window. 
 3a. delay(10) - pause execution for 10 second; 
 3b. click(100,200) - click on point with coordinates x=100 and y=200; 
 3c. compare_with_text(200,300, 80, 20, 'Guild') - capture a window area with top left corner coordinates x=200 and y=300, with width =80 and height=20, convert the captured area to text and compare the converted text with 'Guild'. The command result should return either True or False
@@ -102,28 +100,19 @@ The above 'Supply Depot Farming' scenario represent a user story when the user s
 If 3 red blueprints resource found, click on it, blick Buy in the opened window and them confirm clicking on Claim button in the next opened window to finilize a purchase. click on back-arrow in the top-left window corner to exit from 'Supply deport'.
 
 5. The program should log all events in a log file with timestamp in the name.
-6. The captured area is to be stored in the program location. In case of the error or misinterpretation of recognized text or picture I will be able to see what was captured.
+6. The captured area is to be stored in the program location. In case of the error or misinterpretation of recognized text or picture a user should be able to see the mostrecent captured image.
 7. If emulator window is not responding certain time, the instance is to be restarted and the scenario is to be continued from the place where it was stopped.
-8. The compare_with_image method in the scenario is to compare captured area with saved image not exactly, but approximatly because the saved image will be captured manually and captured area may be different by approximatly 10-20 pixel. Ideally, it would be nice to have the matching accuracy requirement adjustable by user in the scenario or in the program code. I'll try to manually find a value that works.
+8. The compare_with_image method in the scenario is to compare captured area with pre-saved image not exactly, but approximatly because the saved image will be captured manually and captured area may be different by approximatly 10-20 pixel. Ideally, it would be nice to have the matching accuracy requirement adjustable by user in the scenario or in the program code. A user will manually find a threshold value that works.
 9. Since the programn is to maintain multiple game interace language, I believe scenario YAML file is to be defined for each language and resides in a sub-folder with language name. E.g., 'en', 'ru', etc. This folder will not only inlude scenario file but also pre-saved images that can also be different for different game interface language.
 
 In-Scope optional Features:
 20. There is a hot key to pause script execution, resume and stop. Ideally they have to be defined in program ini file to allow user to change them if needed. The hotkeys should not overlap with the most popular Window hot keys like CTRL+C, CTRIL+V, or CTRL+S. For example we can use CTRL+P for pause, CTRL+R for resume and CTRL+H for stop program execution.
-21. Scenario variables are stored in a global context dictionary during execution. They can be created, modified, and used in conditions.
-Example:
-- set: { last_kun_change_time: datetime.now() }
-- capture_text: [100, 100, 50, 20, current_kun_count]
-- if:
-    condition: "${current_kun_count} != ${previous_kun_count}"
-    then:
-      - calculate: { time_diff: "datetime.now() - last_kun_change_time" }
-      - send_email: "Kun count changed to ${current_kun_count} after ${time_diff.seconds} seconds."
 22. Some game events may have text displied with a minor angle to the left or to the right. Ideally, compare_with_text function should be able to handle that. If not, I will have to use compare_with_image instead.
 
 Non-Functional Requirements: 
 30. The program is to be terminal window program with execution messages visible in the terminal window. After program is finished there is no need to keep the terminal window open because log file will have all displayed messages included.
 31. The program should be compatible with Windows 10 and windows 11
-32. After  program is finished all used libraries shoudln't be updated to avoid any failure in the future due to library changes
+32. After program development is finished all used Python library versions shold be fixed and not automatically updated in the future to avoid the failures due to the library changes
 33. The version of Bluestacks I plan to use as my preferred emulator type is 5.22.51.10.38. A potential Nox version 7.0.6.1
 34. An example of log file. File name: CE_robot_2025-05-19_23-06-13.log
 File content:

@@ -1,0 +1,10 @@
+scenarios:
+  - name: Send_flowers_to_friends
+    description: Send flowers to friends
+    steps:
+      - click: [60, 680]
+      - click: [730, 670]
+      - click: [640, 505]
+      - click: [965, 670]
+      - click: [640, 505]
+  
