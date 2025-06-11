@@ -2,17 +2,22 @@ import argparse
 import os
 import sys
 import time
+import logging
+import subprocess # We need this for the new connection logic
 import ce_actions
-import ce_interactive  # Import the new interactive module
+import ce_interactive
+from ce_workflow_engine import WorkflowEngine
 
 # --- CONFIGURATION ---
-# DEFAULT_ADB_ID = "127.0.0.1:5695" #2024.5
 DEFAULT_ADB_ID = "127.0.0.1:5685" #2024.4
+# DEFAULT_ADB_ID = "127.0.0.1:5695" #2024.5
+# DEFAULT_ADB_ID = "127.0.0.1:5605" #Adidas
 DEFAULT_LANGUAGE = "en"
+# Set the name of the scenario from workflows.yaml you want to test with option 9
+DEFAULT_TEST_SCENARIO = "Daily_rewards" # <-- ADDED CONFIGURATION
 # ---------------------
 
 def get_coords(prompt="Enter coordinates as X,Y: "):
-    # ... (this function remains the same)
     while True:
         try:
             val = input(prompt)
@@ -22,7 +27,6 @@ def get_coords(prompt="Enter coordinates as X,Y: "):
             print("Invalid format. Please use X,Y (e.g., 100,200)")
 
 def get_region(prompt="Enter region as X,Y,Width,Height: "):
-    # ... (this function remains the same)
     while True:
         try:
             val = input(prompt)
@@ -44,6 +48,8 @@ def print_menu():
     print("--- Get Info from Emulator (Interactive) ---")
     print("7. Get Coordinates by Clicking on Window")
     print("8. Select Region by Dragging on Window")
+    print("--- Workflow Testing ---") # <-- ADDED SECTION
+    print(f"9. Run Test Scenario ('{DEFAULT_TEST_SCENARIO}')") # <-- ADDED OPTION
     print("--- Utility ---")
     print("5. Delay (pause)")
     print("6. Take Full Screenshot")
@@ -75,9 +81,7 @@ def main(adb_id, language):
                 threshold = float(threshold_str) if threshold_str else 0.85
                 
                 result = ce_actions.compare_with_image(adb_id, language, x, y, w, h, img_name, threshold)
-                print("\n--- RESULT ---")
-                print(f"Match found: {result}")
-                print("----------------")
+                print(f"\n--- RESULT ---\nMatch found: {result}\n----------------")
                 print("INFO: The captured screen area was saved to 'temp/last_capture.png' for inspection.")
             
             elif choice == '3':
@@ -85,9 +89,7 @@ def main(adb_id, language):
                 text = input("Enter the text to search for: ")
                 
                 result = ce_actions.compare_with_text(adb_id, language, x, y, w, h, text)
-                print("\n--- RESULT ---")
-                print(f"Match found: {result}")
-                print("----------------")
+                print(f"\n--- RESULT ---\nMatch found: {result}\n----------------")
                 print("INFO: The captured screen area was saved to 'temp/last_capture.png' for inspection.")
 
             elif choice == '4':
@@ -116,25 +118,34 @@ def main(adb_id, language):
                 else:
                     print("Failed to take screenshot.")
             
-            # --- NEW INTERACTIVE OPTIONS ---
             elif choice == '7':
                 coords = ce_interactive.get_coords_from_click(adb_id)
                 if coords:
-                    print(f"\n--- COORDINATES CAPTURED ---")
-                    print(f"Result: {coords[0]},{coords[1]}")
-                    print(f"----------------------------")
+                    print(f"\n--- COORDINATES CAPTURED ---\nResult: {coords[0]},{coords[1]}\n----------------------------")
                 else:
                     print("Could not get coordinates.")
 
             elif choice == '8':
                 region = ce_interactive.get_region_from_drag(adb_id)
                 if region:
-                    print(f"\n--- REGION CAPTURED ---")
-                    print(f"Result: {region[0]},{region[1]},{region[2]},{region[3]}")
-                    print(f"-----------------------")
+                    print(f"\n--- REGION CAPTURED ---\nResult: {region[0]},{region[1]},{region[2]},{region[3]}\n-----------------------")
                     print("The captured image has been saved in the 'temp' folder for you to inspect.")
                 else:
                     print("Could not get region.")
+            
+            # --- ADDED SCENARIO EXECUTION ---
+            elif choice == '9':
+                if not DEFAULT_TEST_SCENARIO:
+                    print("\nERROR: No test scenario is defined. Edit 'DEFAULT_TEST_SCENARIO' at the top of the script.")
+                    continue
+                
+                print(f"\n--- Starting Scenario: {DEFAULT_TEST_SCENARIO} ---")
+                try:
+                    engine = WorkflowEngine(adb_id, language)
+                    engine.run_workflow(DEFAULT_TEST_SCENARIO)
+                    print(f"--- Scenario Finished: {DEFAULT_TEST_SCENARIO} ---")
+                except Exception as e:
+                    print(f"\nAN ERROR OCCURRED DURING SCENARIO EXECUTION: {e}")
             
             elif choice == 'exit':
                 print("Exiting tester.")
@@ -149,40 +160,48 @@ def main(adb_id, language):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Interactive tester for Clone Evolution automation actions.",
-        formatter_class=argparse.RawTextHelpFormatter,
-        usage="python %(prog)s [adb_id] [language]"
-    )
-    parser.add_argument(
-        "adb_id", 
-        nargs='?',
-        default=None,
-        help="The ADB device ID of the running emulator (e.g., '127.0.0.1:5605')."
-    )
-    parser.add_argument(
-        "language", 
-        nargs='?',
-        default=None,
-        help="The two-letter language code for resource paths (e.g., 'en', 'ru')."
-    )
-    
-    args = parser.parse_args()
+    # --- THIS STARTUP LOGIC IS NOW SIMPLIFIED ---
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    if args.adb_id and args.language:
-        print("Using command-line arguments for configuration.")
-        adb_id_to_use = args.adb_id
-        language_to_use = args.language
-    else:
-        print("Using default configuration from inside the script.")
-        adb_id_to_use = DEFAULT_ADB_ID
-        language_to_use = DEFAULT_LANGUAGE
+    adb_id_to_use = DEFAULT_ADB_ID
+    language_to_use = DEFAULT_LANGUAGE
 
-    if not adb_id_to_use or not language_to_use:
-        print("\nError: ADB ID or Language is not set.")
-        print("Please either edit the CONFIGURATION section at the top of the script")
-        print("or provide both values as command-line arguments.\n")
-        parser.print_help()
+    if not adb_id_to_use:
+        print("\nERROR: DEFAULT_ADB_ID is not set in the script's CONFIGURATION section.")
+        sys.exit(1)
+        
+    print(f"Attempting to connect to device: {adb_id_to_use}")
+    is_connected = False
+    try:
+        # Step 1: Attempt to connect
+        connect_result = subprocess.run(f"adb connect {adb_id_to_use}", shell=True, check=True, capture_output=True, text=True)
+        if "failed to connect" in connect_result.stdout or "unable to connect" in connect_result.stdout:
+            # This handles cases where the port is wrong or the emulator isn't listening
+            pass
+        
+        # Step 2: Verify connection by checking 'adb devices'
+        time.sleep(1) # Give ADB a moment to register the device
+        for _ in range(3): # Try for a few seconds
+            devices_result = subprocess.run("adb devices", shell=True, capture_output=True, text=True)
+            if adb_id_to_use in devices_result.stdout and 'device' in devices_result.stdout:
+                 is_connected = True
+                 break
+            time.sleep(1)
+
+    except FileNotFoundError:
+        print("\nFATAL: 'adb' command not found. Please ensure ADB is installed and in your system's PATH.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\nAn unexpected error occurred during ADB connection: {e}")
         sys.exit(1)
 
-    main(adb_id_to_use, language_to_use)
+    # If connection is successful, start the main program. Otherwise, exit with an error.
+    if is_connected:
+        main(adb_id_to_use, language_to_use)
+    else:
+        print("\nFATAL: Could not connect to the emulator device.")
+        print("Please ensure the following:")
+        print("1. The emulator is running.")
+        print("2. ADB debugging is enabled in the emulator's settings.")
+        print(f"3. The DEFAULT_ADB_ID ('{adb_id_to_use}') at the top of the script is correct.")
+        sys.exit(1)

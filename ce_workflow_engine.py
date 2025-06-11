@@ -19,8 +19,8 @@ class WorkflowEngine:
             'emergency_exit': lambda args: ce_actions.emergency_exit(args)
         }
         self.conditional_actions = {
-            'compare_with_image': lambda args: ce_actions.compare_with_image(self.adb_id, self.language, *args),
-            'compare_with_text': lambda args: ce_actions.compare_with_text(self.adb_id, self.language, *args)
+            'compare_with_image': lambda *args: ce_actions.compare_with_image(self.adb_id, self.language, *args),
+            'compare_with_text': lambda *args: ce_actions.compare_with_text(self.adb_id, self.language, *args)
         }
 
     def _render_template(self, template_string):
@@ -36,7 +36,7 @@ class WorkflowEngine:
             eval_locals = {**self.context, **self.conditional_actions}
             return eval(condition_str, eval_globals, eval_locals)
         except Exception as e:
-            logging.error(f"Error evaluating condition '{condition_str}': {e}")
+            logging.error(f"Error evaluating condition '{condition_str}': {type(e).__name__}: {e}")
             return False
 
     def _process_steps(self, steps):

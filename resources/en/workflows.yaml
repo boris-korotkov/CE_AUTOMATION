@@ -2,9 +2,44 @@ scenarios:
   - name: Send_flowers_to_friends
     description: Send flowers to friends
     steps:
-      - click: [60, 680]
-      - click: [730, 670]
-      - click: [640, 505]
-      - click: [965, 670]
-      - click: [640, 505]
+      - click: [490, 600] # Skip Hero Upgrade Pack popup window
+      - click: [60, 680] # Friends icon
+      - click: [715, 670] # Send All
+      - click: [635, 535] # Claim
+      - click: [965, 670] # Receive All
+      - click: [640, 505] # Claim
+      - click: [60, 50] # return to the main  game sceen
+  
+  - name: Daily_rewards
+    description: Collect daily rewards
+    steps:
+      - click: [150, 685] # envelop icon
+      - click: [437, 657] # confirm that we are on System tab
+      - if:
+          #condition: compare_with_text(297,565,156,34,'Claim all')
+          condition: compare_with_image(293,563,154,38,'Claim_all.png',0.85)
+          then:
+            - click: [369,584] # Claim All
+            - if:
+              condition: compare_with_text(587,462,108,40,'Claim')
+              then:
+                - click: [640,485] # Claim
+      - click: [60, 50] # return to the main  game sceen
+
+  - name: Campaign_farming
+    description: Campaign farming
+    steps:
+      - if:
+          condition: compare_with_text(326,547,85,24,'Campaign')
+          then:
+            - click: [267,496] # Enter to Campaign
+            - click: [1163,680] # Claim button
+            - click: [690,679] # Confirm button
+            - click: [834,679] # Accelerate for free
+            - delay: 2
+            - click: [690,679] # Confirm button
+            - click: [834,679] # Accelerate for ticket or 50 gems
+            - delay: 2
+            - click: [690,679] # Confirm button
+            - click: [60, 50] # return to the main  game sceen
   

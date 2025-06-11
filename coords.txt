@@ -1,0 +1,16 @@
+with ads
+66,680
+Point selected: (747, 676)send all
+Point selected: (966, 676)receive all
+	claim Result: 638,503
+
+with no ads
+55,678
+Point selected: (716, 678)send all
+Point selected: (968, 679)receive all
+	claim Result: 639,508
+
+boss reward
+Point selected: (951, 538)
+Result: 914,520,79,31 -> 915,520,80,30
+Point selected: (636, 480)

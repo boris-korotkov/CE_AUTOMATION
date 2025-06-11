@@ -1,6 +1,0 @@
-=== Automation Test Log ===
-Script started at: Wed Jan  8 22:00:13 2025
-Working directory: C:\Users\Boris\Documents\GitHub\CE_Automation
-This script successfully created a log file.
-Thank you for testing!
-Script ended at: Wed Jan  8 22:00:13 2025

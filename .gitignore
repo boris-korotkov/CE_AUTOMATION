@@ -3,6 +3,8 @@ venv/
 build/
 dist/
 __pycache__/
+temp/
+logs/
 
 # Exclude log files
 *.log

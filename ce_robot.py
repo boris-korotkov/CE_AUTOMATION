@@ -52,8 +52,8 @@ def main():
                     continue
 
                 # Wait for emulator to boot
-                logging.info("Waiting 120 seconds for emulator to boot before connecting ADB...")
-                time.sleep(120)
+                logging.info("Waiting 100 seconds for emulator to boot before connecting ADB...")
+                time.sleep(100)
                 
                 adb_id = connect_adb_to_instance(name, logger=logging)
                 if adb_id:

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CE Automation - Command Reference</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            border-bottom-width: 3px;
+        }
+        h2 {
+            margin-top: 40px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #dee2e6;
+            margin: 40px 0;
+        }
+        code {
+            background-color: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            color: inherit;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        strong {
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CE Automation - Workflow Command Reference</h1>
+        <p>This document provides a complete reference for all commands and functions available for use in your <code>workflows.yaml</code> files.</p>
+
+        <h2>Basic Structure</h2>
+        <p>Each workflow file consists of one or more scenarios. A scenario is a named sequence of steps that the robot will execute in order.</p>
+        <pre><code>scenarios:
+  - name: Your_Scenario_Name
+    description: A brief explanation of what this scenario does.
+    steps:
+      # ... A list of commands goes here ...
+      - click: [100, 200]
+      - delay: 5</code></pre>
+
+        <hr>
+
+        <h2>I. Action Commands</h2>
+        <p>These are the primary commands that perform an action within the emulator. They are always used as a single-line step.</p>
+
+        <h3><code>click</code></h3>
+        <p>Simulates a tap on the screen at a specific coordinate.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>click: [x, y]</code></li>
+            <li><strong>Parameters:</strong>
+                <ul>
+                    <li><code>x</code>: The horizontal coordinate (from the left edge).</li>
+                    <li><code>y</code>: The vertical coordinate (from the top edge).</li>
+                </ul>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>- click: [60, 680] # Click on the "Friends" icon</code></pre>
+            </li>
+        </ul>
+
+        <h3><code>scroll</code></h3>
+        <p>Simulates a swipe gesture on the screen.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>scroll: [x, y, direction, distance]</code></li>
+            <li><strong>Parameters:</strong>
+                <ul>
+                    <li><code>x</code>, <code>y</code>: The starting coordinates for the swipe.</li>
+                    <li><code>direction</code>: The direction of the swipe. Must be one of <code>up</code>, <code>down</code>, <code>left</code>, or <code>right</code>.</li>
+                    <li><code>distance</code>: The length of the swipe in pixels.</li>
+                </ul>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>- scroll: [500, 800, up, 400] # Scroll the friends list up from the middle-bottom of the screen</code></pre>
+            </li>
+        </ul>
+
+        <h3><code>delay</code></h3>
+        <p>Pauses the execution of the script for a specified number of seconds.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>delay: seconds</code></li>
+            <li><strong>Parameters:</strong>
+                <ul>
+                    <li><code>seconds</code>: The duration of the pause in seconds (can be a decimal, e.g., <code>0.5</code>).</li>
+                </ul>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>- delay: 3 # Wait 3 seconds for the next screen to load</code></pre>
+            </li>
+        </ul>
+
+        <h3><code>log</code></h3>
+        <p>Prints a message to the console and the log file. Useful for debugging and tracking progress.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>log: "Your message here"</code></li>
+            <li><strong>Parameters:</strong>
+                <ul>
+                    <li>A string containing the message to be logged. You can embed variables using <code>{{ variable_name }}</code>.</li>
+                </ul>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>- log: "Starting the supply depot farming. Attempt #{{counter}}"</code></pre>
+            </li>
+        </ul>
+
+        <h3><code>send_email</code></h3>
+        <p>Sends an email notification using the configured Outlook account.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>send_email: "Your message here"</code></li>
+            <li><strong>Parameters:</strong>
+                <ul>
+                    <li>A string containing the body of the email.</li>
+                </ul>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>- send_email: "Guild Event is now active! Please check the game."</code></pre>
+            </li>
+        </ul>
+
+        <h3><code>emergency_exit</code></h3>
+        <p>Immediately stops the entire automation script and sends a critical error email.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>emergency_exit: "Error message"</code></li>
+            <li><strong>Parameters:</strong>
+                <ul>
+                    <li>A string explaining the reason for the emergency stop.</li>
+                </ul>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>- emergency_exit: "Game has crashed and cannot be recovered."</code></pre>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h2>II. Variable & Context Commands</h2>
+        <p>These commands allow you to store and manipulate internal variables within a scenario, which is essential for loops and complex logic.</p>
+
+        <h3><code>set</code></h3>
+        <p>Creates or overwrites a variable in the scenario's context.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>set: { variable_name: value }</code></li>
+            <li><strong>Example:</strong>
+<pre><code>- set: { counter: 0 } # Initialize a loop counter
+- set: { target_found: false } # Initialize a boolean flag</code></pre>
+            </li>
+        </ul>
+
+        <h3><code>increment</code></h3>
+        <p>Adds 1 to a numeric variable. If the variable doesn't exist, it is created with a value of 1.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>increment: variable_name</code></li>
+            <li><strong>Example:</strong>
+<pre><code>- increment: counter # Increases the value of 'counter' by 1</code></pre>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h2>III. Control Flow Commands</h2>
+        <p>These commands control the logic of your scenario, allowing for conditional execution and loops.</p>
+
+        <h3><code>if / else</code></h3>
+        <p>Executes a block of steps only if a condition is met. An optional <code>else</code> block can be executed if the condition is not met.</p>
+        <ul>
+            <li><strong>Syntax:</strong>
+<pre><code>- if:
+    condition: "your_condition_here"
+    then:
+      # ... steps to run if condition is true ...
+    else:
+      # ... (optional) steps to run if condition is false ...</code></pre>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>- if:
+    condition: compare_with_text(400, 350, 180, 50, 'Claim')
+    then:
+      - log: "Claim button found. Clicking it."
+      - click: [490, 375]
+    else:
+      - log: "Claim button not found. Moving on."</code></pre>
+            </li>
+        </ul>
+
+        <h3><code>while</code></h3>
+        <p>Repeatedly executes a block of steps as long as a condition remains true.</p>
+        <ul>
+            <li><strong>Syntax:</strong>
+<pre><code>- while:
+    condition: "your_condition_here"
+    do:
+      # ... steps to repeat while the condition is true ...</code></pre>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>- while:
+    condition: "counter < 10 and not target_found"
+    do:
+      - log: "Searching for target..."
+      - # ... more steps ...
+      - increment: counter</code></pre>
+            </li>
+        </ul>
+        
+        <hr>
+        
+        <h2>IV. Conditional Functions</h2>
+        <p>These functions are used <strong>exclusively inside the <code>condition:</code> string</strong> of an <code>if</code> or <code>while</code> block. They return <code>True</code> or <code>False</code>.</p>
+        
+        <h3><code>compare_with_image</code></h3>
+        <p>Captures a region of the screen and compares it to a template image file.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>compare_with_image(x, y, w, h, 'image_filename.png', threshold)</code></li>
+            <li><strong>Parameters:</strong>
+                <ul>
+                    <li><code>x, y, w, h</code>: The coordinates, width, and height of the screen region to capture.</li>
+                    <li><code>'image_filename.png'</code>: The name of the template image. This file must be located in the appropriate language resource folder (e.g., <code>resources/en/</code>).</li>
+                    <li><code>threshold</code> (optional): The matching accuracy, from <code>0.0</code> to <code>1.0</code>. A higher value means a stricter match. Defaults to <code>0.85</code>.</li>
+                </ul>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>condition: "compare_with_image(20, 20, 100, 100, 'back-arrow.png', 0.9)"</code></pre>
+            </li>
+        </ul>
+        
+        <h3><code>compare_with_text</code></h3>
+        <p>Captures a region of the screen, converts it to text using OCR, and checks if it contains the expected text. The comparison is case-insensitive.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>compare_with_text(x, y, w, h, 'expected text')</code></li>
+            <li><strong>Parameters:</strong>
+                <ul>
+                    <li><code>x, y, w, h</code>: The coordinates, width, and height of the screen region to capture.</li>
+                    <li><code>'expected text'</code>: The text to search for within the captured region.</li>
+                </ul>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code>condition: "compare_with_text(297, 565, 156, 34, 'Claim All')"</code></pre>
+            </li>
+        </ul>
+
+        <h3>Combining Conditions</h3>
+        <p>You can combine multiple conditions using standard logical operators: <code>and</code>, <code>or</code>, and <code>not</code>.</p>
+        <ul>
+            <li><strong>Example:</strong>
+<pre><code>condition: "not compare_with_image(100,100,50,50,'error.png') and counter < 5"</code></pre>
+            </li>
+        </ul>
+        
+        <hr>
+
+        <h2>V. Best Practices & Tips</h2>
+        <ul>
+            <li><strong>Use Comments:</strong> Use the <code>#</code> character to add comments to your steps. This makes your scenarios much easier to understand and maintain.</li>
+            <li><strong>Use the Tester:</strong> Use <code>ce_tester.py</code> to find exact coordinates and regions. Options <code>7</code> (Get Coordinates) and <code>8</code> (Select Region) are your best friends for building accurate workflows. The image captured by option <code>8</code> can be used directly as a template for <code>compare_with_image</code>.</li>
+            <li><strong>Descriptive Naming:</strong> Give your template images and scenarios descriptive names (e.g., <code>button_confirm_purchase.png</code> instead of <code>img1.png</code>).</li>
+            <li><strong>Indentation is Key:</strong> YAML relies on strict indentation. Use a text editor that supports YAML to avoid errors. All steps in a block (<code>steps:</code>, <code>then:</code>, <code>do:</code>) must have the same level of indentation.</li>
+        </ul>
+    </div>
+</body>
+</html>
