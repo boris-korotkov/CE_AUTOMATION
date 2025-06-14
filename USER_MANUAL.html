@@ -69,6 +69,13 @@
         strong {
             color: #34495e;
         }
+        .note {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffeeba;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -254,7 +261,7 @@
         <p>These functions are used <strong>exclusively inside the <code>condition:</code> string</strong> of an <code>if</code> or <code>while</code> block. They return <code>True</code> or <code>False</code>.</p>
         
         <h3><code>compare_with_image</code></h3>
-        <p>Captures a region of the screen and compares it to a template image file.</p>
+        <p>Captures a region of the screen and compares it to a single template image file.</p>
         <ul>
             <li><strong>Syntax:</strong> <code>compare_with_image(x, y, w, h, 'image_filename.png', threshold)</code></li>
             <li><strong>Parameters:</strong>
@@ -265,10 +272,32 @@
                 </ul>
             </li>
             <li><strong>Example:</strong>
-<pre><code>condition: "compare_with_image(20, 20, 100, 100, 'back-arrow.png', 0.9)"</code></pre>
+<pre><code>condition: compare_with_image(20, 20, 100, 100, 'back-arrow.png', 0.9)</code></pre>
             </li>
         </ul>
-        
+
+        <!-- NEWLY ADDED SECTION -->
+        <h3><code>compare_with_any_image</code></h3>
+        <p>Captures a region of the screen and compares it against a <strong>list</strong> of template images. Returns <code>True</code> if <strong>any one</strong> of the images matches.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>"compare_with_any_image(x, y, w, h, ['img1.png', 'img2.png'], threshold)"</code></li>
+            <li><strong>Parameters:</strong>
+                <ul>
+                    <li><code>x, y, w, h</code>: The coordinates, width, and height of the screen region to capture.</li>
+                    <li><code>['img1.png', 'img2.png']</code>: A Python-style list of image filenames.</li>
+                    <li><code>threshold</code> (optional): The matching accuracy. Defaults to <code>0.85</code>.</li>
+                </ul>
+            </li>
+            <li><strong>Example:</strong>
+<pre><code># Checks if the reward slot contains either a gold or a purple chest
+condition: "compare_with_any_image(300, 400, 50, 50, ['gold_chest.png', 'purple_chest.png'], 0.9)"</code></pre>
+            </li>
+            <div class="note">
+                <strong>Important:</strong> Because this function's syntax uses square brackets <code>[]</code>, you <strong>must</strong> wrap the entire condition in double quotes <code>"..."</code> to avoid a YAML parsing error.
+            </div>
+        </ul>
+        <!-- END OF NEW SECTION -->
+
         <h3><code>compare_with_text</code></h3>
         <p>Captures a region of the screen, converts it to text using OCR, and checks if it contains the expected text. The comparison is case-insensitive.</p>
         <ul>
@@ -280,7 +309,8 @@
                 </ul>
             </li>
             <li><strong>Example:</strong>
-<pre><code>condition: "compare_with_text(297, 565, 156, 34, 'Claim All')"</code></pre>
+<pre><code># Reliably checks for "Claim all" even if OCR returns "Claim ail"
+condition: compare_with_text(297, 565, 156, 34, 'Clam')</code></pre>
             </li>
         </ul>
 
@@ -299,6 +329,7 @@
             <li><strong>Use Comments:</strong> Use the <code>#</code> character to add comments to your steps. This makes your scenarios much easier to understand and maintain.</li>
             <li><strong>Use the Tester:</strong> Use <code>ce_tester.py</code> to find exact coordinates and regions. Options <code>7</code> (Get Coordinates) and <code>8</code> (Select Region) are your best friends for building accurate workflows. The image captured by option <code>8</code> can be used directly as a template for <code>compare_with_image</code>.</li>
             <li><strong>Descriptive Naming:</strong> Give your template images and scenarios descriptive names (e.g., <code>button_confirm_purchase.png</code> instead of <code>img1.png</code>).</li>
+            <li><strong>Quote Complex Conditions:</strong> When in doubt, always wrap your entire <code>condition:</code> string in double quotes <code>"..."</code> to prevent issues with special characters.</li>
             <li><strong>Indentation is Key:</strong> YAML relies on strict indentation. Use a text editor that supports YAML to avoid errors. All steps in a block (<code>steps:</code>, <code>then:</code>, <code>do:</code>) must have the same level of indentation.</li>
         </ul>
     </div>

@@ -8,7 +8,7 @@ scenarios:
       - click: [635, 535] # Claim
       - click: [965, 670] # Receive All
       - click: [640, 505] # Claim
-      - click: [60, 50] # return to the main  game sceen
+      - click: [60, 50] # return to the main  game screen
   
   - name: Daily_rewards
     description: Collect daily rewards
@@ -21,10 +21,21 @@ scenarios:
           then:
             - click: [369,584] # Claim All
             - if:
-              condition: compare_with_text(587,462,108,40,'Claim')
-              then:
-                - click: [640,485] # Claim
-      - click: [60, 50] # return to the main  game sceen
+                condition: "compare_with_text(587,462,108,40,'Claim') or compare_with_image(587,462,108,40,'daily_reward_claim.png',0.85)" # 1 line
+                then:
+                  - click: [640,485] # Claim
+                else:
+                  - if:
+                      condition: "compare_with_text(587,462,108,40,'Claim') or compare_with_image(587,462,108,40,'daily_reward_claim.png',0.85)" # 2 lines
+                      then:
+                        - click: [640,485] # Claim
+                      else:
+                        - if:
+                            condition: "compare_with_text(592,569,108,40,'Claim') or compare_with_image(592,569,108,40,'daily_reward_claim.png',0.85)" # 3 lines
+                            then:
+                              - click: [639,590] # Claim
+
+      - click: [60, 50] # return to the main  game screen
 
   - name: Campaign_farming
     description: Campaign farming
@@ -36,10 +47,55 @@ scenarios:
             - click: [1163,680] # Claim button
             - click: [690,679] # Confirm button
             - click: [834,679] # Accelerate for free
-            - delay: 2
+            - delay: 4
             - click: [690,679] # Confirm button
             - click: [834,679] # Accelerate for ticket or 50 gems
-            - delay: 2
+            - delay: 4
             - click: [690,679] # Confirm button
+            - click: [60, 50] # return to the main  game screen
+  
+  - name: Gene_Bank
+    description: Gene Bank farming
+    steps:
+      - if:
+          condition: compare_with_text(798,554,88,26,'Gene')
+          then:
+            - click: [750,510] # Enter to Gene Bank
+            - delay: 1
+            - if:
+                condition: compare_with_text(216,481,88,39,'Free') # If Free Ordinary Clone button is available
+                then:
+                  - click: [268,503] # Click Free button
+                  - delay: 2
+                  #check if there is a space available for new clone. Send an email if not
+                  - click: [60, 50] # return to the Gene Bank screen
+            - if:
+                condition: compare_with_text(574,566,140,37,'Free') # If Free Advanced Clone button is available
+                then:
+                  - click: [641,584] # Click Free button
+                  - delay: 2
+                  #check if there is a space available for new clone. Send an email if not
+                  - click: [60, 50] # return to the Gene Bank screen
+
             - click: [60, 50] # return to the main  game sceen
   
+  - name: Supply_Depot
+    description: Supply Depot farming
+    steps:
+      - if:
+          condition: compare_with_text(142,301,111,26,'Supply')
+          then:
+            - click: [194,263] # Enter to Supply Depot
+            - if:
+                condition: compare_with_text(882,637,215,37,'Free') # If Free refresh button is available
+                then:
+                  - click: [968,656] # Click Free Refresh button
+                  - if:
+                      condition: "compare_with_any_image(427,207,105,105, ['purple.png', 'purple_chest.png'], 0.9)"  # Check item. Row 1 from 1. Column 1 from left 
+                      then:
+                        - click: [641,584] # Buy if resource is needed
+                        - delay: 2
+                        
+                  
+            
+            - click: [60, 50] # return to the main  game sceen

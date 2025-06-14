@@ -1,16 +1,17 @@
-with ads
-66,680
-Point selected: (747, 676)send all
-Point selected: (966, 676)receive all
-	claim Result: 638,503
+Store coords
 
-with no ads
-55,678
-Point selected: (716, 678)send all
-Point selected: (968, 679)receive all
-	claim Result: 639,508
-
-boss reward
-Point selected: (951, 538)
-Result: 914,520,79,31 -> 915,520,80,30
-Point selected: (636, 480)
+Region selected: X=427, Y=207, W=106, H=105
+Captured region saved to: temp\captured_region_1749686047.png
+Region selected: X=618, Y=208, W=108, H=106
+Captured region saved to: temp\captured_region_1749686152.png
+Region selected: X=809, Y=206, W=109, H=108
+Captured region saved to: temp\captured_region_1749686170.png
+Region selected: X=1002, Y=207, W=108, H=106
+Captured region saved to: temp\captured_region_1749686181.png
+Region selected: X=427, Y=441, W=106, H=107
+Captured region saved to: temp\captured_region_1749686196.png
+Region selected: X=619, Y=441, W=107, H=108
+Captured region saved to: temp\captured_region_1749686203.png
+Region selected: X=808, Y=441, W=110, H=108
+Captured region saved to: temp\captured_region_1749686209.png
+Region selected: X=1002, Y=440, W=108, H=108

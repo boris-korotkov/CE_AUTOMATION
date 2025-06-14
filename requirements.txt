@@ -4,3 +4,4 @@ numpy
 pytesseract
 pywin32
 jinja2
+keyboard

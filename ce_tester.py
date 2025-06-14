@@ -3,18 +3,29 @@ import os
 import sys
 import time
 import logging
-import subprocess # We need this for the new connection logic
+import subprocess
 import ce_actions
 import ce_interactive
 from ce_workflow_engine import WorkflowEngine
 
 # --- CONFIGURATION ---
-DEFAULT_ADB_ID = "127.0.0.1:5685" #2024.4
-# DEFAULT_ADB_ID = "127.0.0.1:5695" #2024.5
-# DEFAULT_ADB_ID = "127.0.0.1:5605" #Adidas
+# Set the default ADB device ID you want to test.
+
+#DEFAULT_ADB_ID = "127.0.0.1:5605" #Adidas
+#DEFAULT_ADB_ID = "127.0.0.1:5575" #Hidden Enemy
+#DEFAULT_ADB_ID = "127.0.0.1:5585" #Comrad B
+#DEFAULT_ADB_ID = "127.0.0.1:5595" #Charlie
+DEFAULT_ADB_ID = "127.0.0.1:5655" #2024.1
+#DEFAULT_ADB_ID = "127.0.0.1:5665" #2024.2
+#DEFAULT_ADB_ID = "127.0.0.1:5675" #2024.3
+#DEFAULT_ADB_ID = "127.0.0.1:5685" #2024.4
+#DEFAULT_ADB_ID = "127.0.0.1:5695" #2024.5
+
+# Set the language for resource paths (e.g., 'en', 'ru')
 DEFAULT_LANGUAGE = "en"
-# Set the name of the scenario from workflows.yaml you want to test with option 9
-DEFAULT_TEST_SCENARIO = "Daily_rewards" # <-- ADDED CONFIGURATION
+
+# Set the DEFAULT scenario from workflows.yaml to be used if you press Enter at the prompt.
+DEFAULT_TEST_SCENARIO = "Send_flowers_to_friends"
 # ---------------------
 
 def get_coords(prompt="Enter coordinates as X,Y: "):
@@ -48,8 +59,8 @@ def print_menu():
     print("--- Get Info from Emulator (Interactive) ---")
     print("7. Get Coordinates by Clicking on Window")
     print("8. Select Region by Dragging on Window")
-    print("--- Workflow Testing ---") # <-- ADDED SECTION
-    print(f"9. Run Test Scenario ('{DEFAULT_TEST_SCENARIO}')") # <-- ADDED OPTION
+    print("--- Workflow Testing ---")
+    print("9. Run a Test Scenario") 
     print("--- Utility ---")
     print("5. Delay (pause)")
     print("6. Take Full Screenshot")
@@ -61,13 +72,12 @@ def main(adb_id, language):
     if not os.path.exists('temp'):
         os.makedirs('temp')
 
-    print(f"\nTester connected to ADB device: {adb_id}")
+    print(f"\nSuccessfully connected to ADB device: {adb_id}")
     print(f"Using language for resources: '{language}'")
     
     while True:
         print_menu()
         choice = input("Enter your choice: ").strip().lower()
-
         try:
             if choice == '1':
                 x, y = get_coords()
@@ -133,17 +143,23 @@ def main(adb_id, language):
                 else:
                     print("Could not get region.")
             
-            # --- ADDED SCENARIO EXECUTION ---
+            # --- UPDATED SCENARIO EXECUTION LOGIC ---
             elif choice == '9':
-                if not DEFAULT_TEST_SCENARIO:
-                    print("\nERROR: No test scenario is defined. Edit 'DEFAULT_TEST_SCENARIO' at the top of the script.")
+                # Prompt the user, showing the default scenario
+                user_input = input(f"Enter scenario name to run (default: {DEFAULT_TEST_SCENARIO}): ").strip()
+                
+                # Use the user's input, or fallback to the default if the input is empty
+                scenario_to_run = user_input or DEFAULT_TEST_SCENARIO
+
+                if not scenario_to_run:
+                    print("\nERROR: No scenario name provided and no default is set in the script.")
                     continue
                 
-                print(f"\n--- Starting Scenario: {DEFAULT_TEST_SCENARIO} ---")
+                print(f"\n--- Starting Scenario: {scenario_to_run} ---")
                 try:
                     engine = WorkflowEngine(adb_id, language)
-                    engine.run_workflow(DEFAULT_TEST_SCENARIO)
-                    print(f"--- Scenario Finished: {DEFAULT_TEST_SCENARIO} ---")
+                    engine.run_workflow(scenario_to_run)
+                    print(f"--- Scenario Finished: {scenario_to_run} ---")
                 except Exception as e:
                     print(f"\nAN ERROR OCCURRED DURING SCENARIO EXECUTION: {e}")
             
@@ -160,9 +176,7 @@ def main(adb_id, language):
 
 
 if __name__ == "__main__":
-    # --- THIS STARTUP LOGIC IS NOW SIMPLIFIED ---
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
     adb_id_to_use = DEFAULT_ADB_ID
     language_to_use = DEFAULT_LANGUAGE
 
@@ -173,15 +187,12 @@ if __name__ == "__main__":
     print(f"Attempting to connect to device: {adb_id_to_use}")
     is_connected = False
     try:
-        # Step 1: Attempt to connect
         connect_result = subprocess.run(f"adb connect {adb_id_to_use}", shell=True, check=True, capture_output=True, text=True)
         if "failed to connect" in connect_result.stdout or "unable to connect" in connect_result.stdout:
-            # This handles cases where the port is wrong or the emulator isn't listening
             pass
         
-        # Step 2: Verify connection by checking 'adb devices'
-        time.sleep(1) # Give ADB a moment to register the device
-        for _ in range(3): # Try for a few seconds
+        time.sleep(1)
+        for _ in range(3):
             devices_result = subprocess.run("adb devices", shell=True, capture_output=True, text=True)
             if adb_id_to_use in devices_result.stdout and 'device' in devices_result.stdout:
                  is_connected = True
@@ -195,7 +206,6 @@ if __name__ == "__main__":
         print(f"\nAn unexpected error occurred during ADB connection: {e}")
         sys.exit(1)
 
-    # If connection is successful, start the main program. Otherwise, exit with an error.
     if is_connected:
         main(adb_id_to_use, language_to_use)
     else:
