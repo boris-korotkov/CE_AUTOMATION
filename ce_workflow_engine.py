@@ -6,15 +6,20 @@ from jinja2 import Template
 import ce_actions
 
 class WorkflowEngine:
-    def __init__(self, adb_id, language):
+    # --- UPDATED CONSTRUCTOR ---
+    def __init__(self, adb_id, language, instance_name):
         self.adb_id = adb_id
         self.language = language
-        self.context = {}
+        
+        # --- NEW: Initialize context with the instance name ---
+        self.context = {'instance_name': instance_name}
+        
         self.actions = {
             'click': lambda args: ce_actions.click(self.adb_id, *args),
             'delay': lambda args: time.sleep(args),
             'scroll': lambda args: ce_actions.scroll(self.adb_id, *args),
-            'send_email': lambda args: ce_actions.send_email("CE Automation Notification", args),
+            # --- UPDATED: send_email now uses the template renderer ---
+            'send_email': lambda args: ce_actions.send_email("CE Automation Notification", self._render_template(args)),
             'log': lambda args: logging.info(f"[WORKFLOW] {self._render_template(args)}"),
             'emergency_exit': lambda args: ce_actions.emergency_exit(args)
         }
@@ -25,9 +30,11 @@ class WorkflowEngine:
         }
 
     def _render_template(self, template_string):
-        return Template(template_string).render(self.context)
+        """Renders a string with context variables, e.g., 'Hello {{name}}'."""
+        return Template(str(template_string)).render(self.context)
 
     def _evaluate_condition(self, condition_str):
+        # ... (This function remains unchanged) ...
         logging.debug(f"Evaluating condition: {condition_str}")
         try:
             eval_globals = {'__builtins__': None}
@@ -38,7 +45,7 @@ class WorkflowEngine:
             return False
 
     def _process_steps(self, steps):
-        """Recursively processes a list of steps from the workflow."""
+        # ... (This function remains unchanged) ...
         if steps is None:
             logging.error("A 'then' or 'do' block in the workflow is empty. Please check your YAML file.")
             return
@@ -51,11 +58,9 @@ class WorkflowEngine:
             command = list(step.keys())[0]
             params = step[command]
 
-            # --- NEW ROBUSTNESS CHECK ---
-            # Check if a command is missing its value (e.g., "if:")
             if params is None:
                 logging.error(f"Malformed step found in workflow. The command '{command}' has no value. Please check your YAML indentation and structure.")
-                continue # Skip this broken step
+                continue
 
             if command in self.actions:
                 self.actions[command](params)
@@ -67,7 +72,7 @@ class WorkflowEngine:
                 logging.debug(f"Incremented '{params}': {self.context[params]}")
             elif command == 'if':
                 if self._evaluate_condition(params['condition']):
-                    self._process_steps(params.get('then')) # Use .get() for safety
+                    self._process_steps(params.get('then'))
                 elif 'else' in params:
                     self._process_steps(params.get('else'))
             elif command == 'while':
@@ -92,7 +97,6 @@ class WorkflowEngine:
             logging.error(f"Workflow '{workflow_name}' not found in {yaml_path}")
             return
         
-        # Check if the 'steps' key exists and is not empty
         if 'steps' not in target_scenario or not target_scenario['steps']:
              logging.error(f"Workflow '{workflow_name}' has no steps defined. Skipping.")
              return

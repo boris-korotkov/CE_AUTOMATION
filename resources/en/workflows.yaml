@@ -45,13 +45,41 @@ scenarios:
           then:
             - click: [267,496] # Enter to Campaign
             - click: [1163,680] # Claim button
-            - click: [690,679] # Confirm button
+            - if:
+                condition: compare_with_text(460,641,358,38,'Please') # If a new level is reached
+                then:
+                  - click: [683,665] # Click Claim button
+                  - delay: 2
+                  - if:
+                      condition: "compare_with_text(707,445,131,36,'Confirm')"  # if capacity is full
+                      then:
+                        - send_email: "The Campaign farming failed for the {{ instance_name }} instance." # send an email if capacity is full
+                        - click: [510,466] # Tap to continue
+                        - click: [690,679] # Confirm button
+                      else:
+                        - click: [690,679] # Confirm button
+            
             - click: [834,679] # Accelerate for free
-            - delay: 4
-            - click: [690,679] # Confirm button
+            - delay: 5
+            - if:
+                condition: compare_with_text(460,641,358,38,'Please') # If a new level is reached
+                then:
+                  - send_email: "The Campaign farming failed for the {{ instance_name }} instance." # send an email if capacity is full
+                  - click: [510,466] # Tap to continue
+                  - click: [690,679] # Confirm button
+                else:
+                  - click: [690,679] # Confirm button
+
             - click: [834,679] # Accelerate for ticket or 50 gems
-            - delay: 4
-            - click: [690,679] # Confirm button
+            - delay: 5
+            - if:
+                condition: compare_with_text(460,641,358,38,'Please') # If a new level is reached
+                then:
+                  - send_email: "The Campaign farming failed for the {{ instance_name }} instance." # send an email if capacity is full
+                  - click: [510,466] # Tap to continue
+                  - click: [690,679] # Confirm button
+                else:
+                  - click: [690,679] # Confirm button
             - click: [60, 50] # return to the main  game screen
   
   - name: Gene_Bank
@@ -67,17 +95,55 @@ scenarios:
                 then:
                   - click: [268,503] # Click Free button
                   - delay: 2
-                  #check if there is a space available for new clone. Send an email if not
-                  - click: [60, 50] # return to the Gene Bank screen
-            - if:
-                condition: compare_with_text(574,566,140,37,'Free') # If Free Advanced Clone button is available
-                then:
-                  - click: [641,584] # Click Free button
-                  - delay: 2
-                  #check if there is a space available for new clone. Send an email if not
-                  - click: [60, 50] # return to the Gene Bank screen
+                  - if:
+                      condition: "compare_with_text(707,445,131,36,'Confirm')"  # if capacity is full
+                      then:
+                        - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance." # send an email if capacity is full
+                        - click: [510,466] # Click Cancel
+                        - click: [60, 50] # return to the Game main screen
+                      else:
+                        - click: [60, 50] # return to the Gene Bank screen
+                        - if:
+                            condition: compare_with_text(574,566,140,37,'Free') # If Free Advanced Clone button is available
+                            then:
+                              - click: [641,584] # Click Free button
+                              - delay: 2
+                              - if:
+                                  condition: "compare_with_text(707,445,131,36,'Confirm')"  # if capacity is full
+                                  then:
+                                    - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance." # send an email if capacity is full
+                                    - click: [510,466] # Click Cancel
+                                    - click: [60, 50] # return to the Game main screen
+                                  else:
+                                    - click: [60, 50] # return to the Gene Bank screen
+                                    - click: [60, 50] # return to the Game main screen
+                else:
+                  - if:
+                      condition: compare_with_text(574,566,140,37,'Free') # If Free Advanced Clone button is available
+                      then:
+                        - click: [641,584] # Click Free button
+                        - delay: 2
+                        - if:
+                            condition: "compare_with_text(707,445,131,36,'Confirm')"  # if capacity is full
+                            then:
+                              - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance." # send an email if capacity is full
+                              - click: [510,466] # Click Cancel
+                              - click: [60, 50] # return to the Game main screen
+                            else:
+                              - click: [60, 50] # return to the Gene Bank screen
+                              - click: [60, 50] # return to the Game main screen
 
-            - click: [60, 50] # return to the main  game sceen
+  - name: Guild_activity
+    description: Guild activity 
+    steps:
+      if:
+        condition: compare_with_text(1146,671,97,43, 'Guild') # Check if Guild icon is available
+        then:
+          - click: [1195,637] # Click on Guild icon
+          - delay: 2
+          - click: [60, 50] # return to the main game screen
+        else:
+          - send_email: "Guild activity failed for the {{ instance_name }} instance." # send an email if Guild icon is not available
   
   - name: Supply_Depot
     description: Supply Depot farming
