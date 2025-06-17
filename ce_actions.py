@@ -18,7 +18,7 @@ if general_config.get('tesseract_path'):
     pytesseract.pytesseract.tesseract_cmd = general_config['tesseract_path']
 
 def take_screenshot(adb_id):
-    # ... (This function is unchanged)
+    # ... (This function is unchanged) ...
     device_path = "/sdcard/screen.png"
     local_path = os.path.join(TEMP_DIR, f"screenshot_{adb_id.replace(':', '_')}.png")
     try:
@@ -33,14 +33,14 @@ def take_screenshot(adb_id):
         return None
 
 def click(adb_id, x, y):
-    # ... (This function is unchanged)
+    # ... (This function is unchanged) ...
     logging.info(f"Clicking at ({x}, {y}) on {adb_id}")
     subprocess.run(f"adb -s {adb_id} shell input tap {x} {y}", shell=True)
     logging.debug("Click sent. Pausing for 1 second.")
     time.sleep(1)
 
 def scroll(adb_id, x, y, direction, distance):
-    # ... (This function is unchanged)
+    # ... (This function is unchanged) ...
     logging.info(f"Scrolling {direction} by {distance}px from ({x}, {y}) on {adb_id}")
     x2, y2 = x, y
     if direction == 'left': x2 = x - distance
@@ -52,68 +52,96 @@ def scroll(adb_id, x, y, direction, distance):
     logging.debug("Scroll sent. Pausing for 1 second.")
     time.sleep(1)
 
-# --- THIS FUNCTION IS UPDATED WITH A SAFETY CHECK ---
 def compare_with_image(adb_id, language, x, y, w, h, image_name, threshold=0.85):
+    # ... (This function is unchanged, with the safety check) ...
     logging.debug(f"Comparing screen region ({x},{y},{w},{h}) with image '{image_name}' at threshold {threshold}")
     screenshot_path = take_screenshot(adb_id)
-    if not screenshot_path:
-        return False
-        
+    if not screenshot_path: return False
     template_path = os.path.join(RESOURCES_DIR, language, image_name)
-    if not os.path.exists(template_path):
-        logging.error(f"Template image not found: {template_path}")
-        return False
-
+    if not os.path.exists(template_path): logging.error(f"Template image not found: {template_path}"); return False
     screen_img = cv2.imread(screenshot_path)
     template_img = cv2.imread(template_path)
-    
-    if screen_img is None or template_img is None:
-        logging.error("Could not read screenshot or template image.")
-        return False
-    
+    if screen_img is None or template_img is None: logging.error("Could not read screenshot or template image."); return False
     region = screen_img[y:y+h, x:x+w]
-    
-    # --- NEW SAFETY CHECK ---
-    # Get dimensions of the template and the region
     template_h, template_w, _ = template_img.shape
     region_h, region_w, _ = region.shape
-
-    # Check if the search region is smaller than the template image
     if region_h < template_h or region_w < template_w:
         logging.error(f"OpenCV Error Prevention: The search region ({region_w}x{region_h}) is smaller than the template image '{image_name}' ({template_w}x{template_h}).")
-        logging.error("Please ensure the w,h in your YAML are >= the dimensions of the template image.")
         return False
-    # --- END OF SAFETY CHECK ---
-
     cv2.imwrite(LAST_CAPTURE_PATH, region)
     res = cv2.matchTemplate(region, template_img, cv2.TM_CCOEFF_NORMED)
     _, max_val, _, _ = cv2.minMaxLoc(res)
-    
     logging.debug(f"Image match score: {max_val:.2f} (Threshold: {threshold})")
     return max_val >= threshold
 
-# ... (The rest of the file is unchanged) ...
+# --- THIS IS THE NEWLY IMPROVED FUNCTION ---
 def compare_with_text(adb_id, language, x, y, w, h, expected_text):
-    logging.debug(f"Comparing screen region ({x},{y},{w},{h}) with text '{expected_text}'")
+    """
+    Captures a screen region, applies a robust pre-processing pipeline for better OCR accuracy,
+    especially on colored backgrounds and with stylized fonts.
+    """
+    logging.debug(f"Comparing screen region ({x},{y},{w},{h}) with text '{expected_text}' using advanced OCR.")
     screenshot_path = take_screenshot(adb_id)
-    if not screenshot_path: return False
+    if not screenshot_path:
+        return False
+
     screen_img = cv2.imread(screenshot_path)
-    if screen_img is None: logging.error("Could not read screenshot."); return False
+    if screen_img is None:
+        logging.error("Could not read screenshot.")
+        return False
+
+    # 1. Crop the region of interest
     region = screen_img[y:y+h, x:x+w]
-    cv2.imwrite(LAST_CAPTURE_PATH, region)
+    cv2.imwrite(LAST_CAPTURE_PATH, region) # Save original crop for reference
+
+    # 2. Upscale the image for better detail (LANCZOS4 is a high-quality method)
+    scale_factor = 3
+    width = int(region.shape[1] * scale_factor)
+    height = int(region.shape[0] * scale_factor)
+    resized = cv2.resize(region, (width, height), interpolation=cv2.INTER_LANCZOS4)
+
+    # 3. Convert to grayscale
+    gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+
+    # 4. Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    # This enhances local contrast, making text pop from the background.
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    contrast_enhanced = clahe.apply(gray)
+    
+    # 5. Apply Otsu's Binarization to get a clean black-and-white image.
+    # We invert it so the text is black on a white background.
+    _, thresh = cv2.threshold(contrast_enhanced, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # 6. Apply a morphological closing operation to fill gaps in letters.
+    # This helps with italic or broken characters.
+    kernel = np.ones((2,2), np.uint8)
+    processed_image = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    
+    # Save the final processed image for debugging
+    processed_path = os.path.join(TEMP_DIR, "last_ocr_processed.png")
+    cv2.imwrite(processed_path, processed_image)
+    logging.debug(f"Advanced OCR processed image saved to {processed_path}")
+    
     try:
-        gray_region = cv2.cvtColor(region, cv2.COLOR_BGR2GRAY)
-        _, thresh_region = cv2.threshold(gray_region, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-        ocr_text = pytesseract.image_to_string(thresh_region).strip()
+        # 7. Configure Tesseract for best results on single lines of text
+        # --oem 1: Use LSTM (neural network) engine only.
+        # --psm 7: Treat the image as a single text line.
+        custom_config = r'--oem 1 --psm 7'
+        
+        ocr_text = pytesseract.image_to_string(processed_image, config=custom_config).strip()
         logging.debug(f"OCR detected text: '{ocr_text}'")
         return expected_text.lower() in ocr_text.lower()
+        
     except pytesseract.TesseractNotFoundError:
-        logging.critical("Tesseract is not installed or not in your PATH. Check tesseract_path in instances.ini."); emergency_exit("Tesseract is not configured.")
+        logging.critical("Tesseract is not installed or not in your PATH. Check tesseract_path in instances.ini.")
+        emergency_exit("Tesseract is not configured.")
         return False
     except Exception as e:
-        logging.error(f"An error occurred during OCR: {e}"); return False
+        logging.error(f"An error occurred during OCR: {e}")
+        return False
 
 def compare_with_any_image(adb_id, language, x, y, w, h, image_names, threshold=0.85):
+    # ... (This function is unchanged) ...
     logging.debug(f"Comparing screen region ({x},{y},{w},{h}) with ANY of the images: {image_names}")
     screenshot_path = take_screenshot(adb_id)
     if not screenshot_path: return False
@@ -136,6 +164,7 @@ def compare_with_any_image(adb_id, language, x, y, w, h, image_names, threshold=
     return False
 
 def send_email(subject, body):
+    # ... (This function is unchanged) ...
     recipient = general_config.get('recipient_email')
     if not recipient: logging.warning("No recipient_email configured in instances.ini. Cannot send email."); return
     logging.info(f"Sending email to {recipient}: '{subject}'")
@@ -150,6 +179,7 @@ def send_email(subject, body):
         logging.error(f"Failed to send email via Outlook: {e}")
 
 def emergency_exit(message):
+    # ... (This function is unchanged) ...
     logging.critical(f"EMERGENCY EXIT: {message}")
     send_email("CRITICAL ERROR in CE_AUTOMATION", message)
     os._exit(1)

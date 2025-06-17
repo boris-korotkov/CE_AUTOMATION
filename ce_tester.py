@@ -11,19 +11,19 @@ from ce_workflow_engine import WorkflowEngine
 
 # --- CONFIGURATION ---
 # Set the default INSTANCE NAME from instances.ini you want to test.
-DEFAULT_INSTANCE_NAME = "CE_2024_1"
+DEFAULT_INSTANCE_NAME = "ComradB"
 #DEFAULT_ADB_ID = "127.0.0.1:5605" #Adidas
-#DEFAULT_ADB_ID = "127.0.0.1:5575" #Hidden Enemy
-#DEFAULT_ADB_ID = "127.0.0.1:5585" #Comrad B
+#DEFAULT_ADB_ID = "127.0.0.1:5575" #HiddenEnemy
+DEFAULT_ADB_ID = "127.0.0.1:5585" #ComradB
 #DEFAULT_ADB_ID = "127.0.0.1:5595" #Charlie
-DEFAULT_ADB_ID = "127.0.0.1:5655" #2024.1
+#DEFAULT_ADB_ID = "127.0.0.1:5655" #2024.1
 #DEFAULT_ADB_ID = "127.0.0.1:5665" #2024.2
 #DEFAULT_ADB_ID = "127.0.0.1:5675" #2024.3
 #DEFAULT_ADB_ID = "127.0.0.1:5685" #2024.4
 #DEFAULT_ADB_ID = "127.0.0.1:5695" #2024.5
 
 # Set the DEFAULT scenario from workflows.yaml to be used if you press Enter at the prompt.
-DEFAULT_TEST_SCENARIO = "Gene_Bank"
+DEFAULT_TEST_SCENARIO = "Daily_rewards"
 # ---------------------
 
 def get_coords(prompt="Enter coordinates as X,Y: "):
