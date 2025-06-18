@@ -5,3 +5,4 @@ pytesseract
 pywin32
 jinja2
 keyboard
+easyocr

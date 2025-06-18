@@ -16,23 +16,23 @@ scenarios:
       - click: [150, 685] # envelop icon
       - click: [437, 657] # confirm that we are on System tab
       - if:
-          condition: "compare_with_text_easyocr(293,563,154,38,'Claim')"
+          condition: compare_with_image(293,563,154,38,'Claim_all.png',0.85)
           then:
             - click: [369,584] # Claim All
             - if:
-                condition: "compare_with_text_easyocr(587,462,108,40,'Claim')" # one line
+                condition: "compare_with_text(587,462,108,40,'Claim') or compare_with_image(587,462,108,40,'daily_reward_claim.png',0.85)" # 1 line
                 then:
                   - log: "Claiming daily reward - 1 line"
                   - click: [640,485] # Claim
                 else:
                   - if:
-                      condition: "compare_with_text_easyocr(590,533,100,39,'Claim')" # two lines
+                      condition: "compare_with_text(590,533,100,39,'Claim') or compare_with_image(590,533,100,39,'daily_reward_claim2.png',0.85)" # Need to refresh
                       then:
                         - log: "Claiming daily reward - 2 lines"
                         - click: [642,554] # Claim
                       else:
                         - if:
-                            condition: "compare_with_text_easyocr(592,569,108,40,'Claim')" # three lines
+                            condition: "compare_with_text(592,569,108,40,'Claim') or compare_with_image(592,569,108,40,'daily_reward_claim3.png',0.85)" # 3 lines
                             then:
                               - log: "Claiming daily reward - 3 lines"
                               - click: [639,590] # Claim
@@ -43,7 +43,7 @@ scenarios:
     description: Campaign farming
     steps:
       - if:
-          condition: "compare_with_text_easyocr(326,547,85,24,'Campaign')"
+          condition: compare_with_text(326,547,85,24,'Campaign')
           then:
             - log: "Entering the Campaign"
             - click: [267,496] # Enter to Campaign
@@ -52,13 +52,13 @@ scenarios:
             - click: [1163,680] # Claim button
             - delay: 2
             - if:
-                condition: "compare_with_text_easyocr(460,641,358,38,'Please')" # If a new level is reached
+                condition: compare_with_text(460,641,358,38,'Please') # If a new level is reached
                 then:
                   - log: "New level reached"
                   - click: [683,665] # Click Claim button
                   - delay: 2
                   - if:
-                      condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  
+                      condition: "compare_with_text(707,445,131,36,'Confirm')"  
                       then:
                         - click: [510,466] # Tap to continue
                         - click: [690,679] # Confirm button
@@ -71,7 +71,7 @@ scenarios:
             - log: "Accelerate for free"
             - delay: 5
             - if:
-                condition: "compare_with_text_easyocr(460,641,358,38,'Please')" # If a new level is reached
+                condition: compare_with_text(460,641,358,38,'Please') # If a new level is reached
                 then:
                   - click: [510,466] # Tap to continue
                   - click: [690,679] # Confirm button
@@ -82,7 +82,7 @@ scenarios:
             - click: [834,679] # Accelerate for ticket or 50 gems
             - delay: 5
             - if:
-                condition: "compare_with_text_easyocr(460,641,358,38,'Please')" # If a new level is reached
+                condition: compare_with_text(460,641,358,38,'Please') # If a new level is reached
                 then:
                   - log: "New level reached"
                   - click: [510,466] # Tap to continue
@@ -95,17 +95,17 @@ scenarios:
     description: Gene Bank farming
     steps:
       - if:
-          condition: "compare_with_text_easyocr(798,554,88,26,'Gene')"
+          condition: compare_with_text(798,554,88,26,'Gene')
           then:
             - click: [750,510] # Enter to Gene Bank
             - delay: 1
             - if:
-                condition: "compare_with_text_easyocr(216,481,88,39,'Free')" # If Free Ordinary Clone button is available
+                condition: "compare_with_text(216,481,88,39,'Free') or compare_with_image(219,483,85,38,'Free_Ordinary_Clone.png',0.85)" # If Free Ordinary Clone button is available
                 then:
                   - click: [268,503] # Click Free button
                   - delay: 2
                   - if:
-                      condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  # if capacity is full
+                      condition: "compare_with_text(707,445,131,36,'Confirm')"  # if capacity is full
                       then:
                         - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance." # send an email if capacity is full
                         - click: [510,466] # Click Cancel
@@ -113,12 +113,12 @@ scenarios:
                       else:
                         - click: [60, 50] # return to the Gene Bank screen
                         - if:
-                            condition: "compare_with_text_easyocr(574,566,140,37,'Free')" # If Free Advanced Clone button is available
+                            condition: compare_with_text(574,566,140,37,'Free') # If Free Advanced Clone button is available
                             then:
                               - click: [641,584] # Click Free button
                               - delay: 2
                               - if:
-                                  condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  # if capacity is full
+                                  condition: "compare_with_text(707,445,131,36,'Confirm')"  # if capacity is full
                                   then:
                                     - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance." # send an email if capacity is full
                                     - click: [510,466] # Click Cancel
@@ -133,13 +133,13 @@ scenarios:
                               - click: [60, 50] # return to the Game main screen
                 else:
                   - if:
-                      condition: "compare_with_text_easyocr(574,566,140,37,'Free')" # If Free Advanced Clone button is available
+                      condition: compare_with_text(574,566,140,37,'Free') # If Free Advanced Clone button is available
                       then:
                         - log: "Free Advanced Clone button is available"
                         - click: [641,584] # Click Free button
                         - delay: 2
                         - if:
-                            condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  # if capacity is full
+                            condition: "compare_with_text(707,445,131,36,'Confirm')"  # if capacity is full
                             then:
                               - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance." # send an email if capacity is full
                               - click: [510,466] # Click Cancel
@@ -158,7 +158,7 @@ scenarios:
     description: Guild activity 
     steps:
       - if:
-          condition: "compare_with_text_easyocr(1146,671,97,43, 'Guild') or compare_with_image(1146,671,97,43,'Guild.png',0.85)" # Check if Guild icon is available
+          condition: "compare_with_text(1146,671,97,43, 'Guild') or compare_with_image(1146,671,97,43,'Guild.png',0.85)" # Check if Guild icon is available
           then:
             - click: [1195,637] # Click on Guild icon
             - delay: 2
@@ -171,7 +171,7 @@ scenarios:
                   - click: [60,50] # exit from the Boss reward screen
 
             - if:
-                condition: "compare_with_text_easyocr(757,527,78,34,'Claim')" # Claim_playoff_round_reward -- change to image
+                condition: compare_with_text(757,527,78,34,'Claim') # Claim_playoff_round_reward -- change to image
                 then:
                   - click: [792, 546] # click Claim button
                   - delay: 1
@@ -193,7 +193,7 @@ scenarios:
             - click: [146,484] # Go to Boss war screen
             - delay: 1
             - if:
-                condition: "compare_with_text_easyocr(905,398,139,36,'Challenge')" # In Challenge button is available
+                condition: compare_with_text(905,398,139,36,'Challenge') # In Challenge button is available
                 then:
                   - click: [973,416] # click Claim button
                   - delay: 2
@@ -201,14 +201,14 @@ scenarios:
                   - delay: 5
                   - set: { click_attempts: 0 }
                   - while:
-                      condition: "not compare_with_text_easyocr(588,569,106,42,'Claim') and not compare_with_image(588,569,106,42,'boss_war_reward_claim.png',0.85) and click_attempts < 10" 
+                      condition: "not compare_with_text(588,569,106,42,'Claim') and not compare_with_image(588,569,106,42,'boss_war_reward_claim.png',0.85) and click_attempts < 10" 
                       do:
                         - log: "Claim button not visible. Attempt #{{ click_attempts + 1 }}"
                         - click: [228, 54] # click on fight finish button until Claim button appears
                         - delay: 2
                         - increment: click_attempts
                   - if:
-                      condition: "compare_with_text_easyocr(588,569,106,42,'Claim') or compare_with_image(588,569,106,42,'boss_war_reward_claim.png',0.85)"  # If Claim button is available
+                      condition: compare_with_text(588,569,106,42,'Claim') or compare_with_image(588,569,106,42,'boss_war_reward_claim.png',0.85) # If Claim button is available
                       then:
                         - click: [643,594] # click Claim button
                         - delay: 2
@@ -232,11 +232,11 @@ scenarios:
     description: Supply Depot farming
     steps:
       - if:
-          condition: "compare_with_text_easyocr(142,301,111,26,'Supply')"
+          condition: compare_with_text(142,301,111,26,'Supply')
           then:
             - click: [194,263] # Enter to Supply Depot
             - if:
-                condition: "compare_with_text_easyocr(882,637,215,37,'Free')" # If Free refresh button is available
+                condition: compare_with_text(882,637,215,37,'Free') # If Free refresh button is available
                 then:
                   - click: [968,656] # Click Free Refresh button
                   - if:
@@ -257,16 +257,3 @@ scenarios:
           then:
             - log: "Successfully found 'Claim' using EasyOCR."
             - click: [750,510] # 
-      - if:
-          # Use the new feature matching with your tuned match count
-          condition: "compare_with_features(588, 569, 106, 42, 'button_claim_orb.png', 12)"
-          then:
-            - log: "Claim button found using feature matching!"
-            - click: [640, 590]
-      - if:
-          # Check if the reward is a gold chest OR a purple chest, requiring at least 15 feature matches.
-          # Note the surrounding double quotes, which are required for the list syntax.
-          condition: "compare_with_any_image(300, 400, 50, 50, ['gold_chest.png', 'purple_chest.png'], 15)"
-          then:
-            - log: "Found a high-value chest using feature matching!"
-            - click: [325, 425]
