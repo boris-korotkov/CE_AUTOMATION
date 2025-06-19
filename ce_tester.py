@@ -11,7 +11,7 @@ from ce_workflow_engine import WorkflowEngine
 
 # --- CONFIGURATION ---
 DEFAULT_INSTANCE_NAME = "Adidas"
-DEFAULT_TEST_SCENARIO = "Supply_Depot_Farming"
+DEFAULT_TEST_SCENARIO = "Send_flowers_to_friends"
 # ---------------------
 
 def get_coords(prompt="Enter coordinates as X,Y: "):
@@ -74,26 +74,26 @@ def main(adb_id, language, instance_name):
                 x, y, w, h = get_region()
                 img_name = input("Enter template image filename: ")
                 threshold = float(input("Enter match threshold [0.0-1.0] (default 0.85): ") or 0.85)
-                result = ce_actions.compare_with_image(adb_id, language, x, y, w, h, img_name, threshold)
+                result = ce_actions.compare_with_image(adb_id, language, instance_name, x, y, w, h, img_name, threshold) # <-- FIX: Added instance_name
                 print(f"\n--- TEMPLATE MATCH RESULT ---\nMatch found: {result}\n---------------------------")
 
             elif choice == '3':
                 x, y, w, h = get_region()
                 img_name = input("Enter template image filename: ")
                 min_matches = int(input("Enter minimum feature matches required (default 10): ") or 10)
-                result = ce_actions.compare_with_features(adb_id, language, x, y, w, h, img_name, min_matches)
+                result = ce_actions.compare_with_features(adb_id, language, instance_name, x, y, w, h, img_name, min_matches) # <-- FIX: Added instance_name
                 print(f"\n--- FEATURE MATCH RESULT ---\nMatch found: {result}\n--------------------------")
 
             elif choice == '4':
                 x, y, w, h = get_region()
                 text = input("Enter the text to search for: ")
-                result = ce_actions.compare_with_text(adb_id, language, x, y, w, h, text)
+                result = ce_actions.compare_with_text(adb_id, language, instance_name, x, y, w, h, text) # <-- FIX: Added instance_name
                 print(f"\n--- TESSERACT RESULT ---\nMatch found: {result}\n----------------")
 
             elif choice == '5':
                 x, y, w, h = get_region()
                 text = input("Enter the text to search for: ")
-                result = ce_actions.compare_with_text_easyocr(adb_id, language, x, y, w, h, text)
+                result = ce_actions.compare_with_text_easyocr(adb_id, language, instance_name, x, y, w, h, text) # <-- FIX: Added instance_name
                 print(f"\n--- EASYOCR RESULT ---\nMatch found: {result}\n----------------")
 
             elif choice == '6':
