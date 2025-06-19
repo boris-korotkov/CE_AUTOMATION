@@ -23,7 +23,7 @@ def load_general_config():
         'tesseract_path': config.get('General', 'tesseract_path', fallback=None),
         'emulator_boot_time': config.getint('General', 'emulator_boot_time', fallback=45),
         'log_level': config.get('General', 'log_level', fallback='INFO').strip().upper(),
-        # --- ALL GLOBAL CHECK KEYS ARE NOW LOADED ---
+        'save_debug_images': config.getboolean('General', 'save_debug_images', fallback=False),
         'game_load_check_region': config.get('General', 'game_load_check_region', fallback=None),
         'game_load_check_image': config.get('General', 'game_load_check_image', fallback=None),
         'game_load_check_text': config.get('General', 'game_load_check_text', fallback=None),

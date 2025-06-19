@@ -16,23 +16,23 @@ scenarios:
       - click: [150, 685] # envelop icon
       - click: [437, 657] # confirm that we are on System tab
       - if:
-          condition: "compare_with_text_easyocr(293,563,154,38,'Claim')"
+          condition: "compare_with_text_easyocr(293,563,154,38,'Claim') or compare_with_image(293,563,154,38,'Claim_all.png',0.85)"
           then:
             - click: [369,584] # Claim All
             - if:
-                condition: "compare_with_text_easyocr(587,462,108,40,'Claim')" # one line
+                condition: "compare_with_text_easyocr(587,462,108,40,'Claim') or compare_with_image(587,462,108,40,'daily_reward_claim.png',0.85)" # one line
                 then:
                   - log: "Claiming daily reward - 1 line"
                   - click: [640,485] # Claim
                 else:
                   - if:
-                      condition: "compare_with_text_easyocr(590,533,100,39,'Claim')" # two lines
+                      condition: "compare_with_text_easyocr(590,533,100,39,'Claim') or compare_with_image(590,533,100,39,'daily_reward_claim2.png',0.85)" # two lines
                       then:
                         - log: "Claiming daily reward - 2 lines"
                         - click: [642,554] # Claim
                       else:
                         - if:
-                            condition: "compare_with_text_easyocr(592,569,108,40,'Claim')" # three lines
+                            condition: "compare_with_text_easyocr(592,569,108,40,'Claim') or compare_with_image(592,569,108,40,'daily_reward_claim3.png',0.85)" # three lines
                             then:
                               - log: "Claiming daily reward - 3 lines"
                               - click: [639,590] # Claim
@@ -43,7 +43,7 @@ scenarios:
     description: Campaign farming
     steps:
       - if:
-          condition: "compare_with_text_easyocr(326,547,85,24,'Campaign')"
+          condition: "compare_with_text_easyocr(326,547,85,24,'Campaign') or compare_with_text(326,547,85,24,'Campaign')"
           then:
             - log: "Entering the Campaign"
             - click: [267,496] # Enter to Campaign
@@ -95,12 +95,12 @@ scenarios:
     description: Gene Bank farming
     steps:
       - if:
-          condition: "compare_with_text_easyocr(798,554,88,26,'Gene')"
+          condition: "compare_with_text_easyocr(798,554,88,26,'Gene') or compare_with_text(798,554,88,26,'Gene')"
           then:
             - click: [750,510] # Enter to Gene Bank
             - delay: 1
             - if:
-                condition: "compare_with_text_easyocr(216,481,88,39,'Free')" # If Free Ordinary Clone button is available
+                condition: "compare_with_text_easyocr(216,481,88,39,'Free') or compare_with_image(219,483,85,38,'Free_Ordinary_Clone.png',0.85)" # If Free Ordinary Clone button is available
                 then:
                   - click: [268,503] # Click Free button
                   - delay: 2

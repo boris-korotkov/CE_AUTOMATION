@@ -11,20 +11,10 @@ from ce_workflow_engine import WorkflowEngine
 
 # --- CONFIGURATION ---
 DEFAULT_INSTANCE_NAME = "Adidas"
-DEFAULT_ADB_ID = "127.0.0.1:5605" #Adidas
-#DEFAULT_ADB_ID = "127.0.0.1:5575" #HiddenEnemy
-#DEFAULT_ADB_ID = "127.0.0.1:5585" #ComradB
-#DEFAULT_ADB_ID = "127.0.0.1:5595" #Charlie
-#DEFAULT_ADB_ID = "127.0.0.1:5655" #CE_2024_1
-#DEFAULT_ADB_ID = "127.0.0.1:5665" #CE_2024_2
-#DEFAULT_ADB_ID = "127.0.0.1:5675" #CE_2024_3
-#DEFAULT_ADB_ID = "127.0.0.1:5685" #CE_2024_4
-#DEFAULT_ADB_ID = "127.0.0.1:5695" #CE_2024_5
+DEFAULT_TEST_SCENARIO = "Supply_Depot_Farming"
 # ---------------------
-DEFAULT_TEST_SCENARIO="Send_flowers_to_friends"
 
 def get_coords(prompt="Enter coordinates as X,Y: "):
-    # ... (This function is unchanged) ...
     while True:
         try:
             val = input(prompt)
@@ -34,7 +24,6 @@ def get_coords(prompt="Enter coordinates as X,Y: "):
             print("Invalid format. Please use X,Y (e.g., 100,200)")
 
 def get_region(prompt="Enter region as X,Y,Width,Height: "):
-    # ... (This function is unchanged) ...
     while True:
         try:
             val = input(prompt)
@@ -43,22 +32,24 @@ def get_region(prompt="Enter region as X,Y,Width,Height: "):
         except ValueError:
             print("Invalid format. Please use X,Y,W,H (e.g., 50,100,80,25)")
 
-# --- UPDATED MENU ---
 def print_menu():
+    """Prints the main menu of available commands."""
+    menu_items = {
+        "1": "Click at specified coordinates (x, y)",
+        "2": "Compare w/ Image (Template Match)",
+        "3": "Compare w/ Image (Feature Match - ORB)",
+        "4": "Compare w/ Text (Tesseract)",
+        "5": "Compare w/ Text (EasyOCR)",
+        "6": "Scroll",
+        "7": "Get Coordinates by Clicking on Window",
+        "8": "Select Region by Dragging on Window",
+        "9": "Run a Test Scenario"
+    }
     print("\n" + "="*50)
     print("      Clone Evolution Interactive Tester")
     print("="*50)
-    print("1. Click at specified coordinates (x, y)")
-    print("2. Compare w/ Image (Template Match)")
-    print("3. Compare w/ Image (Feature Match - ORB)") # <-- NEW
-    print("4. Compare w/ Text (Tesseract)")
-    print("5. Compare w/ Text (EasyOCR)")
-    print("6. Scroll")
-    print("--- Get Info from Emulator (Interactive) ---")
-    print("7. Get Coordinates by Clicking on Window")
-    print("8. Select Region by Dragging on Window")
-    print("--- Workflow Testing ---")
-    print("9. Run a Test Scenario")
+    for key, value in menu_items.items():
+        print(f"{key}. {value}")
     print("exit - Quit the tester")
     print("-"*50)
 
@@ -84,9 +75,9 @@ def main(adb_id, language, instance_name):
                 img_name = input("Enter template image filename: ")
                 threshold = float(input("Enter match threshold [0.0-1.0] (default 0.85): ") or 0.85)
                 result = ce_actions.compare_with_image(adb_id, language, x, y, w, h, img_name, threshold)
-                print(f"\n--- RESULT ---\nMatch found: {result}\n----------------")
-            
-            elif choice == '3': # New compare_with_features
+                print(f"\n--- TEMPLATE MATCH RESULT ---\nMatch found: {result}\n---------------------------")
+
+            elif choice == '3':
                 x, y, w, h = get_region()
                 img_name = input("Enter template image filename: ")
                 min_matches = int(input("Enter minimum feature matches required (default 10): ") or 10)
@@ -99,7 +90,6 @@ def main(adb_id, language, instance_name):
                 result = ce_actions.compare_with_text(adb_id, language, x, y, w, h, text)
                 print(f"\n--- TESSERACT RESULT ---\nMatch found: {result}\n----------------")
 
-            # --- NEW OPTION IMPLEMENTATION ---
             elif choice == '5':
                 x, y, w, h = get_region()
                 text = input("Enter the text to search for: ")
@@ -145,7 +135,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Interactive tester for Clone Evolution automation actions.", formatter_class=argparse.RawTextHelpFormatter, usage="python %(prog)s [instance_name]")
     parser.add_argument("instance_name", nargs='?', default=None, help="The instance name from instances.ini (e.g., 'Adidas').")
     args = parser.parse_args()
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     instance_name_to_use = args.instance_name or DEFAULT_INSTANCE_NAME
     if not instance_name_to_use: print("\nERROR: Instance name is not set."); sys.exit(1)
     print(f"Using instance: '{instance_name_to_use}'")

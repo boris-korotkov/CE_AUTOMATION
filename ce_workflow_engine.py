@@ -19,12 +19,11 @@ class WorkflowEngine:
             'emergency_exit': lambda args: ce_actions.emergency_exit(args)
         }
         self.conditional_actions = {
-            'compare_with_image': lambda *args: ce_actions.compare_with_image(self.adb_id, self.language, *args),
-            'compare_with_text': lambda *args: ce_actions.compare_with_text(self.adb_id, self.language, *args),
-            # --- UPDATED LAMBDA TO HANDLE OPTIONAL min_match_count ---
-            'compare_with_any_image': lambda *args: ce_actions.compare_with_any_image(self.adb_id, self.language, *args),
-            'compare_with_text_easyocr': lambda *args: ce_actions.compare_with_text_easyocr(self.adb_id, self.language, *args),
-            'compare_with_features': lambda *args: ce_actions.compare_with_features(self.adb_id, self.language, *args)
+            'compare_with_image': lambda *args: ce_actions.compare_with_image(self.adb_id, self.language, self.context['instance_name'], *args),
+            'compare_with_text': lambda *args: ce_actions.compare_with_text(self.adb_id, self.language, self.context['instance_name'], *args),
+            'compare_with_any_image': lambda *args: ce_actions.compare_with_any_image(self.adb_id, self.language, self.context['instance_name'], *args),
+            'compare_with_text_easyocr': lambda *args: ce_actions.compare_with_text_easyocr(self.adb_id, self.language, self.context['instance_name'], *args),
+            'compare_with_features': lambda *args: ce_actions.compare_with_features(self.adb_id, self.language, self.context['instance_name'], *args)
         }
 
     def _render_template(self, template_string):
