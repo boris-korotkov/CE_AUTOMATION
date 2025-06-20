@@ -14,7 +14,7 @@ from ce_hotkeys import setup_hotkey_listener
 pause_event = threading.Event()
 stop_event = threading.Event()
 
-def setup_logging(log_level_str='INFO'):
+def setup_logging(log_level_str='DEBUG'):
     log_level = getattr(logging, log_level_str, logging.INFO)
     logger = logging.getLogger()
     logger.setLevel(log_level)
@@ -105,6 +105,7 @@ def main():
                 check_for_pause_or_stop()
                 logging.info(f"--- Processing instance: {name} (Attempt {attempt}/{MAX_LAUNCH_ATTEMPTS}) ---")
                 process = None
+                adb_id = None # <-- FIX: Initialize adb_id for the loop
                 try:
                     process = launch_instance(name, command)
                     if not process:
@@ -117,7 +118,7 @@ def main():
                     adb_id = connect_adb_to_instance(name, logger=logging)
                     if not adb_id:
                         logging.warning(f"Could not connect ADB for instance {name} on attempt {attempt}.")
-                        terminate_instance(process, emulator_type)
+                        terminate_instance(process, adb_id) # <-- FIX: Pass adb_id (which is None here)
                         time.sleep(15)
                         continue
                     logging.info(f"Successfully connected ADB to {adb_id}. Verifying game screen...")
@@ -131,11 +132,11 @@ def main():
                             check_region = tuple(map(int, check_region_str.split(',')))
                             
                             # Try image check first (more reliable)
-                            if check_image and ce_actions.compare_with_image(adb_id, language, *check_region, check_image, check_threshold):
+                            if check_image and ce_actions.compare_with_image(adb_id, language, name, *check_region, check_image, check_threshold): #<-- FIX: Added 'name' for instance_name
                                 logging.info("Game load verification successful (Image Match).")
                                 is_loaded = True
                             # If image fails, try text check
-                            elif check_text and ce_actions.compare_with_text(adb_id, language, *check_region, check_text):
+                            elif check_text and ce_actions.compare_with_text(adb_id, language, name, *check_region, check_text): #<-- FIX: Added 'name' for instance_name
                                 logging.info("Game load verification successful (Text Match).")
                                 is_loaded = True
                             else:
@@ -154,13 +155,13 @@ def main():
                         break
                     else:
                         ce_actions.send_email(subject=f"CE Automation Alert: Instance {name} Failed Verification", body=f"Instance '{name}' failed the game load check on attempt {attempt}.\nThe script will try to relaunch it.")
-                        terminate_instance(process, emulator_type)
+                        terminate_instance(process, adb_id) # <-- FIX: Pass the acquired adb_id
                         logging.info("Waiting 15 seconds before next attempt...")
                         time.sleep(15)
                 except Exception as e:
                     logging.error(f"An unexpected error occurred during launch attempt {attempt} for {name}: {e}", exc_info=True)
                     if process:
-                        terminate_instance(process, emulator_type)
+                        terminate_instance(process, adb_id) # <-- FIX: Pass adb_id (may be None, which is handled)
             
             if instance_ready:
                 try:
@@ -184,8 +185,7 @@ def main():
                     logging.error(f"An error occurred during workflow execution for {name}: {e}", exc_info=True)
                 finally:
                     logging.info(f"--- Finished processing instance {name}. Terminating. ---")
-                    if final_process:
-                        terminate_instance(final_process, emulator_type)
+                    terminate_instance(final_process, final_adb_id) # <-- FIX: Pass final_adb_id
             else:
                 logging.critical(f"--- FAILED to launch and verify instance {name} after {MAX_LAUNCH_ATTEMPTS} attempts. Skipping. ---")
                 ce_actions.send_email(subject=f"CE Automation FAILURE: Instance {name} Could Not Be Launched", body=f"The automation script failed to launch and verify the instance '{name}' after {MAX_LAUNCH_ATTEMPTS} attempts.\n\nThe script will now skip this instance and continue with the next one in the run order.")

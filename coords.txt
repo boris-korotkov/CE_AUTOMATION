@@ -15,3 +15,23 @@ Captured region saved to: temp\captured_region_1749686203.png
 Region selected: X=808, Y=441, W=110, H=108
 Captured region saved to: temp\captured_region_1749686209.png
 Region selected: X=1002, Y=440, W=108, H=108
+
+daily rewards
+3 lines
+2nd kine: 584,532,108,40
+daily_reward_claim.png
+
+707,445,131,36
+- send_email: "The Gene Bank farming failed for the {{ instance_name }} instance."
+510,466
+
+460,641,358,38,'Please'
+683,665
+
+757,527,78,34
+
+condition: "compare_with_text(592,569,108,40,'Claim') or compare_with_image(592,569,108,40,'daily_reward_claim.png',0.85)" 
+
+228, 54 - end battle
+
+588,569,106,42 - claim

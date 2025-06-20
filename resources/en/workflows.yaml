@@ -153,6 +153,9 @@ scenarios:
                       else:
                         - log: "if not advance clone is available for free"
                         - click: [60, 50] # return to the Game main screen
+          else:
+            - log: "Gene Bank icon is not available"
+            - send_email: "Gene Bank farming failed for the {{ instance_name }} instance." # send an email if Gene Bank icon is not available
 
   - name: Guild_activity
     description: Guild activity 
@@ -221,6 +224,104 @@ scenarios:
             - click: [60, 50] # return to the Game main screen
           else:
             - send_email: "Guild activity failed for the {{ instance_name }} instance." # send an email if Guild icon is not available
+  
+  - name: Dangeon_farming
+    description: Dangeon farming
+    steps:
+      - scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
+      - scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
+      - click: [975,429] # enter to Dangeon
+      - click: [926,674] # Click Sweep button
+      - click: [765,465] # Click Confirm button
+      - delay: 1
+      - click: [638,587] # Click Claim button
+      - click: [414,38] # Switch to Advanced Dangeon
+      - click: [1198,659] # Initiate reward collection
+      - delay: 3
+      - if:
+          condition: "compare_with_text_easyocr(588,459,104,45, 'Claim')" # Check if Claim button is available
+          then:
+            - click: [638,481] # Click on Claim button
+          else:
+            - log: "Claim button not found in Dangeon farming"
+            #- click: [60, 50] # return to the main  game screen
+      - click: [60, 50] # exit main game screen
+  
+  - name: Arena_farming
+    description: Arena farming. Fight most left opponent in the list. Good for minor accounts.
+    steps:
+      - if:
+          condition: "compare_with_text_easyocr(257,551,57,27,'Arena')" # Check if Arena icon is available
+          then:
+            - click: [272,486] # Click on Arena icon
+            - delay: 1
+            ### General Arena ###
+            - click: [153,359] 
+            - delay: 3
+            - click: [629,560] # Click Match button
+            - delay: 1
+            # Quick battle checkbox is to be checked
+            # Attack #1
+            - log: "General Arena attack #1"
+            - click: [280,580] # Click the most left opponent in the list
+            - delay: 2
+            - click: [462,615] # Collect rewards
+            - delay: 2
+            - click: [462,615] # Second click if areana league is increased
+            - log: "General Arena attack #2"
+            - click: [280,580] # Click the most left opponent in the list
+            - delay: 2
+            - click: [462,615] # Collect rewards
+            - delay: 2
+            - click: [462,615] # Second click if areana league is increased
+            - log: "General Arena attack #3"
+            - click: [280,580] # Click the most left opponent in the list
+            - delay: 2
+            - click: [462,615] # Collect rewards
+            - delay: 2
+            - click: [462,615] # Second click if areana league is increased
+            - click: [60, 50] # exit General arena screen
+            - delay: 1
+            - click: [60, 50] # exit main arena screen
+
+            ### Cross server Arena ###
+            - log: "Cross server Arena farming"
+            - click: [474,377] 
+            - delay: 3
+            - click: [629,560] # Click Match button
+            - delay: 1
+            # Quick battle checkbox is to be checked
+            # Attack #1
+            - log: "Cross server Arena attack #1"
+            - click: [280,580] # Click the most left opponent in the list
+            - delay: 2
+            - click: [462,615] # Collect rewards
+            - delay: 2
+            - click: [462,615] # Second click if areana league is increased
+            - log: "Cross server Arena attack #2"
+            - click: [280,580] # Click the most left opponent in the list
+            - delay: 2
+            - click: [462,615] # Collect rewards
+            - delay: 2
+            - click: [462,615] # Second click if areana league is increased
+            - log: "Cross server Arena attack #3"
+            - click: [280,580] # Click the most left opponent in the list
+            - delay: 2
+            - click: [462,615] # Collect rewards
+            - delay: 2
+            - click: [462,615] # Second click if areana league is increased
+            - click: [60, 50] # exit General arena screen
+            - delay: 1
+            - click: [60, 50] # exit main arena screen
+            ### Summit Arena Challenge ###
+            # Placeholder for Summit Arena Challenge farming
+            
+            ### End farming ###
+            - log: "Arena farming completed"
+            - click: [60, 50] # exit main game screen
+          else:
+            - log: "Arena icon is not available"
+            - send_email: "Arena farming failed for the {{ instance_name }} instance." # send an email if Arena icon is not available
   
   - name: Bonus_rewards
     description: Bonus rewards collection
