@@ -43,7 +43,7 @@ scenarios:
     description: Campaign farming
     steps:
       - if:
-          condition: "compare_with_text_easyocr(326,547,85,24,'Campaign') or compare_with_text(326,547,85,24,'Campaign')"
+          condition: "compare_with_text_easyocr(327,547,83,25,'Campaign') or compare_with_image(327,547,83,25,'Campaign.png',0.85)" # Check if Campaign icon is available
           then:
             - log: "Entering the Campaign"
             - click: [267,496] # Enter to Campaign
@@ -95,7 +95,7 @@ scenarios:
     description: Gene Bank farming
     steps:
       - if:
-          condition: "compare_with_text_easyocr(798,554,88,26,'Gene') or compare_with_text(798,554,88,26,'Gene')"
+          condition: "compare_with_text_easyocr(798,554,88,26,'Gene') or compare_with_image(798,554,88,26,'GeneBank.png',0.85)"
           then:
             - click: [750,510] # Enter to Gene Bank
             - delay: 1
@@ -120,7 +120,7 @@ scenarios:
                               - if:
                                   condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  # if capacity is full
                                   then:
-                                    - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance." # send an email if capacity is full
+                                    - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
                                     - click: [510,466] # Click Cancel
                                     - click: [60, 50] # return to the Game main screen
                                   else:
@@ -141,7 +141,7 @@ scenarios:
                         - if:
                             condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  # if capacity is full
                             then:
-                              - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance." # send an email if capacity is full
+                              - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
                               - click: [510,466] # Click Cancel
                               - click: [60, 50] # return to the Game main screen
                             else:
@@ -165,6 +165,7 @@ scenarios:
           then:
             - click: [1195,637] # Click on Guild icon
             - delay: 2
+            - log : "Check if Boss  reward is available"
             - if:
                 condition: compare_with_image(915,521,79,29,'Boss_reward_claim.png',0.85) # Check if Boss  reward is available
                 then:
@@ -173,6 +174,7 @@ scenarios:
                   - click: [638, 481] # One more claim button
                   - click: [60,50] # exit from the Boss reward screen
 
+            - log : "Check if Claim_playoff_round_reward is available"
             - if:
                 condition: "compare_with_text_easyocr(757,527,78,34,'Claim')" # Claim_playoff_round_reward -- change to image
                 then:
@@ -181,6 +183,7 @@ scenarios:
                   - click: [636,482] # click another Claim button
                   - click: [60, 50] # exit from the playoff round reward screen
             
+            - log : "Check if championship reward is available"
             - if:
                 condition: compare_with_image(918,523,73,27,'champion_cup_reward.png',0.85) # Claim championship reward
                 then:
@@ -188,15 +191,23 @@ scenarios:
                   - delay: 2
                   - click: [646, 486] # One more claim button
                   - click: [60,50] # exit from the championship reward screen
-
+            
+            - log : "click sign in"
             - click: [294,624] # click sign in
             - delay: 2
             - click: [640, 488] # click Claim
+            - if :
+                condition: "compare_with_text_easyocr(474,553,96,40,'Send') or compare_with_image(474,553,96,40,'Guild_Send.png',0.85)" # Check if Sign-in button has already been clicked
+                then:
+                  - log: "Sign-in button has already been clicked"                    
+                  - click: [60, 50] # return to the guild screen
             - delay: 1
+            - log : "Go to Boss war screen"
             - click: [146,484] # Go to Boss war screen
             - delay: 1
+            - log : "Check if  Challenge button  available"
             - if:
-                condition: "compare_with_text_easyocr(905,398,139,36,'Challenge')" # In Challenge button is available
+                condition: "compare_with_text_easyocr(905,398,139,36,'Challenge')" # Check if  Challenge button  available
                 then:
                   - click: [973,416] # click Claim button
                   - delay: 2
@@ -225,10 +236,226 @@ scenarios:
           else:
             - send_email: "Guild activity failed for the {{ instance_name }} instance." # send an email if Guild icon is not available
   
+  - name: Airship_farming
+    description: Airship farming
+    steps:
+      #- scroll: [996,352, right,400] # Scroll right to make sure Airship icon is visible
+      - scroll: [996,352, left,400] # Scroll right to make sure Airship icon is visible
+      - if:
+          condition: "compare_with_text_easyocr(498,254,116,41,'air') or compare_with_text_easyocr(570,256,101,36,'air')" # Check if Guild icon is available - with ad sidebar
+          then:
+            - click: [549, 186] # Click on Airship  icon without ad sidebar
+            - click: [610, 198] # Click on Airship  icon with  ad sidebar
+            - delay: 1
+            - log : "Left slot farming"
+            - click: [236, 376] # Click on left slot
+            - scroll: [624,582, up,400] # Scroll up
+            - scroll: [624,582, up,400] # Scroll up
+            - scroll: [624,582, up,400] # Scroll up
+            - scroll: [624,582, up,400] # Scroll up
+            - log : "check last position"
+            - if:
+                condition: compare_with_text_easyocr(905,584,92,32,'Sweep') # Check if Sweep button is available at the last position
+                then:
+                  - click: [948,601] # Click Sweep button
+                  - delay: 4
+                  - click: [639,485] # Click Claim button
+                  - click: [948,601] # Click Sweep button
+                  - delay: 4
+                  - click: [639,485] # Click Claim button
+                  - click: [60,50] # exit from the Airship reward screen
+                else:
+                  - log : "check last-1 position"
+                  - if:
+                      condition: compare_with_text_easyocr(905,489,93,32,'Sweep') # Check if Sweep button is available at the last-1 position
+                      then:
+                        - click: [948, 504] # Click Sweep button
+                        - delay: 4
+                        - click: [639,485] # Click Claim button
+                        - click: [948, 504] # Click Sweep button
+                        - delay: 4
+                        - click: [639,485] # Click Claim button
+                        - click: [60,50] # exit from the Airship reward screen
+                      else:
+                        - log : "check last-2 position"
+                        - if:
+                            condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-2 position
+                            then:
+                              - click: [948, 409] # Click Sweep button
+                              - delay: 4
+                              - click: [639,485] # Click Claim button
+                              - click: [948, 409] # Click Sweep button
+                              - delay: 4
+                              - click: [639,485] # Click Claim button
+                              - click: [60,50] # exit from the Airship reward screen
+                            else:
+                              - log : "check last-3 position"
+                              - if:
+                                  condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-3 position
+                                  then:
+                                    - click: [946,408] # Click Sweep button
+                                    - delay: 4
+                                    - click: [639,485] # Click Claim button
+                                    - click: [946,408] # Click Sweep button
+                                    - delay: 4
+                                    - click: [639,485] # Click Claim button
+                                    - click: [60,50] # exit from the Airship reward screen
+                                  else:
+                                    - if:
+                                        condition: compare_with_text_easyocr(905,204,93,32,'Sweep') # Check if Sweep button is available at the last-4 position
+                                        then:
+                                          - click: [948,218] # Click Sweep button
+                                          - delay: 4
+                                          - click: [639,485] # Click Claim button
+                                          - click: [948,218] # Click Sweep button
+                                          - delay: 4
+                                          - click: [639,485] # Click Claim button
+                                          - click: [60,50] # exit from the Airship reward screen
+                                        else:
+                                          - log : "No Sweep button found in Airship farming"
+            - log : "middle slot farming"
+            - click: [636,373] # Click on middle  slot
+            - scroll: [624,582, up,400] # Scroll up
+            - scroll: [624,582, up,400] # Scroll up
+            - scroll: [624,582, up,400] # Scroll up
+            - scroll: [624,582, up,400] # Scroll up
+            - log : "check last position"
+            - if:
+                condition: compare_with_text_easyocr(905,584,92,32,'Sweep') # Check if Sweep button is available at the last position
+                then:
+                  - click: [948,601] # Click Sweep button
+                  - delay: 4
+                  - click: [639,485] # Click Claim button
+                  - click: [948,601] # Click Sweep button
+                  - delay: 4
+                  - click: [639,485] # Click Claim button
+                  - click: [60,50] # exit from the Airship reward screen
+                else:
+                  - log : "check last-1 position"
+                  - if:
+                      condition: compare_with_text_easyocr(905,489,93,32,'Sweep') # Check if Sweep button is available at the last-1 position
+                      then:
+                        - click: [948, 504] # Click Sweep button
+                        - delay: 4
+                        - click: [639,485] # Click Claim button
+                        - click: [948, 504] # Click Sweep button
+                        - delay: 4
+                        - click: [639,485] # Click Claim button
+                        - click: [60,50] # exit from the Airship reward screen
+                      else:
+                        - log : "check last-2 position"
+                        - if:
+                            condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-2 position
+                            then:
+                              - click: [948, 409] # Click Sweep button
+                              - delay: 4
+                              - click: [639,485] # Click Claim button
+                              - click: [948, 409] # Click Sweep button
+                              - delay: 4
+                              - click: [639,485] # Click Claim button
+                              - click: [60,50] # exit from the Airship reward screen
+                            else:
+                              - log : "check last-3 position"
+                              - if:
+                                  condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-3 position
+                                  then:
+                                    - click: [946,408] # Click Sweep button
+                                    - delay: 4
+                                    - click: [639,485] # Click Claim button
+                                    - click: [946,408] # Click Sweep button
+                                    - delay: 4
+                                    - click: [639,485] # Click Claim button
+                                    - click: [60,50] # exit from the Airship reward screen
+                                  else:
+                                    - if:
+                                        condition: compare_with_text_easyocr(905,204,93,32,'Sweep') # Check if Sweep button is available at the last-4 position
+                                        then:
+                                          - click: [948,218] # Click Sweep button
+                                          - delay: 4
+                                          - click: [639,485] # Click Claim button
+                                          - click: [948,218] # Click Sweep button
+                                          - delay: 4
+                                          - click: [639,485] # Click Claim button
+                                          - click: [60,50] # exit from the Airship reward screen
+                                        else:
+                                          - log : "No Sweep button found in Airship farming"          
+            - log : "right slot farming"
+            - click: [1050,352] # Click on right  slot
+            - scroll: [624,582, up,400] # Scroll up
+            - scroll: [624,582, up,400] # Scroll up
+            - scroll: [624,582, up,400] # Scroll up
+            - scroll: [624,582, up,400] # Scroll up
+            - log : "check last position"
+            - if:
+                condition: compare_with_text_easyocr(905,584,92,32,'Sweep') # Check if Sweep button is available at the last position
+                then:
+                  - click: [948,601] # Click Sweep button
+                  - delay: 4
+                  - click: [639,485] # Click Claim button
+                  - click: [948,601] # Click Sweep button
+                  - delay: 4
+                  - click: [639,485] # Click Claim button
+                  - click: [60,50] # exit from the Airship reward screen
+                else:
+                  - log : "check last-1 position"
+                  - if:
+                      condition: compare_with_text_easyocr(905,489,93,32,'Sweep') # Check if Sweep button is available at the last-1 position
+                      then:
+                        - click: [948, 504] # Click Sweep button
+                        - delay: 4
+                        - click: [639,485] # Click Claim button
+                        - click: [948, 504] # Click Sweep button
+                        - delay: 4
+                        - click: [639,485] # Click Claim button
+                        - click: [60,50] # exit from the Airship reward screen
+                      else:
+                        - log : "check last-2 position"
+                        - if:
+                            condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-2 position
+                            then:
+                              - click: [948, 409] # Click Sweep button
+                              - delay: 4
+                              - click: [639,485] # Click Claim button
+                              - click: [948, 409] # Click Sweep button
+                              - delay: 4
+                              - click: [639,485] # Click Claim button
+                              - click: [60,50] # exit from the Airship reward screen
+                            else:
+                              - log : "check last-3 position"
+                              - if:
+                                  condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-3 position
+                                  then:
+                                    - click: [946,408] # Click Sweep button
+                                    - delay: 4
+                                    - click: [639,485] # Click Claim button
+                                    - click: [946,408] # Click Sweep button
+                                    - delay: 4
+                                    - click: [639,485] # Click Claim button
+                                    - click: [60,50] # exit from the Airship reward screen
+                                  else:
+                                    - if:
+                                        condition: compare_with_text_easyocr(905,204,93,32,'Sweep') # Check if Sweep button is available at the last-4 position
+                                        then:
+                                          - click: [948,218] # Click Sweep button
+                                          - delay: 4
+                                          - click: [639,485] # Click Claim button
+                                          - click: [948,218] # Click Sweep button
+                                          - delay: 4
+                                          - click: [639,485] # Click Claim button
+                                          - click: [60,50] # exit from the Airship reward screen
+                                        else:
+                                          - log : "No Sweep button found in Airship farming"  
+            - log : "return to the Game main screen"
+            - click: [60, 50] # return to the Game main screen
+          else:
+            - send_email: "Airship farming failed for the {{ instance_name }} instance. No Airship icon is available" # send an email if Airship icon is not available
+      - log : "End of Airship farming"
+      #- click: [60,50] # exit from the Airship reward screen
+
   - name: Dangeon_farming
     description: Dangeon farming
     steps:
-      - scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
+      #- scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
       - scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
       - click: [975,429] # enter to Dangeon
       - click: [926,674] # Click Sweep button
@@ -251,7 +478,7 @@ scenarios:
     description: Arena farming. Fight most left opponent in the list. Good for minor accounts.
     steps:
       - if:
-          condition: "compare_with_text_easyocr(257,551,57,27,'Arena')" # Check if Arena icon is available
+          condition: "compare_with_text_easyocr(260,553,56,23,'Arena') or compare_with_any_image(260,553,56,23,'Arena.png',0.85)" #  Check if Arena icon is available
           then:
             - click: [272,486] # Click on Arena icon
             - delay: 1
@@ -261,6 +488,7 @@ scenarios:
             - click: [629,560] # Click Match button
             - delay: 1
             # Quick battle checkbox is to be checked
+            # TO-DO Add a check if attack is free 
             # Attack #1
             - log: "General Arena attack #1"
             - click: [280,580] # Click the most left opponent in the list
@@ -322,7 +550,7 @@ scenarios:
           else:
             - log: "Arena icon is not available"
             - send_email: "Arena farming failed for the {{ instance_name }} instance." # send an email if Arena icon is not available
-  
+
   - name: Bonus_rewards
     description: Bonus rewards collection
     steps:
@@ -350,24 +578,3 @@ scenarios:
             
             - click: [60, 50] # return to the main  game sceen
 
-  - name: test_easyocr
-    description: Test new OCR library easyocr
-    steps:
-      - if:
-          condition: "compare_with_text_easyocr(1146,671,97,43, 'Guild')"
-          then:
-            - log: "Successfully found 'Claim' using EasyOCR."
-            - click: [750,510] # 
-      - if:
-          # Use the new feature matching with your tuned match count
-          condition: "compare_with_features(588, 569, 106, 42, 'button_claim_orb.png', 12)"
-          then:
-            - log: "Claim button found using feature matching!"
-            - click: [640, 590]
-      - if:
-          # Check if the reward is a gold chest OR a purple chest, requiring at least 15 feature matches.
-          # Note the surrounding double quotes, which are required for the list syntax.
-          condition: "compare_with_any_image(300, 400, 50, 50, ['gold_chest.png', 'purple_chest.png'], 15)"
-          then:
-            - log: "Found a high-value chest using feature matching!"
-            - click: [325, 425]

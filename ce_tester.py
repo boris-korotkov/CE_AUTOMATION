@@ -10,7 +10,7 @@ import ce_interactive
 from ce_workflow_engine import WorkflowEngine
 
 # --- CONFIGURATION ---
-DEFAULT_INSTANCE_NAME = "HiddenEnemy"
+DEFAULT_INSTANCE_NAME = "CE_2024_3"
 DEFAULT_TEST_SCENARIO = "Send_flowers_to_friends"
 # ---------------------
 
