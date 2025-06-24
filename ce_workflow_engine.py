@@ -2,7 +2,7 @@ import yaml
 import logging
 import os
 import time
-from jinja2 import Template
+from jinja2 import Template, UndefinedError
 import ce_actions
 
 class WorkflowEngine:
@@ -23,14 +23,32 @@ class WorkflowEngine:
             'compare_with_text': lambda *args: ce_actions.compare_with_text(self.adb_id, self.language, self.context['instance_name'], *args),
             'compare_with_any_image': lambda *args: ce_actions.compare_with_any_image(self.adb_id, self.language, self.context['instance_name'], *args),
             'compare_with_text_easyocr': lambda *args: ce_actions.compare_with_text_easyocr(self.adb_id, self.language, self.context['instance_name'], *args),
-            'compare_with_features': lambda *args: ce_actions.compare_with_features(self.adb_id, self.language, self.context['instance_name'], *args)
+            'compare_with_features': lambda *args: ce_actions.compare_with_features(self.adb_id, self.language, self.context['instance_name'], *args),
+            'get_coords_from_image': lambda *args: ce_actions.get_coords_from_image(self.adb_id, self.language, *args)
         }
 
     def _render_template(self, template_string):
-        return Template(str(template_string)).render(self.context)
+        full_context = {**self.context, **self.conditional_actions}
+        return Template(str(template_string)).render(full_context)
+
+    def _render_params(self, params):
+        if isinstance(params, str):
+            full_context = {**self.context, **self.conditional_actions}
+            rendered_template = Template(params).render(full_context)
+            try:
+                # Using a safe eval to convert string representations like "(1,2)" into Python objects
+                return eval(rendered_template, {'__builtins__':{}}, {})
+            except (SyntaxError, TypeError, NameError):
+                # If eval fails, the result was likely just a plain string.
+                return rendered_template
+        elif isinstance(params, list):
+            return [self._render_params(item) for item in params]
+        elif isinstance(params, dict):
+            return {key: self._render_params(value) for key, value in params.items()}
+        else:
+            return params
 
     def _evaluate_condition(self, condition_str):
-        # ... (This function is unchanged) ...
         logging.debug(f"Evaluating condition: {condition_str}")
         try:
             eval_globals = {'__builtins__': None}
@@ -39,23 +57,50 @@ class WorkflowEngine:
         except Exception as e:
             logging.error(f"Error evaluating condition '{condition_str}': {type(e).__name__}: {e}"); return False
 
+    # --- THIS IS THE CORRECTED METHOD ---
     def _process_steps(self, steps):
-        # ... (This function is unchanged) ...
-        if steps is None: logging.error("A 'then' or 'do' block in the workflow is empty."); return
+        if steps is None: 
+            logging.error("A 'then' or 'do' block in the workflow is empty."); return
         for step in steps:
-            if not isinstance(step, dict): logging.error(f"Malformed step found in workflow: {step}"); continue
+            if not isinstance(step, dict): 
+                logging.error(f"Malformed step found in workflow: {step}"); continue
+            
             command = list(step.keys())[0]
-            params = step[command]
-            if params is None: logging.error(f"Malformed step: command '{command}' has no value."); continue
-            if command in self.actions: self.actions[command](params)
-            elif command == 'set': self.context.update(params); logging.debug(f"Context updated: {self.context}")
-            elif command == 'increment': self.context[params] = self.context.get(params, 0) + 1; logging.debug(f"Incremented '{params}': {self.context[params]}")
-            elif command == 'if':
-                if self._evaluate_condition(params['condition']): self._process_steps(params.get('then'))
-                elif 'else' in params: self._process_steps(params.get('else'))
+            # Get the original, raw parameters
+            raw_params = step[command]
+            
+            if raw_params is None:
+                 logging.error(f"Malformed step: command '{command}' has no value."); continue
+
+            # Handle structural commands first, as they need the raw condition string
+            if command == 'if':
+                if self._evaluate_condition(raw_params['condition']):
+                    self._process_steps(raw_params.get('then'))
+                elif 'else' in raw_params:
+                    self._process_steps(raw_params.get('else'))
             elif command == 'while':
-                while self._evaluate_condition(params['condition']): self._process_steps(params.get('do'))
-            else: logging.warning(f"Unknown command in workflow: {command}")
+                while self._evaluate_condition(raw_params['condition']):
+                    self._process_steps(raw_params.get('do'))
+            
+            # For all other "action" commands, render their parameters now
+            else:
+                rendered_params = self._render_params(raw_params)
+                
+                if command in self.actions:
+                    if isinstance(rendered_params, list) and command in ['click', 'scroll']:
+                        self.actions[command](rendered_params)
+                    else:
+                        self.actions[command](rendered_params)
+                elif command == 'set':
+                    self.context.update(rendered_params)
+                    logging.debug(f"Context updated: {self.context}")
+                elif command == 'increment':
+                    # Increment needs the raw key, not the rendered one
+                    self.context[raw_params] = self.context.get(raw_params, 0) + 1
+                    logging.debug(f"Incremented '{raw_params}': {self.context[raw_params]}")
+                else:
+                    logging.warning(f"Unknown command in workflow: {command}")
+
 
     def run_workflow(self, workflow_name):
         # ... (This function is unchanged) ...

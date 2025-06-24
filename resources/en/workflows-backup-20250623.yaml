@@ -14,163 +14,82 @@ scenarios:
     description: Collect daily rewards
     steps:
       - click: [150, 685] # envelop icon
-      - set:
-          mail_system_coords: "{{ get_coords_from_image('daily_rewards_system.png') }}"
+      - click: [437, 657] # confirm that we are on System tab
       - if:
-          condition: "mail_system_coords"  # This is true if coordinates were found, false if None
+          condition: "compare_with_text_easyocr(293,563,154,38,'Claim') or compare_with_image(293,563,154,38,'Claim_all.png',0.85)"
           then:
-            - log: "Mail system coordinates found"
-            - click: "{{ mail_system_coords }}" # Click on the Mail System icon
-            - set:
-                mail_claim_all_coords: "{{ get_coords_from_image('Claim_all.png') }}"
+            - click: [369,584] # Claim All
             - if:
-                condition: "mail_claim_all_coords"  # This is true if coordinates were found,
+                condition: "compare_with_text_easyocr(587,462,108,40,'Claim') or compare_with_image(587,462,108,40,'daily_reward_claim.png',0.85)" # one line
                 then:
-                  - log: "Mail Claim All coordinates found"
-                  - click: "{{mail_claim_all_coords}}" # Click on the Mail System icon
-                  - set:
-                      claim_button_coords: "{{ get_coords_from_image('mail_daily_reward_claim.png') }}"
-                  - if:
-                      condition: "claim_button_coords"  # This is true if coordinates were found,
-                      then:
-                        - log: "Claim button coordinates found"
-                        - click: "{{claim_button_coords}}" # Click on the Claim button
-                        - delay: 1
-                        - click: [60, 50]  # return to the main  game screen
+                  - log: "Claiming daily reward - 1 line"
+                  - click: [640,485] # Claim
                 else:
-                  - log: "Mail Claim All coordinates not found, returning to main game screen"
-                  - click: [60, 50] # return to the main  game screen
-          else:
-            - log: "Mail system coordinates not found, returning to main game screen"
-            - click: [60, 50] # return to the main  game screen
+                  - if:
+                      condition: "compare_with_text_easyocr(590,533,100,39,'Claim') or compare_with_image(590,533,100,39,'daily_reward_claim2.png',0.85)" # two lines
+                      then:
+                        - log: "Claiming daily reward - 2 lines"
+                        - click: [642,554] # Claim
+                      else:
+                        - if:
+                            condition: "compare_with_text_easyocr(592,569,108,40,'Claim') or compare_with_image(592,569,108,40,'daily_reward_claim3.png',0.85)" # three lines
+                            then:
+                              - log: "Claiming daily reward - 3 lines"
+                              - click: [639,590] # Claim
 
-
+      - click: [60, 50] # return to the main  game screen
 
   - name: Campaign_farming
     description: Campaign farming
     steps:
-      - set:
-          campaign_coords: "{{ get_coords_from_image('Campaign.png') }}"
       - if:
-          condition: "campaign_coords"  # This is true if coordinates were found, false
+          condition: "compare_with_text_easyocr(327,547,83,25,'Campaign') or compare_with_image(327,547,83,25,'Campaign.png',0.85)" # Check if Campaign icon is available
           then:
-            - log: "Campaign coordinates found"
-            - click: [ "{{ campaign_coords[0] - 115 }}", "{{ campaign_coords[1]-60 }}" ] # Click on the Campaign icon
+            - log: "Entering the Campaign"
+            - click: [267,496] # Enter to Campaign
             - delay: 2
-            - set:
-                campaign_claim_button_coords: "{{ get_coords_from_image('campaign_claim.png') }}"
+            - log: "Claim button"
+            - click: [1163,680] # Claim button
+            - delay: 2
             - if:
-                condition: "campaign_claim_button_coords"  # This is true if coordinates were found,
+                condition: "compare_with_text_easyocr(460,641,358,38,'Please')" # If a new level is reached
                 then:
-                  - log: "Campaign Claim button coordinates found"
-                  - click: "{{campaign_claim_button_coords}}" # Click on the Campaign Claim button
+                  - log: "New level reached"
+                  - click: [683,665] # Click Claim button
                   - delay: 2
-                  - set:
-                      level_up_coords: "{{ get_coords_from_image('please_tap_to_continue.png') }}"
                   - if:
-                      condition: "level_up_coords" # If a new level is reached
+                      condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  
                       then:
-                        - log: "New level reached"
-                        - click: "{{level_up_coords}}" # Click on 'Please tap to continue' message
-                        - delay: 2
-                        - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
-                        - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
-                            then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
+                        - click: [510,466] # Tap to continue
+                        - click: [690,679] # Confirm button
                       else:
-                        - log: "No new level reached, checking for Confirm button"
-                        - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
-                        - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
-                            then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
+                        - click: [690,679] # Confirm button
                 else:
-                  - log: "Campaign Claim button coordinates not found."
-            
-            - log: "Checking for Campaign Accelerate for free button"
-            - set:
-                campaign_accelerate_free_coords: "{{ get_coords_from_image('campaign_free_accelerate.png') }}" # TO-DO change to Free Accelerate
+                  - click: [690,679] # Confirm button
+
+            - click: [834,679] # Accelerate for free
+            - log: "Accelerate for free"
+            - delay: 5
             - if:
-                condition: "campaign_accelerate_free_coords"  # This is true if coordinates
+                condition: "compare_with_text_easyocr(460,641,358,38,'Please')" # If a new level is reached
                 then:
-                  - log: "Campaign Accelerate for free coordinates found"
-                  - click: "{{campaign_accelerate_free_coords}}" # Click on the Campaign Accelerate for 50 gems button
-                  - delay: 5
-                  - set:
-                      level_up_coords: "{{ get_coords_from_image('please_tap_to_continue.png') }}"
-                  - if:
-                      condition: "level_up_coords" # If a new level is reached
-                      then:
-                        - log: "New level reached"
-                        - click: "{{level_up_coords}}" # Click on 'Please tap to continue' message
-                        - delay: 2
-                        - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
-                        - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
-                            then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
-                      else:
-                        - log: "No new level reached, checking for Confirm button"
-                        - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
-                        - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
-                            then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
+                  - click: [510,466] # Tap to continue
+                  - click: [690,679] # Confirm button
+                else:
+                  - click: [690,679] # Confirm button
             
-            - log: "Checking for Campaign Accelerate for 50 gems button"
-            - set:
-                campaign_accelerate_50_coords: "{{ get_coords_from_image('campaign_accelerate_50.png') }}"
+            - log: "Accelerate for free or 50 gems"
+            - click: [834,679] # Accelerate for ticket or 50 gems
+            - delay: 5
             - if:
-                condition: "campaign_accelerate_50_coords"  # This is true if coordinates
+                condition: "compare_with_text_easyocr(460,641,358,38,'Please')" # If a new level is reached
                 then:
-                  - log: "Campaign Accelerate for 50 gems coordinates found"
-                  - click: "{{campaign_accelerate_50_coords}}" # Click on the Campaign Accelerate for 50 gems button
-                  - delay: 5
-                  - set:
-                      level_up_coords: "{{ get_coords_from_image('please_tap_to_continue.png') }}"
-                  - if:
-                      condition: "level_up_coords" # If a new level is reached
-                      then:
-                        - log: "New level reached"
-                        - click: "{{level_up_coords}}" # Click on 'Please tap to continue' message
-                        - delay: 2
-                        - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
-                        - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
-                            then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
-                      else:
-                        - log: "No new level reached, checking for Confirm button"
-                        - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
-                        - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
-                            then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
-            
+                  - log: "New level reached"
+                  - click: [510,466] # Tap to continue
+                  - click: [690,679] # Confirm button
+                else:
+                  - click: [690,679] # Confirm button
             - click: [60, 50] # return to the main  game screen
-            - set:
-                team_coords: "{{ get_coords_from_image('campaign_team.png') }}"
-            - if:
-                condition: "team_coords"  # We are still inside campaign interface. need to go to the main screen
-                then:
-                  - log: "Still in the Campaign. Return to the main game screen"
-                  - click: [60, 50] # return to the main  game screen
-          else:
-            - log: "Campaign icon is not available"
-            - send_email: "Campaign farming failed for the {{ instance_name }} instance." # send an email if Campaign icon is not available
   
   - name: Gene_Bank
     description: Gene Bank farming

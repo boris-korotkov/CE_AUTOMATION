@@ -198,6 +198,48 @@ def compare_with_text_easyocr(adb_id, language, instance_name, x, y, w, h, expec
     except Exception as e:
         logging.error(f"An error occurred during EasyOCR processing: {e}"); return False
 
+def get_coords_from_image(adb_id, language, image_name, threshold=0.85):
+    """
+    Finds a template image on the screen and returns the coordinates of its center.
+    Returns (x, y) tuple on success, or None on failure.
+    """
+    logging.debug(f"Searching for image '{image_name}' to get its coordinates.")
+    screenshot_path = take_screenshot(adb_id)
+    if not screenshot_path:
+        return None
+
+    template_path = os.path.join(RESOURCES_DIR, language, image_name)
+    if not os.path.exists(template_path):
+        logging.error(f"Template image not found: {template_path}")
+        return None
+
+    screen_img = cv2.imread(screenshot_path, cv2.IMREAD_GRAYSCALE)
+    template_img = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
+
+    if screen_img is None or template_img is None:
+        logging.error("Could not read screenshot or template image for coordinate finding.")
+        return None
+
+    # Get the dimensions of the template
+    template_h, template_w = template_img.shape
+
+    # Perform template matching
+    res = cv2.matchTemplate(screen_img, template_img, cv2.TM_CCOEFF_NORMED)
+    _, max_val, _, max_loc = cv2.minMaxLoc(res)
+
+    logging.debug(f"Coordinate search for '{image_name}' match score: {max_val:.2f} (Threshold: {threshold})")
+
+    if max_val >= threshold:
+        # max_loc is the top-left corner of the match
+        # Calculate the center of the found region
+        center_x = max_loc[0] + template_w // 2
+        center_y = max_loc[1] + template_h // 2
+        logging.info(f"Found '{image_name}' at coordinates: ({center_x}, {center_y})")
+        return (center_x, center_y)
+    else:
+        logging.warning(f"Could not find image '{image_name}' on screen with sufficient confidence.")
+        return None
+
 def send_email(subject, body):
     recipient = general_config.get('recipient_email')
     if not recipient: logging.warning("No recipient_email configured in instances.ini. Cannot send email."); return
