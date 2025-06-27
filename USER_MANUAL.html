@@ -70,8 +70,15 @@
             color: #34495e;
         }
         .note {
+            background-color: #e7f3ff;
+            border-left: 5px solid #0d6efd;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+        .warning {
             background-color: #fff3cd;
-            border-left: 5px solid #ffeeba;
+            border-left: 5px solid #ffc107;
             padding: 15px;
             margin-top: 15px;
             border-radius: 4px;
@@ -83,120 +90,59 @@
         <h1>CE Automation - Workflow Command Reference</h1>
         <p>This document provides a complete reference for all commands and functions available for use in your <code>workflows.yaml</code> files.</p>
 
-        <h2>Basic Structure</h2>
-        <p>Each workflow file consists of one or more scenarios. A scenario is a named sequence of steps that the robot will execute in order.</p>
-        <pre><code>scenarios:
-  - name: Your_Scenario_Name
-    description: A brief explanation of what this scenario does.
-    steps:
-      # ... A list of commands goes here ...
-      - click: [100, 200]
-      - delay: 5</code></pre>
-
         <hr>
 
         <h2>I. Action Commands</h2>
-        <p>These are the primary commands that perform an action within the emulator. They are always used as a single-line step.</p>
+        <p>These are the primary commands that perform an action within the emulator.</p>
 
         <h3><code>click</code></h3>
         <p>Simulates a tap on the screen at a specific coordinate.</p>
         <ul>
             <li><strong>Syntax:</strong> <code>click: [x, y]</code></li>
-            <li><strong>Parameters:</strong>
-                <ul>
-                    <li><code>x</code>: The horizontal coordinate (from the left edge).</li>
-                    <li><code>y</code>: The vertical coordinate (from the top edge).</li>
-                </ul>
-            </li>
-            <li><strong>Example:</strong>
-<pre><code>- click: [60, 680] # Click on the "Friends" icon</code></pre>
-            </li>
         </ul>
 
         <h3><code>scroll</code></h3>
-        <p>Simulates a swipe gesture on the screen.</p>
+        <p>Simulates a swipe gesture on the screen from a starting point.</p>
         <ul>
             <li><strong>Syntax:</strong> <code>scroll: [x, y, direction, distance]</code></li>
-            <li><strong>Parameters:</strong>
-                <ul>
-                    <li><code>x</code>, <code>y</code>: The starting coordinates for the swipe.</li>
-                    <li><code>direction</code>: The direction of the swipe. Must be one of <code>up</code>, <code>down</code>, <code>left</code>, or <code>right</code>.</li>
-                    <li><code>distance</code>: The length of the swipe in pixels.</li>
-                </ul>
-            </li>
-            <li><strong>Example:</strong>
-<pre><code>- scroll: [500, 800, up, 400] # Scroll the friends list up from the middle-bottom of the screen</code></pre>
-            </li>
+            <li><strong>Parameters:</strong> <code>direction</code> must be <code>up</code>, <code>down</code>, <code>left</code>, or <code>right</code>.</li>
         </ul>
 
         <h3><code>delay</code></h3>
         <p>Pauses the execution of the script for a specified number of seconds.</p>
         <ul>
             <li><strong>Syntax:</strong> <code>delay: seconds</code></li>
-            <li><strong>Parameters:</strong>
-                <ul>
-                    <li><code>seconds</code>: The duration of the pause in seconds (can be a decimal, e.g., <code>0.5</code>).</li>
-                </ul>
-            </li>
-            <li><strong>Example:</strong>
-<pre><code>- delay: 3 # Wait 3 seconds for the next screen to load</code></pre>
-            </li>
         </ul>
 
         <h3><code>log</code></h3>
-        <p>Prints a message to the console and the log file. Useful for debugging and tracking progress.</p>
+        <p>Prints a message to the console and the log file for debugging and progress tracking.</p>
         <ul>
             <li><strong>Syntax:</strong> <code>log: "Your message here"</code></li>
-            <li><strong>Parameters:</strong>
-                <ul>
-                    <li>A string containing the message to be logged. You can embed variables using <code>{{ variable_name }}</code>.</li>
-                </ul>
-            </li>
-            <li><strong>Example:</strong>
-<pre><code>- log: "Starting the supply depot farming. Attempt #{{counter}}"</code></pre>
-            </li>
         </ul>
 
         <h3><code>send_email</code></h3>
         <p>Sends an email notification using the configured Outlook account.</p>
         <ul>
             <li><strong>Syntax:</strong> <code>send_email: "Your message here"</code></li>
-            <li><strong>Parameters:</strong>
-                <ul>
-                    <li>A string containing the body of the email.</li>
-                </ul>
-            </li>
-            <li><strong>Example:</strong>
-<pre><code>- send_email: "Guild Event is now active! Please check the game."</code></pre>
-            </li>
         </ul>
-
+        
         <h3><code>emergency_exit</code></h3>
-        <p>Immediately stops the entire automation script and sends a critical error email.</p>
+        <p>Immediately stops the entire automation script and sends a critical error email. Use this for unrecoverable errors.</p>
         <ul>
             <li><strong>Syntax:</strong> <code>emergency_exit: "Error message"</code></li>
-            <li><strong>Parameters:</strong>
-                <ul>
-                    <li>A string explaining the reason for the emergency stop.</li>
-                </ul>
-            </li>
-            <li><strong>Example:</strong>
-<pre><code>- emergency_exit: "Game has crashed and cannot be recovered."</code></pre>
-            </li>
         </ul>
 
         <hr>
 
         <h2>II. Variable & Context Commands</h2>
-        <p>These commands allow you to store and manipulate internal variables within a scenario, which is essential for loops and complex logic.</p>
+        <p>These commands allow you to store and manipulate internal variables (the "context") within a scenario.</p>
 
         <h3><code>set</code></h3>
         <p>Creates or overwrites a variable in the scenario's context.</p>
         <ul>
             <li><strong>Syntax:</strong> <code>set: { variable_name: value }</code></li>
             <li><strong>Example:</strong>
-<pre><code>- set: { counter: 0 } # Initialize a loop counter
-- set: { target_found: false } # Initialize a boolean flag</code></pre>
+<pre><code>- set: { click_attempts: 0 } # Initialize a loop counter</code></pre>
             </li>
         </ul>
 
@@ -205,7 +151,7 @@
         <ul>
             <li><strong>Syntax:</strong> <code>increment: variable_name</code></li>
             <li><strong>Example:</strong>
-<pre><code>- increment: counter # Increases the value of 'counter' by 1</code></pre>
+<pre><code>- increment: click_attempts # Increases the value of 'click_attempts' by 1</code></pre>
             </li>
         </ul>
 
@@ -215,122 +161,129 @@
         <p>These commands control the logic of your scenario, allowing for conditional execution and loops.</p>
 
         <h3><code>if / else</code></h3>
-        <p>Executes a block of steps only if a condition is met. An optional <code>else</code> block can be executed if the condition is not met.</p>
-        <ul>
-            <li><strong>Syntax:</strong>
+        <p>Executes a block of steps only if a condition is met.</p>
 <pre><code>- if:
     condition: "your_condition_here"
     then:
       # ... steps to run if condition is true ...
     else:
       # ... (optional) steps to run if condition is false ...</code></pre>
-            </li>
-            <li><strong>Example:</strong>
-<pre><code>- if:
-    condition: compare_with_text(400, 350, 180, 50, 'Claim')
-    then:
-      - log: "Claim button found. Clicking it."
-      - click: [490, 375]
-    else:
-      - log: "Claim button not found. Moving on."</code></pre>
-            </li>
-        </ul>
 
         <h3><code>while</code></h3>
         <p>Repeatedly executes a block of steps as long as a condition remains true.</p>
-        <ul>
-            <li><strong>Syntax:</strong>
 <pre><code>- while:
     condition: "your_condition_here"
     do:
       # ... steps to repeat while the condition is true ...</code></pre>
-            </li>
-            <li><strong>Example:</strong>
-<pre><code>- while:
-    condition: "counter < 10 and not target_found"
-    do:
-      - log: "Searching for target..."
-      - # ... more steps ...
-      - increment: counter</code></pre>
-            </li>
-        </ul>
         
         <hr>
+
+        <h2>IV. Dynamic Actions & Templating</h2>
+        <p>The real power of the engine comes from using variables and functions to make your actions dynamic. This is done using the Jinja2 templating syntax: <code>{{ ... }}</code>.</p>
         
-        <h2>IV. Conditional Functions</h2>
-        <p>These functions are used <strong>exclusively inside the <code>condition:</code> string</strong> of an <code>if</code> or <code>while</code> block. They return <code>True</code> or <code>False</code>.</p>
+        <div class="note">
+            <strong>The Golden Rule:</strong> To use a variable or perform a calculation as a parameter for an action, you <strong>must</strong> wrap it in quotes and curly braces: <code>"{{ your_variable }}"</code> or <code>"{{ your_variable[0] + 10 }}"</code>.
+        </div>
         
-        <h3><code>compare_with_image</code></h3>
-        <p>Captures a region of the screen and compares it to a single template image file.</p>
+        <h3>Dynamic <code>set</code></h3>
+        <p>Store the result of a function call in a variable.</p>
+        <pre><code># Find the 'Home' button and store its coordinates in the 'home_button_coords' variable
+- set:
+    home_button_coords: "{{ get_coords_from_image('home_button.png') }}"</code></pre>
+    
+        <h3>Dynamic <code>click</code> and <code>scroll</code></h3>
+        <p>Use variables to define where to click or scroll. This is the key to creating robust, anchor-based automation.</p>
+        <pre><code># Click the coordinates stored in the 'home_button_coords' variable
+- click: "{{ home_button_coords }}"
+
+# Click 50 pixels to the right of the found button
+- click: [ "{{ home_button_coords[0] + 50 }}", "{{ home_button_coords[1] }}" ]
+
+# Scroll up, starting from the position of the found button
+- scroll: [ "{{ home_button_coords[0] }}", "{{ home_button_coords[1] }}", "up", 400 ]</code></pre>
+
+        <hr>
+
+        <h2>V. Functions</h2>
+        <p>These functions can be used within the <code>{{ ... }}</code> templating syntax, typically with the <code>set</code> command, or inside the <code>condition:</code> string of an <code>if</code> or <code>while</code> block.</p>
+        
+        <h3><code>get_coords_from_image</code></h3>
+        <p>Finds the <strong>single best match</strong> for a template image on the screen and returns its center coordinates as a tuple `(x, y)`. Returns `None` if no match is found.</p>
         <ul>
-            <li><strong>Syntax:</strong> <code>compare_with_image(x, y, w, h, 'image_filename.png', threshold)</code></li>
-            <li><strong>Parameters:</strong>
-                <ul>
-                    <li><code>x, y, w, h</code>: The coordinates, width, and height of the screen region to capture.</li>
-                    <li><code>'image_filename.png'</code>: The name of the template image. This file must be located in the appropriate language resource folder (e.g., <code>resources/en/</code>).</li>
-                    <li><code>threshold</code> (optional): The matching accuracy, from <code>0.0</code> to <code>1.0</code>. A higher value means a stricter match. Defaults to <code>0.85</code>.</li>
-                </ul>
-            </li>
+            <li><strong>Syntax:</strong> <code>get_coords_from_image('image.png', threshold)</code></li>
             <li><strong>Example:</strong>
-<pre><code>condition: compare_with_image(20, 20, 100, 100, 'back-arrow.png', 0.9)</code></pre>
+<pre><code># Find the 'Confirm' button and store its location
+- set:
+    confirm_coords: "{{ get_coords_from_image('button_confirm.png', threshold=0.9) }}"
+- if:
+    condition: "confirm_coords"
+    then:
+      - click: "{{ confirm_coords }}"</code></pre>
+            </li>
+        </ul>
+        
+        <h3><code>get_all_coords_from_image</code></h3>
+        <p>Finds <strong>all occurrences</strong> of a template image on the screen and returns a list of coordinate tuples `[(x1, y1), (x2, y2), ...]`. The list is sorted from top-to-bottom, left-to-right. Returns an empty list `[]` if no matches are found.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>get_all_coords_from_image('image.png', threshold)</code></li>
+            <li><strong>Example (Clicking the lowest button):</strong>
+<pre><code># Find all 'Claim' buttons
+- set:
+    all_buttons: "{{ get_all_coords_from_image('claim_button.png', threshold=0.9) }}"
+
+# Check if any buttons were found
+- if:
+    condition: "all_buttons" # True if the list is not empty
+    then:
+      # The list is sorted top-to-bottom, so the last item [-1] is the lowest on screen
+      - log: "Found {{ len(all_buttons) }} buttons. Clicking the lowest one."
+      - click: "{{ all_buttons[-1] }}"</code></pre>
             </li>
         </ul>
 
-        <!-- NEWLY ADDED SECTION -->
-        <h3><code>compare_with_any_image</code></h3>
-        <p>Captures a region of the screen and compares it against a <strong>list</strong> of template images. Returns <code>True</code> if <strong>any one</strong> of the images matches.</p>
+        <h3><code>compare_with_image</code></h3>
+        <p>Returns <code>True</code> or <code>False</code>. Best used inside a condition to quickly check if an image exists in a specific region.</p>
         <ul>
-            <li><strong>Syntax:</strong> <code>"compare_with_any_image(x, y, w, h, ['img1.png', 'img2.png'], threshold)"</code></li>
-            <li><strong>Parameters:</strong>
-                <ul>
-                    <li><code>x, y, w, h</code>: The coordinates, width, and height of the screen region to capture.</li>
-                    <li><code>['img1.png', 'img2.png']</code>: A Python-style list of image filenames.</li>
-                    <li><code>threshold</code> (optional): The matching accuracy. Defaults to <code>0.85</code>.</li>
-                </ul>
-            </li>
+            <li><strong>Syntax:</strong> <code>compare_with_image(x, y, w, h, 'image.png', threshold)</code></li>
             <li><strong>Example:</strong>
-<pre><code># Checks if the reward slot contains either a gold or a purple chest
-condition: "compare_with_any_image(300, 400, 50, 50, ['gold_chest.png', 'purple_chest.png'], 0.9)"</code></pre>
+<pre><code>condition: "compare_with_image(20, 20, 100, 100, 'back-arrow.png')"</code></pre>
             </li>
-            <div class="note">
+        </ul>
+        
+        <h3><code>compare_with_any_image</code></h3>
+        <p>Returns <code>True</code> if <strong>any one</strong> of a list of images is found in a region.</p>
+        <ul>
+            <li><strong>Syntax:</strong> <code>compare_with_any_image(x, y, w, h, ['img1.png', 'img2.png'])</code></li>
+            <div class="warning">
                 <strong>Important:</strong> Because this function's syntax uses square brackets <code>[]</code>, you <strong>must</strong> wrap the entire condition in double quotes <code>"..."</code> to avoid a YAML parsing error.
             </div>
+            <li><strong>Example:</strong>
+<pre><code>condition: "compare_with_any_image(300, 400, 50, 50, ['gold_chest.png', 'purple_chest.png'])"</code></pre>
+            </li>
         </ul>
-        <!-- END OF NEW SECTION -->
 
-        <h3><code>compare_with_text</code></h3>
-        <p>Captures a region of the screen, converts it to text using OCR, and checks if it contains the expected text. The comparison is case-insensitive.</p>
+        <h3><code>compare_with_text</code> / <code>compare_with_text_easyocr</code></h3>
+        <p>Returns <code>True</code> if the expected text is found within a region of the screen (case-insensitive).</p>
         <ul>
             <li><strong>Syntax:</strong> <code>compare_with_text(x, y, w, h, 'expected text')</code></li>
-            <li><strong>Parameters:</strong>
-                <ul>
-                    <li><code>x, y, w, h</code>: The coordinates, width, and height of the screen region to capture.</li>
-                    <li><code>'expected text'</code>: The text to search for within the captured region.</li>
-                </ul>
-            </li>
             <li><strong>Example:</strong>
-<pre><code># Reliably checks for "Claim all" even if OCR returns "Claim ail"
-condition: compare_with_text(297, 565, 156, 34, 'Clam')</code></pre>
+<pre><code>condition: "compare_with_text(297, 565, 156, 34, 'Claim All')"</code></pre>
             </li>
         </ul>
 
         <h3>Combining Conditions</h3>
-        <p>You can combine multiple conditions using standard logical operators: <code>and</code>, <code>or</code>, and <code>not</code>.</p>
-        <ul>
-            <li><strong>Example:</strong>
-<pre><code>condition: "not compare_with_image(100,100,50,50,'error.png') and counter < 5"</code></pre>
-            </li>
-        </ul>
+        <p>You can combine conditions using standard logical operators: <code>and</code>, <code>or</code>, and <code>not</code>.</p>
+<pre><code>condition: "not compare_with_image(100,100,50,50,'error.png') and click_attempts < 5"</code></pre>
         
         <hr>
 
-        <h2>V. Best Practices & Tips</h2>
+        <h2>VI. Best Practices & Tips</h2>
         <ul>
-            <li><strong>Use Comments:</strong> Use the <code>#</code> character to add comments to your steps. This makes your scenarios much easier to understand and maintain.</li>
-            <li><strong>Use the Tester:</strong> Use <code>ce_tester.py</code> to find exact coordinates and regions. Options <code>7</code> (Get Coordinates) and <code>8</code> (Select Region) are your best friends for building accurate workflows. The image captured by option <code>8</code> can be used directly as a template for <code>compare_with_image</code>.</li>
-            <li><strong>Descriptive Naming:</strong> Give your template images and scenarios descriptive names (e.g., <code>button_confirm_purchase.png</code> instead of <code>img1.png</code>).</li>
-            <li><strong>Quote Complex Conditions:</strong> When in doubt, always wrap your entire <code>condition:</code> string in double quotes <code>"..."</code> to prevent issues with special characters.</li>
-            <li><strong>Indentation is Key:</strong> YAML relies on strict indentation. Use a text editor that supports YAML to avoid errors. All steps in a block (<code>steps:</code>, <code>then:</code>, <code>do:</code>) must have the same level of indentation.</li>
+            <li><strong>Anchor-Based Automation is Best:</strong> Avoid hardcoded coordinates like <code>click: [100, 200]</code> whenever possible. Use <code>get_coords_from_image</code> to find an element first, then use the returned variable to click. This makes your scripts resilient to ads and UI shifts.</li>
+            <li><strong>Use the Tester:</strong> Use <code>ce_tester.py</code> to test your anchor images. Option <code>9</code> (Get Coordinates from Image) is perfect for checking if your image is unique and detectable.</li>
+            <li><strong>Quote Your Conditions:</strong> When in doubt, always wrap your entire <code>condition:</code> string in double quotes <code>"..."</code> to prevent issues with special characters.</li>
+            <li><strong>Add Delays:</strong> After a click that triggers a screen transition or animation, add a <code>delay</code> to give the game time to load before you look for the next element.</li>
+            <li><strong>Indentation is Key:</strong> YAML relies on strict indentation. All steps in a block (<code>steps:</code>, <code>then:</code>, <code>do:</code>) must be indented and start with a <code>-</code>.</li>
         </ul>
     </div>
 </body>

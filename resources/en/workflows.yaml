@@ -44,8 +44,6 @@ scenarios:
             - log: "Mail system coordinates not found, returning to main game screen"
             - click: [60, 50] # return to the main  game screen
 
-
-
   - name: Campaign_farming
     description: Campaign farming
     steps:
@@ -175,69 +173,221 @@ scenarios:
   - name: Gene_Bank
     description: Gene Bank farming
     steps:
+      - set:
+          gene_bank_coords: "{{ get_coords_from_image('GeneBank.png') }}"
       - if:
-          condition: "compare_with_text_easyocr(798,554,88,26,'Gene') or compare_with_image(798,554,88,26,'GeneBank.png',0.85)"
+          condition: "gene_bank_coords"  # This is true if coordinates were found, false
           then:
-            - click: [750,510] # Enter to Gene Bank
-            - delay: 1
+            - log: "Gene Bank coordinates found"
+            - click: [ "{{ gene_bank_coords[0] - 115 }}", "{{ gene_bank_coords[1]-60 }}" ] # Click on the Gene Bank icon
+            - delay: 2
+            - log : "Checking if ordinary clone is available"
+            - set:
+                free_ordinary_coords: "{{ get_coords_from_image('Free_Ordinary_Clone.png') }}"
             - if:
-                condition: "compare_with_text_easyocr(216,481,88,39,'Free') or compare_with_image(219,483,85,38,'Free_Ordinary_Clone.png',0.85)" # If Free Ordinary Clone button is available
+                condition: "free_ordinary_coords"  # If Free Ordinary Clone button is available
                 then:
-                  - click: [268,503] # Click Free button
-                  - delay: 2
+                  - log: "Free Ordinary Clone button coordinates found"
+                  - click: "{{free_ordinary_coords}}" # Click on the Free Ordinary Clone button
+                  - delay: 3
+                  - set:
+                      cancel_button_coords: "{{ get_coords_from_image('gene_bank_cancel.png') }}"
                   - if:
-                      condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  # if capacity is full
+                      condition: "cancel_button_coords"  # If Confirm button is available
                       then:
-                        - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance." # send an email if capacity is full
-                        - click: [510,466] # Click Cancel
-                        - click: [60, 50] # return to the Game main screen
+                        - log: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full"
+                        - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
+                        - click: "{{cancel_button_coords}}" # Click on the Confirm button
+                        - click: [60, 50] # return to the main  game screen
                       else:
-                        - click: [60, 50] # return to the Gene Bank screen
-                        - if:
-                            condition: "compare_with_text_easyocr(574,566,140,37,'Free')" # If Free Advanced Clone button is available
-                            then:
-                              - click: [641,584] # Click Free button
-                              - delay: 2
-                              - if:
-                                  condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  # if capacity is full
-                                  then:
-                                    - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
-                                    - click: [510,466] # Click Cancel
-                                    - click: [60, 50] # return to the Game main screen
-                                  else:
-                                    - log: "No Free Ordinary Clone button, but Free Advanced Clone button is available"
-                                    - click: [60, 50] # return to the Gene Bank screen
-                                    - delay: 1
-                                    - log: "Second click on back arrows"
-                                    - click: [60, 50] # return to the Game main screen
-                            else:
-                              - click: [60, 50] # return to the Game main screen
+                        - click: [60, 50] # return to the gene bank screen
+                        
                 else:
+                  - log: "Free Ordinary Clone button not found"
+                  #- log: "Free Ordinary Clone button not found, checking for Free Advanced Clone button"
+            
+            - log : "Checking if Advanced clone is available"
+            - set:
+                free_advanced_coords: "{{ get_coords_from_image('Free_Advanced_Clone.png') }}"
+            - if:
+                condition: "free_advanced_coords"  # If Free Advanced Clone button is available
+                then:
+                  - log: "Free Advanced Clone button coordinates found"
+                  - click: "{{free_advanced_coords}}" # Click on the Free Advanced Clone button
+                  - delay: 3
+                  - set:
+                      cancel_button_coords: "{{ get_coords_from_image('gene_bank_cancel.png') }}"
                   - if:
-                      condition: "compare_with_text_easyocr(574,566,140,37,'Free')" # If Free Advanced Clone button is available
+                      condition: "cancel_button_coords"  # If Confirm button is available
                       then:
-                        - log: "Free Advanced Clone button is available"
-                        - click: [641,584] # Click Free button
-                        - delay: 2
-                        - if:
-                            condition: "compare_with_text_easyocr(707,445,131,36,'Confirm')"  # if capacity is full
-                            then:
-                              - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
-                              - click: [510,466] # Click Cancel
-                              - click: [60, 50] # return to the Game main screen
-                            else:
-                              
-                              - click: [60, 50] # return to the Gene Bank screen
-                              - delay: 2
-                              - log: "Second click on back arrows"
-                              - click: [60, 50] # return to the Game main screen
+                        - log: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full"
+                        - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
+                        - click: "{{cancel_button_coords}}" # Click on the Confirm button
+                        - click: [60, 50] # return to the gene bank screen
                       else:
-                        - log: "if not advance clone is available for free"
-                        - click: [60, 50] # return to the Game main screen
+                        - click: [60, 50] # return to the gene bank screen
+                        
+                else:
+                  - log: "Free Advanced Clone button not found"
+                  #- log: "Free Ordinary Clone button not found, checking for Free Advanced Clone button"
+
+            - click: [60, 50] # return to the main  game screen
           else:
             - log: "Gene Bank icon is not available"
-            - send_email: "Gene Bank farming failed for the {{ instance_name }} instance." # send an email if Gene Bank icon is not available
+            - send_email: "Gene Bank farming failed for the {{ instance_name }} instance. Gene Bank icon is not available" 
+                        
+  - name: Guild_activity_new
+    description: Guild activity - new version
+    steps:
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
+      - if:
+          condition: "guild_coords"  # This is true if coordinates were found, false
+          then:
+            - log: "Guild coordinates found"
+            - click: "{{guild_coords}}" # Click on the Guild icon
+            - delay: 2
+            - log : "Check if Boss reward is available"
+            - set:
+                boss_reward_coords: "{{ get_coords_from_image('Boss_reward_claim.png') }}"
+            - if:
+                condition: "boss_reward_coords"  # Check if Boss reward is available
+                then:
+                  - click: "{{boss_reward_coords}}" # Claim Boss reward
+                  - delay: 2
+                  - set:
+                      boss_reward_coords: "{{ get_coords_from_image('boss_war_reward_claim.png') }}"
+                  - click: "{{boss_reward_coords}}" # Claim Boss reward
+                  - click: [60,50] # exit from the Boss reward screen
+                else:
+                  - log: "Boss reward not available"
 
+            - log : "Check if Claim_playoff_round_reward is available"
+            - set:
+                playoff_round_reward_coords: "{{ get_coords_from_image('Claim_playoff_round_reward.png') }}" # TO-DO change to real image. The current is fake
+            - if:
+                condition: "playoff_round_reward_coords" # Claim_playoff_round_reward 
+                then:
+                  - click: [ "{{ playoff_round_reward_coords[0] + 170 }}", "{{ playoff_round_reward_coords[1] }}" ] # click Claim button
+                  - delay: 1
+                  - set:
+                      playoff_round_claim_button_coords: "{{ get_coords_from_image('daily_reward_claim.png.png') }}" 
+                  - if:
+                      condition: "playoff_round_claim_button_coords" # Claim another Claim button
+                      then:
+                        - click: "{{playoff_round_claim_button_coords}}" # click another Claim button
+                        - delay: 1
+                        - click: [60, 50] # exit from the playoff round reward screen
+                      else:
+                        - log: "Playoff round clain button is not available" 
+                else:
+                  - log: "Playoff round reward not available"
+            
+            - log : "Check if championship reward is available"
+            - set:
+                championship_reward_coords: "{{ get_coords_from_image('champion_cup_reward.png') }}"
+            - if:
+                condition: "championship_reward_coords" # Claim championship reward
+                then:
+                  - click: "{{championship_reward_coords}}" # Claim Championship reward
+                  - delay: 2
+                  - click: [646, 486] # One more claim button # TO-DO need to update this to the image # TO-DO need to update this to the image
+                  - click: [60,50] # exit from the championship reward screen
+            
+            - log : "Daily Sign In"
+            - set:
+                sign_in_coords: "{{ get_coords_from_image('sign_in.png') }}"
+            - if:
+                condition: "sign_in_coords" # Check if Sign-in button is available
+                then:
+                  - click: "{{sign_in_coords}}" # click sign in
+                  - delay: 2
+                  - set:
+                      sign_in_claim_coords: "{{ get_coords_from_image('daily_reward_claim.png') }}"
+                  - if:
+                      condition: "sign_in_claim_coords" # Check if Claim button is available
+                      then:
+                        - click: "{{sign_in_claim_coords}}" # click Claim
+                      else:
+                        - log: "Sign-in claim button not found, returning to the guild screen"
+                else:
+                  - log: "Sign-in button has already been clicked"
+            
+            - log : "Go to Boss war screen"
+            - set:
+                boss_war_coords: "{{ get_coords_from_image('war_will_end.png') }}"
+            - if:
+                condition: "boss_war_coords" # Go to Boss war screen
+                then:
+                  - click: "{{boss_war_coords}}" # Go to Boss war screen
+                  - delay: 2
+                  - log: "Check if Challenge button available"
+                  - set:
+                      challenge_button_coords: "{{ get_coords_from_image('Challenge.png') }}" #TO-DO replace to a normal  war challenge button
+                  - if:
+                      condition: "challenge_button_coords" # Check if Challenge button available
+                      then:
+                        - click: "{{challenge_button_coords}}" # click Challenge button
+                        - delay: 2
+                        - set:
+                            start_button_coords: "{{ get_coords_from_image('boss_war_start.png') }}"
+                        - if:
+                            condition: "start_button_coords" # Check if Start button is available
+                            then:
+                              - click: "{{start_button_coords}}" # click Start button
+                              - delay: 5
+                              - set:
+                                  click_attempts: 0
+                              - set:
+                                  boss_war_reward_claim_coords: "{{ get_coords_from_image('boss_war_reward_claim.png') }}"
+                              - while:
+                                  condition: "not boss_war_reward_claim_coords and click_attempts < 10" 
+                                  do:
+                                    - log: "Claim button not visible. Attempt #{{ click_attempts + 1 }}"
+                                    - set:
+                                        end_boss_battle_button_coords: "{{ get_coords_from_image('end_boss_battle.png') }}"
+                                    - if:
+                                        condition: "end_boss_battle_button_coords"  # If End Boss Battle button is available
+                                        then:
+                                          - click: "{{end_boss_battle_button_coords}}" # click on fight finish button until Claim button appears
+                                          - delay: 2
+                                        else:
+                                          - log: "WARNING: Neither 'Claim' nor 'End Battle' button is visible. Waiting..."
+                                          - delay: 2
+                                    - increment: click_attempts
+                                    - set:
+                                        boss_war_reward_claim_coords: "{{ get_coords_from_image('boss_war_reward_claim.png') }}"
+                              
+                              - if:
+                                  condition: "boss_war_reward_claim_coords"
+                                  then:
+                                    - log: "Success! Claim button is now visible. Clicking it."
+                                    - click: "{{ boss_war_reward_claim_coords }}"
+                                    - set:
+                                        confirm_button_coords: "{{ get_coords_from_image('confirm.png') }}"
+                                    - click: "{{confirm_button_coords}}" # click Confirm button to finish the boss  battle
+                                    - delay: 2
+                                    - click: [60, 50] # unfocus from the ship
+                                    - click: [60, 50] # return to the guild menu
+                                  else:
+                                    # This block runs if the loop finished because it hit 10 attempts.
+                                    - log: "ERROR: Claim button did not appear after 10 attempts."
+                                    - emergency_exit: "Boss War: Failed to find reward claim button after 10 attempts."
+                            else:
+                              - log: "Start  button not available, returning to the guild screen"
+                              - click: [60, 50] # unfocus from the ship
+                              - click: [60, 50] # unfocus from the ship
+                              - click: [60, 50] # return to the guild menu
+                      else:
+                        - log: "Challenge button not available, returning to the guild screen"
+                        - click: [60, 50] # unfocus from the ship
+                        - click: [60, 50] # return to the guild menu  
+                else:
+                  - log: "Boss war screen not available"
+                  
+            - click: [60, 50] # return to the main game menu        
+
+  
   - name: Guild_activity
     description: Guild activity 
     steps:

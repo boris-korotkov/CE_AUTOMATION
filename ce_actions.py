@@ -240,6 +240,76 @@ def get_coords_from_image(adb_id, language, image_name, threshold=0.85):
         logging.warning(f"Could not find image '{image_name}' on screen with sufficient confidence.")
         return None
 
+# Add this function to ce_actions.py
+
+def get_all_coords_from_image(adb_id, language, image_name, threshold=0.85):
+    """
+    Finds ALL occurrences of a template image on the screen that meet a threshold.
+    Returns a list of (x, y) tuples. The list is empty if no matches are found.
+    The list is sorted from top-to-bottom, then left-to-right.
+    """
+    logging.debug(f"Searching for ALL occurrences of image '{image_name}'.")
+    screenshot_path = take_screenshot(adb_id)
+    if not screenshot_path:
+        return []
+
+    template_path = os.path.join(RESOURCES_DIR, language, image_name)
+    if not os.path.exists(template_path):
+        logging.error(f"Template image not found: {template_path}")
+        return []
+
+    # Read images in color for drawing, but we'll match in grayscale
+    screen_img_color = cv2.imread(screenshot_path)
+    screen_img = cv2.cvtColor(screen_img_color, cv2.COLOR_BGR2GRAY)
+    template_img = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
+
+    if screen_img is None or template_img is None:
+        logging.error("Could not read screenshot or template image for coordinate finding.")
+        return []
+
+    template_h, template_w = template_img.shape
+    res = cv2.matchTemplate(screen_img, template_img, cv2.TM_CCOEFF_NORMED)
+    
+    # Find all locations where the match score is above the threshold
+    locations = np.where(res >= threshold)
+    
+    # Zip the locations into (x, y) pairs
+    points = list(zip(*locations[::-1])) # Switch from (row, col) to (x, y)
+    
+    if not points:
+        logging.info(f"No occurrences of '{image_name}' found with threshold >= {threshold}.")
+        return []
+
+    # --- Non-Maximum Suppression ---
+    # Group overlapping rectangles together to find the true centers
+    rectangles, _ = cv2.groupRectangles(
+        [ (pt[0], pt[1], template_w, template_h) for pt in points ], 
+        groupThreshold=1, 
+        eps=0.5
+    )
+
+    # Calculate the center of each unique, non-overlapping rectangle found
+    centers = []
+    for (x, y, w, h) in rectangles:
+        center_x = x + w // 2
+        center_y = y + h // 2
+        centers.append((center_x, center_y))
+        if SAVE_DEBUG_IMAGES:
+             # Draw a rectangle on the color screenshot for debugging
+             cv2.rectangle(screen_img_color, (x, y), (x + w, y + h), (0, 255, 0), 2)
+             cv2.putText(screen_img_color, f"({center_x},{center_y})", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+    if SAVE_DEBUG_IMAGES and centers:
+        filename = f"DEBUG_all_matches_{image_name.replace('.','_')}_{int(time.time())}.png"
+        cv2.imwrite(os.path.join(TEMP_DIR, filename), screen_img_color)
+        logging.debug(f"Saved debug image with all found matches to {filename}")
+
+    # Sort the centers from top-to-bottom, then left-to-right for predictable order
+    centers.sort(key=lambda p: (p[1], p[0]))
+
+    logging.info(f"Found {len(centers)} occurrences of '{image_name}'. Coords: {centers}")
+    return centers
+
 def send_email(subject, body):
     recipient = general_config.get('recipient_email')
     if not recipient: logging.warning("No recipient_email configured in instances.ini. Cannot send email."); return
