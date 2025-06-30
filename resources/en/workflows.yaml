@@ -246,7 +246,7 @@ scenarios:
           then:
             - log: "Guild coordinates found"
             - click: "{{guild_coords}}" # Click on the Guild icon
-            - delay: 2
+            - delay: 3
             - log : "Check if Boss reward is available"
             - set:
                 boss_reward_coords: "{{ get_coords_from_image('Boss_reward_claim.png') }}"
@@ -271,7 +271,7 @@ scenarios:
                   - click: [ "{{ playoff_round_reward_coords[0] + 170 }}", "{{ playoff_round_reward_coords[1] }}" ] # click Claim button
                   - delay: 1
                   - set:
-                      playoff_round_claim_button_coords: "{{ get_coords_from_image('daily_reward_claim.png.png') }}" 
+                      playoff_round_claim_button_coords: "{{ get_coords_from_image('daily_reward_claim.png') }}" 
                   - if:
                       condition: "playoff_round_claim_button_coords" # Claim another Claim button
                       then:
@@ -283,16 +283,27 @@ scenarios:
                 else:
                   - log: "Playoff round reward not available"
             
-            - log : "Check if championship reward is available"
+            - log : "Check if champion league final reward is available"
             - set:
                 championship_reward_coords: "{{ get_coords_from_image('champion_cup_reward.png') }}"
             - if:
                 condition: "championship_reward_coords" # Claim championship reward
                 then:
-                  - click: "{{championship_reward_coords}}" # Claim Championship reward
-                  - delay: 2
-                  - click: [646, 486] # One more claim button # TO-DO need to update this to the image # TO-DO need to update this to the image
-                  - click: [60,50] # exit from the championship reward screen
+                  - log: "Championship reward coordinates found"
+                  - click: [ "{{ championship_reward_coords[0]}}", "{{ championship_reward_coords[1] }}" ] # Claim Championship reward
+                  - delay: 3
+                  - set:
+                      claim_button_coords: "{{ get_coords_from_image('daily_reward_claim.png') }}" 
+                  - if:
+                      condition: "claim_button_coords" # Claim another Claim button
+                      then:
+                        - click: "{{claim_button_coords}}" # click another Claim button
+                        - delay: 1
+                        - click: [60, 50] # exit from the playoff round reward screen
+                      else:
+                        - log: " clain button is not available" 
+                else:
+                  - log: "Champion league final reward is not available"
             
             - log : "Daily Sign In"
             - set:
@@ -386,86 +397,6 @@ scenarios:
                   - log: "Boss war screen not available"
                   
             - click: [60, 50] # return to the main game menu        
-
-  
-  - name: Guild_activity
-    description: Guild activity 
-    steps:
-      - if:
-          condition: "compare_with_text_easyocr(1146,671,97,43, 'Guild') or compare_with_image(1146,671,97,43,'Guild.png',0.85)" # Check if Guild icon is available
-          then:
-            - click: [1195,637] # Click on Guild icon
-            - delay: 2
-            - log : "Check if Boss  reward is available"
-            - if:
-                condition: compare_with_image(915,521,79,29,'Boss_reward_claim.png',0.85) # Check if Boss  reward is available
-                then:
-                  - click: [955,536] # Claim Boss reward
-                  - delay: 2
-                  - click: [638, 481] # One more claim button
-                  - click: [60,50] # exit from the Boss reward screen
-
-            - log : "Check if Claim_playoff_round_reward is available"
-            - if:
-                condition: "compare_with_text_easyocr(757,527,78,34,'Claim')" # Claim_playoff_round_reward -- change to image
-                then:
-                  - click: [792, 546] # click Claim button
-                  - delay: 1
-                  - click: [636,482] # click another Claim button
-                  - click: [60, 50] # exit from the playoff round reward screen
-            
-            - log : "Check if championship reward is available"
-            - if:
-                condition: compare_with_image(918,523,73,27,'champion_cup_reward.png',0.85) # Claim championship reward
-                then:
-                  - click: [950, 534] # Claim Championship reward
-                  - delay: 2
-                  - click: [646, 486] # One more claim button
-                  - click: [60,50] # exit from the championship reward screen
-            
-            - log : "click sign in"
-            - click: [294,624] # click sign in
-            - delay: 2
-            - click: [640, 488] # click Claim
-            - if :
-                condition: "compare_with_text_easyocr(474,553,96,40,'Send') or compare_with_image(474,553,96,40,'Guild_Send.png',0.85)" # Check if Sign-in button has already been clicked
-                then:
-                  - log: "Sign-in button has already been clicked"                    
-                  - click: [60, 50] # return to the guild screen
-            - delay: 1
-            - log : "Go to Boss war screen"
-            - click: [146,484] # Go to Boss war screen
-            - delay: 1
-            - log : "Check if  Challenge button  available"
-            - if:
-                condition: "compare_with_text_easyocr(905,398,139,36,'Challenge')" # Check if  Challenge button  available
-                then:
-                  - click: [973,416] # click Claim button
-                  - delay: 2
-                  - click: [637,644] # click Start button
-                  - delay: 5
-                  - set: { click_attempts: 0 }
-                  - while:
-                      condition: "not compare_with_text_easyocr(588,569,106,42,'Claim') and not compare_with_image(588,569,106,42,'boss_war_reward_claim.png',0.85) and click_attempts < 10" 
-                      do:
-                        - log: "Claim button not visible. Attempt #{{ click_attempts + 1 }}"
-                        - click: [228, 54] # click on fight finish button until Claim button appears
-                        - delay: 2
-                        - increment: click_attempts
-                  - if:
-                      condition: "compare_with_text_easyocr(588,569,106,42,'Claim') or compare_with_image(588,569,106,42,'boss_war_reward_claim.png',0.85)"  # If Claim button is available
-                      then:
-                        - click: [643,594] # click Claim button
-                        - delay: 2
-                        - click: [1131,509] # click Confirm button
-                        - click: [60, 50] # unfocus from the ship
-                        - click: [60, 50] # return to the guild screen
-                else:
-                  - click: [60, 50] # 
-                  - click: [60, 50] # return to the guild screen
-            - click: [60, 50] # return to the Game main screen
-          else:
-            - send_email: "Guild activity failed for the {{ instance_name }} instance." # send an email if Guild icon is not available
   
   - name: Airship_farming
     description: Airship farming
