@@ -25,9 +25,10 @@ scenarios:
                   - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
                   - delay: 150 # Wait for the game to restart
                   - log: "Send_flowers_to_friends scenario is skipped due to game unavailability and restarted."
+                  - send_email: "[ERROR] Send_flowers_to_friends scenario is skipped for the {{ instance_name }} instance and game was restarted." 
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
+                  - send_email: "[ERROR] Send_flowers_to_friends scenario is skipped for the {{ instance_name }} instance and game was not restarted." 
   
   - name: Daily_rewards
     description: Collect daily rewards
@@ -88,9 +89,11 @@ scenarios:
                   - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
                   - delay: 150 # Wait for the game to restart
                   - log: "Daily_rewards scenario is skipped due to game unavailability and restarted."
+                  - send_email: "[ERROR] Daily_rewards scenario is skipped for the {{ instance_name }} instance and game was restarted."
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
+                  - send_email: "[ERROR] Daily_rewards scenario is skipped for the {{ instance_name }} instance and game was not restarted."
+                  
 
   - name: Campaign_farming
     description: Campaign farming
@@ -241,9 +244,10 @@ scenarios:
                   - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
                   - delay: 150 # Wait for the game to restart
                   - log: "Campaign_farming scenario is skipped due to game unavailability and restarted."
+                  - send_email: "[ERROR] Campaign_farming scenario is skipped for the {{ instance_name }} instance and game was restarted."
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available   
+                  - send_email: "[ERROR] Campaign_farming scenario is skipped for the {{ instance_name }} instance and game was not restarted."
   
   - name: Gene_Bank
     description: Gene Bank farming
@@ -326,9 +330,11 @@ scenarios:
                   - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
                   - delay: 150 # Wait for the game to restart
                   - log: "Gene_Bank scenario is skipped due to game unavailability and restarted."
+                  - send_email: "[ERROR] Gene_Bank scenario is skipped for the {{ instance_name }} instance and game was restarted."
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
+                  - send_email: "[ERROR] Gene_Bank scenario is skipped for the {{ instance_name }} instance and game was not restarted."
+                  
                         
   - name: Guild_activity
     description: Guild activity
@@ -477,6 +483,7 @@ scenarios:
                                   else:
                                     # This block runs if the loop finished because it hit 10 attempts.
                                     - log: "ERROR: Claim button did not appear after 10 attempts."
+                                    - send_email: "[ERROR] Boss War: Failed to find reward claim button after 10 attempts. Exit the program to avoid indefinine loop" # send an email if Claim button is not available
                                     - emergency_exit: "Boss War: Failed to find reward claim button after 10 attempts."
                             else:
                               - log: "Start  button not available, returning to the guild screen"
@@ -502,9 +509,11 @@ scenarios:
                   - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
                   - delay: 150 # Wait for the game to restart
                   - log: "Guild_activity_new scenario is skipped due to game unavailability and restarted."
+                  - send_email: "[ERROR] Guild_activity scenario is skipped for the {{ instance_name }} instance and game was restarted."
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available        
+                  - send_email: "[ERROR] Guild_activity scenario is skipped for the {{ instance_name }} instance and game was not restarted."
+                  
   
   - name: Airship_farming
     description: Airship farming
@@ -674,6 +683,7 @@ scenarios:
                         - log: "It seems we are in the main game screen already, no need to click"
                 else:
                   - log: "Airship farming is not available, returning to the main game screen"
+                  - send_email: "Airship farming failed for the {{ instance_name }} instance. Airship icon is not available" # send an email if Airship icon is not available
                   
             - log : "End of Airship farming"
           else:
@@ -687,11 +697,13 @@ scenarios:
                   - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
                   - delay: 150 # Wait for the game to restart
                   - log: "Airship_farming scenario is skipped due to game unavailability and restarted."
+                  - send_email: "Airship_farming scenario is skipped for the {{ instance_name }} instance and game was restarted."
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
+                  - send_email: "Airship_farming scenario is skipped for the {{ instance_name }} instance and game was not restarted."
+                  
 
-  - name: Dangeon_farming_new
+  - name: Dangeon_farming
     description: Dangeon farming
     steps:
       - set:
@@ -776,132 +788,227 @@ scenarios:
                   - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
                   - delay: 150 # Wait for the game to restart
                   - log: "Airship_farming scenario is skipped due to game unavailability and restarted."
+                  - send_email: "Dangeon_farming scenario is skipped for the {{ instance_name }} instance and game was restarted."
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available      
-
-  - name: Dangeon_farming
-    description: Dangeon farming
-    steps:
-      #- scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
-      - set:
-          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
-      - if:
-          condition: "guild_coords"  # This is true if coordinates were found, false
-          then:
-            - scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
-            - click: [975,429] # enter to Dangeon
-            - click: [926,674] # Click Sweep button
-            - click: [765,465] # Click Confirm button
-            - delay: 1
-            - click: [638,587] # Click Claim button
-            - click: [414,38] # Switch to Advanced Dangeon
-            - click: [1198,659] # Initiate reward collection
-            - delay: 3
-            - if:
-                condition: "compare_with_text_easyocr(588,459,104,45, 'Claim')" # Check if Claim button is available
-                then:
-                  - click: [638,481] # Click on Claim button
-                else:
-                  - log: "Claim button not found in Dangeon farming"
-                  #- click: [60, 50] # return to the main  game screen
-            - click: [60, 50] # exit main game screen
-          else:
-            - log: "Guild icon is not available. I'm trying to restart the game."
-            - set:
-                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
-            - if:
-                condition: "game_icon_coords"  # This is true if coordinates were found, false
-                then:
-                  - log: "Game icon coordinates found, clicking on it to restart the game."
-                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
-                  - delay: 150 # Wait for the game to restart
-                  - log: "Airship_farming scenario is skipped due to game unavailability and restarted."
-                else:
-                  - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
-  
-  - name: Arena_farming
-    description: Arena farming. Fight most left opponent in the list. Good for minor accounts.
-    steps:
-      - set:
-          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
-      - if:
-          condition: "guild_coords"  # This is true if coordinates were found, false
-          then:
-            - if:
-                condition: "compare_with_text_easyocr(260,553,56,23,'Arena') or compare_with_any_image(260,553,56,23,'Arena.png',0.85)" #  Check if Arena icon is available
-                then:
-                  - click: [272,486] # Click on Arena icon
-                  - delay: 1
-                  ### General Arena ###
-                  - click: [153,359] 
-                  - delay: 3
-                  - click: [629,560] # Click Match button
-                  - delay: 1
-                  # Quick battle checkbox is to be checked
-                  # TO-DO Add a check if attack is free 
-                  # Attack #1
-                  - log: "General Arena attack #1"
-                  - click: [280,580] # Click the most left opponent in the list
-                  - delay: 2
-                  - click: [462,615] # Collect rewards
-                  - delay: 2
-                  - click: [462,615] # Second click if areana league is increased
-                  - log: "General Arena attack #2"
-                  - click: [280,580] # Click the most left opponent in the list
-                  - delay: 2
-                  - click: [462,615] # Collect rewards
-                  - delay: 2
-                  - click: [462,615] # Second click if areana league is increased
-                  - log: "General Arena attack #3"
-                  - click: [280,580] # Click the most left opponent in the list
-                  - delay: 2
-                  - click: [462,615] # Collect rewards
-                  - delay: 2
-                  - click: [462,615] # Second click if areana league is increased
-                  - click: [60, 50] # exit General arena screen
-                  - delay: 1
-                  - click: [60, 50] # exit main arena screen
-
-                  ### Cross server Arena ###
-                  - log: "Cross server Arena farming"
-                  - click: [474,377] 
-                  - delay: 3
-                  - click: [629,560] # Click Match button
-                  - delay: 1
-                  # Quick battle checkbox is to be checked
-                  # Attack #1
-                  - log: "Cross server Arena attack #1"
-                  - click: [280,580] # Click the most left opponent in the list
-                  - delay: 2
-                  - click: [462,615] # Collect rewards
-                  - delay: 2
-                  - click: [462,615] # Second click if areana league is increased
-                  - log: "Cross server Arena attack #2"
-                  - click: [280,580] # Click the most left opponent in the list
-                  - delay: 2
-                  - click: [462,615] # Collect rewards
-                  - delay: 2
-                  - click: [462,615] # Second click if areana league is increased
-                  - log: "Cross server Arena attack #3"
-                  - click: [280,580] # Click the most left opponent in the list
-                  - delay: 2
-                  - click: [462,615] # Collect rewards
-                  - delay: 2
-                  - click: [462,615] # Second click if areana league is increased
-                  - click: [60, 50] # exit General arena screen
-                  - delay: 1
-                  - click: [60, 50] # exit main arena screen
-                  ### Summit Arena Challenge ###
-                  # Placeholder for Summit Arena Challenge farming
+                  - send_email: "Dangeon_farming scenario is skipped for the {{ instance_name }} instance and game was not restarted."
                   
-                  ### End farming ###
-                  - log: "Arena farming completed"
-                  - click: [60, 50] # exit main game screen
+
+  - name: Arena_farming
+    description: Arena farming. Fight the most left opponent in the list. Good for minor accounts.
+    steps:
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
+      - if:
+          condition: "guild_coords"  # This is true if coordinates were found, false
+          then:
+            - log: "Guild coordinates found"
+            - set:
+                arena_icon_coords: "{{ get_coords_from_image('Arena.png') }}"
+            - if:
+                condition: "arena_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "arena facility coordinates found"
+                  - click: [ "{{ arena_icon_coords[0] }}", "{{ arena_icon_coords[1]-100 }}" ] # Click on the Arena icon
+                  - delay: 1
+                  - log : "Checking if General Arena farming is available"
+                  - set:
+                      general_arena_icon_coords: "{{ get_coords_from_image('general_arena.png') }}"
+                  - if:
+                      condition: "general_arena_icon_coords"  # If General Arena farming is available
+                      then:
+                      ###
+                        - log: "General Arena icon coordinates found. Go to General Arena"
+                        - click: [ "{{ general_arena_icon_coords[0] }}", "{{ general_arena_icon_coords[1]+200 }}" ]
+                        - delay: 3
+                        - set:
+                            match_button_coords: "{{ get_coords_from_image('match_yellow.png') }}"
+                        - if:
+                            condition: "match_button_coords"  # If Match button is available
+                            then:
+                              - click: "{{ match_button_coords }}" # Click on the Match button
+                              - delay: 2
+                              - log: "Match button coordinates found. Starting 3 attack loops."
+                              
+                              # 1. Initialize the loop counter
+                              - set:
+                                  attack_counter: 0
+                                  
+                              # 2. Start the while loop, which will run as long as the counter is less than 3
+                              - while:
+                                  condition: "attack_counter < 3"
+                                  do:
+                                    - log: "--- Starting General Arena Attack #{{ attack_counter + 1 }} ---"
+                                    
+                                    # 3. This is your entire "Attack" block, which will now be repeated
+                                    - set:
+                                        free_battle_coords: "{{ get_all_coords_from_image('free_battle.png') }}"
+                                    - if:
+                                        condition: "free_battle_coords"  # If free battle checkbox is available
+                                        then:
+                                          - log: "Free battle checkbox found."
+                                          - click: "{{ free_battle_coords[0] }}" # Click on the left Free button 
+                                          - delay: 2
+                                          - click: [ "{{ free_battle_coords[0][0] + 200 }}", "{{ free_battle_coords[0][1] }}" ] # Click the 'Battle' button
+                                          - delay: 2
+                                          - log: "Confirming battle result (e.g., league increase)."
+                                          - click: [ "{{ free_battle_coords[0][0] + 200 }}", "{{ free_battle_coords[0][1] }}" ] # Click the 'Confirm' button
+                                          - delay: 2 # Wait for the arena screen to be ready for the next attack
+                                        else:
+                                          - log: "Free battle button is not available for this attack. Continuing without it."
+                                    
+                                    # 4. CRUCIAL: Increment the counter at the end of each loop
+                                    - increment: attack_counter
+                                    
+                              # 5. This part runs AFTER the while loop is finished
+                              - log: "All 3 arena attacks completed. Exiting."
+                              - click: [60, 50] # exit General arena screen
+                              - delay: 2
+                              - click: [60, 50] # exit General arena screen
+                            else:
+                              - log: "Match button is not available, returning to the guild screen."
+                              - click: [60, 50] # exit General arena screen
+
+                              ####
+                      else:
+                        - log: "General Arena icon is not available, continuing without it"
+                        - send_email: "General Arena farming failed for the {{ instance_name }} instance. General Arena icon is not available" # send an email if General Arena icon is not available
+                        #- click: [60, 50] # exit General arena screen
+
+                  - log: "General Arena farming completed"
+                  
+                  - log : "Checking if Cross server Arena farming is available"
+                  - set:
+                      cross_server_arena_icon_coords: "{{ get_coords_from_image('cross_server_arena.png') }}"
+                  - if:
+                      condition: "cross_server_arena_icon_coords"  # If cross_server Arena farming is available
+                      then:
+                      ###
+                        - log: "cross server Arena icon coordinates found. Go to Cross Server Arena"
+                        - click: [ "{{ cross_server_arena_icon_coords[0] }}", "{{ cross_server_arena_icon_coords[1]+200 }}" ]
+                        - delay: 3
+                        - set:
+                            match_button_coords: "{{ get_coords_from_image('cross_server_matching.png') }}"
+                        - if:
+                            condition: "match_button_coords"  # If Match button is available
+                            then:
+                              - click: "{{ match_button_coords }}" # Click on the Match button
+                              - delay: 2
+                              - log: "Match button coordinates found. Starting 3 attack loops."
+                              
+                              # 1. Initialize the loop counter
+                              - set:
+                                  attack_counter: 0
+                                  
+                              # 2. Start the while loop, which will run as long as the counter is less than 3
+                              - while:
+                                  condition: "attack_counter < 3"
+                                  do:
+                                    - log: "--- Starting Cross Server Arena Attack #{{ attack_counter + 1 }} ---"
+                                    
+                                    # 3. This is your entire "Attack" block, which will now be repeated
+                                    - set:
+                                        free_battle_coords: "{{ get_all_coords_from_image('free_battle.png') }}"
+                                    - if:
+                                        condition: "free_battle_coords"  # If free battle checkbox is available
+                                        then:
+                                          - log: "Free battle checkbox found."
+                                          - click: "{{ free_battle_coords[0] }}" # Click on the left Free button 
+                                          - delay: 2
+                                          - click: [ "{{ free_battle_coords[0][0] + 200 }}", "{{ free_battle_coords[0][1] }}" ] # Click the 'Battle' button
+                                          - delay: 2
+                                          - log: "Confirming battle result (e.g., league increase)."
+                                          - click: [ "{{ free_battle_coords[0][0] + 200 }}", "{{ free_battle_coords[0][1] }}" ] # Click the 'Confirm' button
+                                          - delay: 2 # Wait for the arena screen to be ready for the next attack
+                                        else:
+                                          - log: "Free battle button is not available for this attack. Continuing without it."
+                                    
+                                    # 4. CRUCIAL: Increment the counter at the end of each loop
+                                    - increment: attack_counter
+                                    
+                              # 5. This part runs AFTER the while loop is finished
+                              - log: "All 3 arena attacks completed. Exiting."
+                              - click: [60, 50] # exit General arena screen
+                              - delay: 2
+                              - click: [60, 50] # exit General arena screen
+                            else:
+                              - log: "Match button is not available, returning to the guild screen."
+                              - click: [60, 50] # exit General arena screen
+
+                          ###
+                      else:
+                        - log: "Cross server Arena icon is not available, continuing without it"
+                        - send_email: "Cross server Arena farming failed for the {{ instance_name }} instance. Cross server Arena icon is not available" # send an email if Cross server Arena icon is not available
+                        #- click: [60, 50] # exit cross server arena screen
+                  - log: "Cross server Arena farming completed"
+                  
+                  - log : "Checking if Summit Arena Challenge farming is available"
+                  - set:
+                      summit_arena_icon_coords: "{{ get_coords_from_image('summit_arena.png') }}"
+                  - if:
+                      condition: "summit_arena_icon_coords"  # If Summit Arena Challenge farming is available
+                      then:
+                        - log: "Summit Arena Challenge icon coordinates found. Go to Summit Arena Challenge"
+                        - click: [ "{{ summit_arena_icon_coords[0] }}", "{{ summit_arena_icon_coords[1]+200 }}" ]
+                        - delay: 3
+                        - set:
+                            match_button_coords: "{{ get_coords_from_image('cross_server_matching.png') }}"
+                        - if:
+                            condition: "match_button_coords"  # If Match button is available
+                            then:
+                              - click: "{{ match_button_coords }}" # Click on the Match button
+                              - delay: 2
+                              - log: "Match button coordinates found. Starting 3 attack loops."
+                              
+                              # 1. Initialize the loop counter
+                              - set:
+                                  attack_counter: 0
+                                  
+                              # 2. Start the while loop, which will run as long as the counter is less than 3
+                              - while:
+                                  condition: "attack_counter < 5"
+                                  do:
+                                    - log: "--- Starting Summit Arena Challenge Attack #{{ attack_counter + 1 }} ---"
+                                    
+                                    # 3. This is your entire "Attack" block, which will now be repeated
+                                    - set:
+                                        summit_battle_coords: "{{ get_all_coords_from_image('summit_arena_battle.png') }}"
+                                    - if:
+                                        condition: "summit_battle_coords"  # If free battle checkbox is available
+                                        then:
+                                          - log: "summit_battle_coords icon found."
+                                          - click: "{{ summit_battle_coords[0] }}" # Click on the left Free button 
+                                          - delay: 2
+                                          - click: [ "{{ summit_battle_coords[0][0] + 200 }}", "{{ summit_battle_coords[0][1] }}" ] # Click the 'Battle' button
+                                          - delay: 2
+                                          - log: "Confirming battle result (e.g., league increase)."
+                                          - click: [ "{{ summit_battle_coords[0][0] + 200 }}", "{{ summit_battle_coords[0][1] }}" ] # Click the 'Confirm' button
+                                          - delay: 2 # Wait for the arena screen to be ready for the next attack
+                                        else:
+                                          - log: "summit_battle_coords battle button is not available for this attack. Continuing without it."
+                                    
+                                    # 4. CRUCIAL: Increment the counter at the end of each loop
+                                    - increment: attack_counter
+                              
+                              # 5. This part runs AFTER the while loop is finished
+                              - log: "All 5 arena attacks completed. Exiting."
+                              - click: [60, 50] # exit Summit arena screen
+                              - delay: 2
+                              - click: [60, 50] # exit Summit arena screen
+                            else:
+                              - log: "Match button is not available, returning to the guild screen."
+                              - send_email: "Summit Arena Challenge farming failed for the {{ instance_name }} instance. Match button is not available" # send an email if Match button is not available
+                              - click: [60, 50] # exit Summit arena screen
+
+                          ###
+                      else:
+                        - log: "Summit Arena icon is not available, continuing without it"
+                        - send_email: "Summit Arena Challenge farming failed for the {{ instance_name }} instance. Summit Arena icon is not available" # send an email if Summit Arena icon is not available
+                        #- click: [60, 50] # exit cross server arena screen
+                  - log: "Summit Arena farming completed"
                 else:
-                  - log: "Arena icon is not available"
-                  - send_email: "Arena farming failed for the {{ instance_name }} instance." # send an email if Arena icon is not available
+                  - log: "arena icon is not available, continuing without it"
+                  - send_email: "Arena icon is not available for the {{ instance_name }} instance and farming is skipped." # send an email if Game icon is not available
           else:
             - log: "Guild icon is not available. I'm trying to restart the game."
             - set:
@@ -913,9 +1020,12 @@ scenarios:
                   - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
                   - delay: 150 # Wait for the game to restart
                   - log: "Arena_farming scenario is skipped due to game unavailability and restarted."
+                  - send_email: "Arena_farming scenario is skipped for the {{ instance_name }} instance and game was restarted."
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
+                  - send_email: "Arena_farming scenario is skipped for the {{ instance_name }} instance and game was not restarted."
+                  
+
       
   - name: Bonus_rewards
     description: Bonus rewards collection
