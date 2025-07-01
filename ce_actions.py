@@ -8,6 +8,7 @@ import pytesseract
 import win32com.client as win32
 import easyocr
 from ce_config import load_general_config
+from sklearn.cluster import DBSCAN
 
 TEMP_DIR = "temp"
 RESOURCES_DIR = "resources"
@@ -291,8 +292,10 @@ def get_all_coords_from_image(adb_id, language, image_name, threshold=0.85):
     # Calculate the center of each unique, non-overlapping rectangle found
     centers = []
     for (x, y, w, h) in rectangles:
-        center_x = x + w // 2
-        center_y = y + h // 2
+        # --- THIS IS THE FIX ---
+        # Explicitly cast the numpy types to standard Python integers
+        center_x = int(x + w // 2)
+        center_y = int(y + h // 2)
         centers.append((center_x, center_y))
         if SAVE_DEBUG_IMAGES:
              # Draw a rectangle on the color screenshot for debugging
@@ -308,6 +311,196 @@ def get_all_coords_from_image(adb_id, language, image_name, threshold=0.85):
     centers.sort(key=lambda p: (p[1], p[0]))
 
     logging.info(f"Found {len(centers)} occurrences of '{image_name}'. Coords: {centers}")
+    return centers
+
+def get_coords_from_features(adb_id, language, image_name, min_match_count=10):
+    """
+    Finds a template image on the screen using feature matching (ORB) and returns
+    the coordinates of its center. Ideal for animated or slightly scaled/rotated elements.
+    Returns (x, y) tuple on success, or None on failure.
+    """
+    logging.debug(f"Feature-searching for image '{image_name}' to get its coordinates.")
+    
+    # 1. Load template and find its features
+    template_path = os.path.join(RESOURCES_DIR, language, image_name)
+    if not os.path.exists(template_path):
+        logging.error(f"Template image not found: {template_path}")
+        return None
+    
+    template_img = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
+    if template_img is None:
+        logging.error(f"Could not read template image: {template_path}")
+        return None
+
+    # --- IMPROVEMENT 1: Increase the number of features to detect ---
+    # We look for more features to get a higher chance of a good match on small templates.
+    orb = cv2.ORB_create(nfeatures=5000) 
+    keypoints_template, descriptors_template = orb.detectAndCompute(template_img, None)
+    
+    if descriptors_template is None:
+        logging.error(f"Could not find any features in template image '{image_name}'.")
+        return None
+
+    # 2. Take screenshot and find its features
+    screenshot_path = take_screenshot(adb_id)
+    if not screenshot_path: return None
+    
+    screen_img = cv2.imread(screenshot_path, cv2.IMREAD_GRAYSCALE)
+    if screen_img is None:
+        logging.error("Could not read screenshot for feature matching.")
+        return None
+        
+    keypoints_screen, descriptors_screen = orb.detectAndCompute(screen_img, None)
+    
+    if descriptors_screen is None:
+        logging.warning("No features found on the screen to compare against.")
+        return None
+
+    # 3. Match features between template and screenshot
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
+    all_matches = bf.knnMatch(descriptors_template, descriptors_screen, k=2)
+
+    # Apply ratio test to find good matches
+    good_matches = []
+    try:
+        # --- IMPROVEMENT 2: Relax the ratio test slightly ---
+        # A value of 0.8 is less strict than 0.75 and can help with similar-looking images.
+        ratio_thresh = 0.8 
+        for m, n in all_matches:
+            if m.distance < ratio_thresh * n.distance:
+                good_matches.append(m)
+    except ValueError:
+        logging.debug("Not enough matches to perform ratio test. Likely no match.")
+        return None
+
+    logging.info(f"Found {len(good_matches)} good feature matches. Required: {min_match_count}.")
+    
+    # 4. If enough matches are found, find the object's location
+    if len(good_matches) >= min_match_count:
+        src_pts = np.float32([keypoints_template[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+        dst_pts = np.float32([keypoints_screen[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+        
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+        
+        if M is None:
+            logging.warning("Could not compute homography matrix. Matches may be inconsistent.")
+            return None
+            
+        h, w = template_img.shape
+        pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
+        dst = cv2.perspectiveTransform(pts, M)
+        
+        center_x = int(np.mean(dst[:, 0, 0]))
+        center_y = int(np.mean(dst[:, 0, 1]))
+        
+        logging.info(f"SUCCESS: Located '{image_name}' via features at center: ({center_x}, {center_y})")
+        
+        if SAVE_DEBUG_IMAGES:
+            debug_img = cv2.polylines(cv2.imread(screenshot_path), [np.int32(dst)], True, (0, 255, 0), 3, cv2.LINE_AA)
+            cv2.circle(debug_img, (center_x, center_y), 10, (0, 0, 255), -1)
+            filename = f"DEBUG_feature_coords_{image_name.replace('.','_')}_{int(time.time())}.png"
+            cv2.imwrite(os.path.join(TEMP_DIR, filename), debug_img)
+            logging.debug(f"Saved feature coordinate debug image to {filename}")
+
+        return (center_x, center_y)
+    else:
+        logging.info(f"FAILURE: Not enough good feature matches for '{image_name}'.")
+        return None
+
+def get_all_coords_from_features(adb_id, language, image_name, min_match_count=7, eps=50, min_samples=5):
+    """
+    Finds ALL occurrences of a template image on the screen using feature matching and clustering.
+    Ideal for finding multiple instances of animated or scaled/rotated elements.
+    Returns a list of (x, y) tuples, sorted top-to-bottom. Returns an empty list if none are found.
+
+    - min_match_count: Minimum "good" feature matches required to even attempt clustering.
+    - eps: The maximum distance between two points for them to be considered as in the same neighborhood (DBSCAN parameter).
+    - min_samples: The number of samples in a neighborhood for a point to be considered as a core point (DBSCAN parameter).
+    """
+    logging.debug(f"Feature-searching for ALL occurrences of image '{image_name}'.")
+
+    # 1. Load template and find its features
+    template_path = os.path.join(RESOURCES_DIR, language, image_name)
+    if not os.path.exists(template_path):
+        logging.error(f"Template image not found: {template_path}"); return []
+    template_img = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
+    if template_img is None:
+        logging.error(f"Could not read template image: {template_path}"); return []
+
+    orb = cv2.ORB_create(nfeatures=5000)
+    keypoints_template, descriptors_template = orb.detectAndCompute(template_img, None)
+    if descriptors_template is None:
+        logging.error(f"No features in template '{image_name}'."); return []
+
+    # 2. Take screenshot and find its features
+    screenshot_path = take_screenshot(adb_id)
+    if not screenshot_path: return []
+    screen_img_color = cv2.imread(screenshot_path) # For drawing debug output
+    screen_img = cv2.cvtColor(screen_img_color, cv2.COLOR_BGR2GRAY)
+    if screen_img is None:
+        logging.error("Could not read screenshot."); return []
+    keypoints_screen, descriptors_screen = orb.detectAndCompute(screen_img, None)
+    if descriptors_screen is None:
+        logging.warning("No features found on screen."); return []
+
+    # 3. Find all good matches
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
+    all_matches = bf.knnMatch(descriptors_template, descriptors_screen, k=2)
+    good_matches = []
+    try:
+        for m, n in all_matches:
+            if m.distance < 0.8 * n.distance:
+                good_matches.append(m)
+    except ValueError:
+        pass # Not enough matches
+
+    logging.info(f"Found {len(good_matches)} total good feature matches. Required: {min_match_count}.")
+    if len(good_matches) < min_match_count:
+        logging.info("Not enough good matches to proceed with clustering."); return []
+
+    # 4. Get the locations of the good matches on the SCREEN
+    matched_points = np.float32([keypoints_screen[m.trainIdx].pt for m in good_matches])
+    if len(matched_points) < min_samples:
+        logging.info(f"Not enough matched points ({len(matched_points)}) for DBSCAN clustering (min_samples={min_samples})."); return []
+
+
+    # 5. Use DBSCAN to cluster these points.
+    # 'eps' is a critical parameter to tune. It's roughly the max pixel distance within a single object.
+    # 'min_samples' is also important. It's the minimum number of matched features to form a "dense" object.
+    db = DBSCAN(eps=eps, min_samples=min_samples).fit(matched_points)
+    labels = db.labels_
+    
+    unique_labels = set(labels)
+    centers = []
+    
+    # 6. Calculate the center of each found cluster
+    for k in unique_labels:
+        if k == -1:
+            # -1 represents noisy outliers that don't belong to any cluster
+            continue
+        
+        class_member_mask = (labels == k)
+        cluster_points = matched_points[class_member_mask]
+        
+        # Calculate the center of the cluster by averaging the coordinates
+        center_x = int(np.mean(cluster_points[:, 0]))
+        center_y = int(np.mean(cluster_points[:, 1]))
+        centers.append((center_x, center_y))
+
+        if SAVE_DEBUG_IMAGES:
+            # Draw a circle around the cluster for debugging
+            cv2.circle(screen_img_color, (center_x, center_y), int(eps), (0, 255, 0), 2)
+            cv2.putText(screen_img_color, f"Cluster {k}", (center_x, center_y - int(eps)), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+    if SAVE_DEBUG_IMAGES and centers:
+        filename = f"DEBUG_all_feature_matches_{image_name.replace('.','_')}_{int(time.time())}.png"
+        cv2.imwrite(os.path.join(TEMP_DIR, filename), screen_img_color)
+        logging.debug(f"Saved all-feature-matches debug image to {filename}")
+
+    # 7. Sort the centers for predictable order
+    centers.sort(key=lambda p: (p[1], p[0]))
+    
+    logging.info(f"Clustered into {len(centers)} instances of '{image_name}'. Coords: {centers}")
     return centers
 
 def send_email(subject, body):

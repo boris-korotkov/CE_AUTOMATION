@@ -2,242 +2,336 @@ scenarios:
   - name: Send_flowers_to_friends
     description: Send flowers to friends
     steps:
-      - click: [490, 600] # Skip Hero Upgrade Pack popup window
-      - click: [60, 680] # Friends icon
-      - click: [715, 670] # Send All
-      - click: [635, 535] # Claim
-      - click: [965, 670] # Receive All
-      - click: [640, 505] # Claim
-      - click: [60, 50] # return to the main  game screen
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
+      - if:
+          condition: "guild_coords"  # This is true if coordinates were found, false
+          then:
+            - click: [490, 600] # Skip Hero Upgrade Pack popup window
+            - click: [60, 680] # Friends icon
+            - click: [715, 670] # Send All
+            - click: [635, 535] # Claim
+            - click: [965, 670] # Receive All
+            - click: [640, 505] # Claim
+            - click: [60, 50] # return to the main  game screen
+          else:
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Send_flowers_to_friends scenario is skipped due to game unavailability and restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
   
   - name: Daily_rewards
     description: Collect daily rewards
     steps:
-      - click: [150, 685] # envelop icon
       - set:
-          mail_system_coords: "{{ get_coords_from_image('daily_rewards_system.png') }}"
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
       - if:
-          condition: "mail_system_coords"  # This is true if coordinates were found, false if None
+          condition: "guild_coords"  # This is true if coordinates were found, false
           then:
-            - log: "Mail system coordinates found"
-            - click: "{{ mail_system_coords }}" # Click on the Mail System icon
             - set:
-                mail_claim_all_coords: "{{ get_coords_from_image('Claim_all.png') }}"
+                envelop_coords: "{{ get_coords_from_image('envelop.png') }}"
+            
             - if:
-                condition: "mail_claim_all_coords"  # This is true if coordinates were found,
+                condition: "envelop_coords"  # This is true if coordinates were found, false
                 then:
-                  - log: "Mail Claim All coordinates found"
-                  - click: "{{mail_claim_all_coords}}" # Click on the Mail System icon
+                  - log: "Envelop coordinates found"
+                  - click: "{{ envelop_coords }}" # Click on the Mail System icon
+                  - delay: 2
                   - set:
-                      claim_button_coords: "{{ get_coords_from_image('mail_daily_reward_claim.png') }}"
+                      mail_system_coords: "{{ get_coords_from_image('daily_rewards_system.png') }}"
                   - if:
-                      condition: "claim_button_coords"  # This is true if coordinates were found,
+                      condition: "mail_system_coords"  # This is true if coordinates were found, false if None
                       then:
-                        - log: "Claim button coordinates found"
-                        - click: "{{claim_button_coords}}" # Click on the Claim button
-                        - delay: 1
-                        - click: [60, 50]  # return to the main  game screen
+                        - log: "Mail system coordinates found"
+                        - click: "{{ mail_system_coords }}" # Click on the Mail System icon
+                        - set:
+                            mail_claim_all_coords: "{{ get_coords_from_image('Claim_all.png') }}"
+                        - if:
+                            condition: "mail_claim_all_coords"  # This is true if coordinates were found,
+                            then:
+                              - log: "Mail Claim All coordinates found"
+                              - click: "{{mail_claim_all_coords}}" # Click on the Mail System icon
+                              - set:
+                                  claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                              - if:
+                                  condition: "claim_button_coords"  # This is true if coordinates were found,
+                                  then:
+                                    - log: "Claim button coordinates found"
+                                    - click: "{{claim_button_coords}}" # Click on the Claim button
+                                    - delay: 1
+                                    - click: [60, 50]  # return to the main  game screen
+                            else:
+                              - log: "Mail Claim All coordinates not found, returning to main game screen"
+                              - click: [60, 50] # return to the main  game screen
+                      else:
+                        - log: "Mail system coordinates not found, returning to main game screen"
+                        - click: [60, 50] # return to the main  game screen
                 else:
-                  - log: "Mail Claim All coordinates not found, returning to main game screen"
-                  - click: [60, 50] # return to the main  game screen
+                  - log: "Envelop icon is not available, returning to main game screen"
           else:
-            - log: "Mail system coordinates not found, returning to main game screen"
-            - click: [60, 50] # return to the main  game screen
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Daily_rewards scenario is skipped due to game unavailability and restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
 
   - name: Campaign_farming
     description: Campaign farming
     steps:
       - set:
-          campaign_coords: "{{ get_coords_from_image('Campaign.png') }}"
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
       - if:
-          condition: "campaign_coords"  # This is true if coordinates were found, false
+          condition: "guild_coords"  # This is true if coordinates were found, false
           then:
-            - log: "Campaign coordinates found"
-            - click: [ "{{ campaign_coords[0] - 115 }}", "{{ campaign_coords[1]-60 }}" ] # Click on the Campaign icon
-            - delay: 2
             - set:
-                campaign_claim_button_coords: "{{ get_coords_from_image('campaign_claim.png') }}"
+                campaign_coords: "{{ get_coords_from_image('Campaign.png') }}"
             - if:
-                condition: "campaign_claim_button_coords"  # This is true if coordinates were found,
+                condition: "campaign_coords"  # This is true if coordinates were found, false
                 then:
-                  - log: "Campaign Claim button coordinates found"
-                  - click: "{{campaign_claim_button_coords}}" # Click on the Campaign Claim button
+                  - log: "Campaign coordinates found"
+                  - click: [ "{{ campaign_coords[0] - 115 }}", "{{ campaign_coords[1]-60 }}" ] # Click on the Campaign icon
                   - delay: 2
                   - set:
-                      level_up_coords: "{{ get_coords_from_image('please_tap_to_continue.png') }}"
+                      campaign_claim_button_coords: "{{ get_coords_from_image('campaign_claim.png') }}"
                   - if:
-                      condition: "level_up_coords" # If a new level is reached
+                      condition: "campaign_claim_button_coords"  # This is true if coordinates were found,
                       then:
-                        - log: "New level reached"
-                        - click: "{{level_up_coords}}" # Click on 'Please tap to continue' message
+                        - log: "Campaign Claim button coordinates found"
+                        - click: "{{campaign_claim_button_coords}}" # Click on the Campaign Claim button
                         - delay: 2
                         - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
+                            level_up_coords: "{{ get_coords_from_image('please_tap_to_continue.png') }}"
                         - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
+                            condition: "level_up_coords" # If a new level is reached
                             then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
+                              - log: "New level reached"
+                              - click: "{{level_up_coords}}" # Click on 'Please tap to continue' message
+                              - delay: 2
+                              - set:
+                                  confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
+                              - if:
+                                  condition: "confirm_button_coords"  # If Confirm button is available
+                                  then:
+                                    - log: "Confirm button coordinates found"
+                                    - click: "{{confirm_button_coords}}" # Click on the Confirm button
+                            else:
+                              - log: "No new level reached, checking for Confirm button"
+                              - set:
+                                  confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
+                              - if:
+                                  condition: "confirm_button_coords"  # If Confirm button is available
+                                  then:
+                                    - log: "Confirm button coordinates found"
+                                    - click: "{{confirm_button_coords}}" # Click on the Confirm button
                       else:
-                        - log: "No new level reached, checking for Confirm button"
-                        - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
-                        - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
-                            then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
-                else:
-                  - log: "Campaign Claim button coordinates not found."
-            
-            - log: "Checking for Campaign Accelerate for free button"
-            - set:
-                campaign_accelerate_free_coords: "{{ get_coords_from_image('campaign_free_accelerate.png') }}" # TO-DO change to Free Accelerate
-            - if:
-                condition: "campaign_accelerate_free_coords"  # This is true if coordinates
-                then:
-                  - log: "Campaign Accelerate for free coordinates found"
-                  - click: "{{campaign_accelerate_free_coords}}" # Click on the Campaign Accelerate for 50 gems button
-                  - delay: 5
+                        - log: "Campaign Claim button coordinates not found."
+                  
+                  - log: "Checking for Campaign Accelerate for free button"
                   - set:
-                      level_up_coords: "{{ get_coords_from_image('please_tap_to_continue.png') }}"
+                      campaign_accelerate_free_coords: "{{ get_coords_from_image('campaign_free_accelerate.png') }}" # TO-DO change to Free Accelerate
                   - if:
-                      condition: "level_up_coords" # If a new level is reached
+                      condition: "campaign_accelerate_free_coords"  # This is true if coordinates
                       then:
-                        - log: "New level reached"
-                        - click: "{{level_up_coords}}" # Click on 'Please tap to continue' message
-                        - delay: 2
+                        - log: "Campaign Accelerate for free coordinates found"
+                        - click: "{{campaign_accelerate_free_coords}}" # Click on the Campaign Accelerate for 50 gems button
+                        - delay: 5
                         - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
+                            level_up_coords: "{{ get_coords_from_image('please_tap_to_continue.png') }}"
                         - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
+                            condition: "level_up_coords" # If a new level is reached
                             then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
-                      else:
-                        - log: "No new level reached, checking for Confirm button"
-                        - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
-                        - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
-                            then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
-            
-            - log: "Checking for Campaign Accelerate for 50 gems button"
-            - set:
-                campaign_accelerate_50_coords: "{{ get_coords_from_image('campaign_accelerate_50.png') }}"
-            - if:
-                condition: "campaign_accelerate_50_coords"  # This is true if coordinates
-                then:
-                  - log: "Campaign Accelerate for 50 gems coordinates found"
-                  - click: "{{campaign_accelerate_50_coords}}" # Click on the Campaign Accelerate for 50 gems button
-                  - delay: 5
+                              - log: "New level reached"
+                              - click: "{{level_up_coords}}" # Click on 'Please tap to continue' message
+                              - delay: 2
+                              - set:
+                                  confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
+                              - if:
+                                  condition: "confirm_button_coords"  # If Confirm button is available
+                                  then:
+                                    - log: "Confirm button coordinates found"
+                                    - click: "{{confirm_button_coords}}" # Click on the Confirm button
+                            else:
+                              - log: "No new level reached, checking for Confirm button"
+                              - set:
+                                  confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
+                              - if:
+                                  condition: "confirm_button_coords"  # If Confirm button is available
+                                  then:
+                                    - log: "Confirm button coordinates found"
+                                    - click: "{{confirm_button_coords}}" # Click on the Confirm button
+                  
+                  - log: "Checking for Campaign Accelerate for 50 gems button"
                   - set:
-                      level_up_coords: "{{ get_coords_from_image('please_tap_to_continue.png') }}"
+                      campaign_accelerate_50_coords: "{{ get_coords_from_image('campaign_accelerate_50.png') }}"
+                  - set:
+                      campaign_accelerate_ticket_coords: "{{ get_coords_from_image('accelarate.png') }}"
                   - if:
-                      condition: "level_up_coords" # If a new level is reached
+                      condition: "campaign_accelerate_50_coords or campaign_accelerate_ticket_coords"  # This is true if coordinates
                       then:
-                        - log: "New level reached"
-                        - click: "{{level_up_coords}}" # Click on 'Please tap to continue' message
-                        - delay: 2
-                        - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
                         - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
+                            condition: "campaign_accelerate_50_coords"
                             then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
-                      else:
-                        - log: "No new level reached, checking for Confirm button"
+                              - log: "Found 'Accelerate for 50 gems' button. Clicking it."
+                              - click: "{{ campaign_accelerate_50_coords }}"
+                            else:
+                              - log: "Found 'Accelerate with Ticket' button. Clicking it."
+                              - click: "{{ campaign_accelerate_ticket_coords }}"
+                        - delay: 5
                         - set:
-                            confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
+                            level_up_coords: "{{ get_coords_from_image('please_tap_to_continue.png') }}"
                         - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
+                            condition: "level_up_coords" # If a new level is reached
                             then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{confirm_button_coords}}" # Click on the Confirm button
-            
-            - click: [60, 50] # return to the main  game screen
-            - set:
-                team_coords: "{{ get_coords_from_image('campaign_team.png') }}"
-            - if:
-                condition: "team_coords"  # We are still inside campaign interface. need to go to the main screen
-                then:
-                  - log: "Still in the Campaign. Return to the main game screen"
+                              - log: "New level reached"
+                              - click: "{{level_up_coords}}" # Click on 'Please tap to continue' message
+                              - delay: 2
+                              - set:
+                                  confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
+                              - if:
+                                  condition: "confirm_button_coords"  # If Confirm button is available
+                                  then:
+                                    - log: "Confirm button coordinates found"
+                                    - click: "{{confirm_button_coords}}" # Click on the Confirm button
+                            else:
+                              - log: "No new level reached, checking for Confirm button"
+                              - set:
+                                  confirm_button_coords: "{{ get_coords_from_image('campaign_confirm.png') }}"
+                              - if:
+                                  condition: "confirm_button_coords"  # If Confirm button is available
+                                  then:
+                                    - log: "Confirm button coordinates found"
+                                    - click: "{{confirm_button_coords}}" # Click on the Confirm button
+                  
                   - click: [60, 50] # return to the main  game screen
+                  - set:
+                      team_coords: "{{ get_coords_from_image('campaign_team.png') }}"
+                  - if:
+                      condition: "team_coords"  # We are still inside campaign interface. need to go to the main screen
+                      then:
+                        - log: "Still in the Campaign. Return to the main game screen"
+                        - click: [60, 50] # return to the main  game screen
+                else:
+                  - log: "Campaign icon is not available"
+                  - send_email: "Campaign farming failed for the {{ instance_name }} instance." # send an email if Campaign icon is not available
           else:
-            - log: "Campaign icon is not available"
-            - send_email: "Campaign farming failed for the {{ instance_name }} instance." # send an email if Campaign icon is not available
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Campaign_farming scenario is skipped due to game unavailability and restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available   
   
   - name: Gene_Bank
     description: Gene Bank farming
     steps:
       - set:
-          gene_bank_coords: "{{ get_coords_from_image('GeneBank.png') }}"
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
       - if:
-          condition: "gene_bank_coords"  # This is true if coordinates were found, false
+          condition: "guild_coords"  # This is true if coordinates were found, false
           then:
-            - log: "Gene Bank coordinates found"
-            - click: [ "{{ gene_bank_coords[0] - 115 }}", "{{ gene_bank_coords[1]-60 }}" ] # Click on the Gene Bank icon
-            - delay: 2
-            - log : "Checking if ordinary clone is available"
             - set:
-                free_ordinary_coords: "{{ get_coords_from_image('Free_Ordinary_Clone.png') }}"
+                gene_bank_coords: "{{ get_coords_from_image('GeneBank.png') }}"
             - if:
-                condition: "free_ordinary_coords"  # If Free Ordinary Clone button is available
+                condition: "gene_bank_coords"  # This is true if coordinates were found, false
                 then:
-                  - log: "Free Ordinary Clone button coordinates found"
-                  - click: "{{free_ordinary_coords}}" # Click on the Free Ordinary Clone button
-                  - delay: 3
+                  - log: "Gene Bank coordinates found"
+                  - click: [ "{{ gene_bank_coords[0] - 115 }}", "{{ gene_bank_coords[1]-60 }}" ] # Click on the Gene Bank icon
+                  - delay: 2
+                  - log : "Checking if ordinary clone is available"
                   - set:
-                      cancel_button_coords: "{{ get_coords_from_image('gene_bank_cancel.png') }}"
+                      free_ordinary_coords: "{{ get_coords_from_image('Free_Ordinary_Clone.png') }}"
                   - if:
-                      condition: "cancel_button_coords"  # If Confirm button is available
+                      condition: "free_ordinary_coords"  # If Free Ordinary Clone button is available
                       then:
-                        - log: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full"
-                        - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
-                        - click: "{{cancel_button_coords}}" # Click on the Confirm button
-                        - click: [60, 50] # return to the main  game screen
+                        - log: "Free Ordinary Clone button coordinates found"
+                        - click: "{{free_ordinary_coords}}" # Click on the Free Ordinary Clone button
+                        - delay: 3
+                        - set:
+                            cancel_button_coords: "{{ get_coords_from_image('gene_bank_cancel.png') }}"
+                        - if:
+                            condition: "cancel_button_coords"  # If Confirm button is available
+                            then:
+                              - log: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full"
+                              - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
+                              - click: "{{cancel_button_coords}}" # Click on the Confirm button
+                              - click: [60, 50] # return to the main  game screen
+                            else:
+                              - click: [60, 50] # return to the gene bank screen
+                              
                       else:
-                        - click: [60, 50] # return to the gene bank screen
-                        
-                else:
-                  - log: "Free Ordinary Clone button not found"
-                  #- log: "Free Ordinary Clone button not found, checking for Free Advanced Clone button"
-            
-            - log : "Checking if Advanced clone is available"
-            - set:
-                free_advanced_coords: "{{ get_coords_from_image('Free_Advanced_Clone.png') }}"
-            - if:
-                condition: "free_advanced_coords"  # If Free Advanced Clone button is available
-                then:
-                  - log: "Free Advanced Clone button coordinates found"
-                  - click: "{{free_advanced_coords}}" # Click on the Free Advanced Clone button
-                  - delay: 3
+                        - log: "Free Ordinary Clone button not found"
+                        #- log: "Free Ordinary Clone button not found, checking for Free Advanced Clone button"
+                  
+                  - log : "Checking if Advanced clone is available"
                   - set:
-                      cancel_button_coords: "{{ get_coords_from_image('gene_bank_cancel.png') }}"
+                      free_advanced_coords: "{{ get_coords_from_image('Free_Advanced_Clone.png') }}"
                   - if:
-                      condition: "cancel_button_coords"  # If Confirm button is available
+                      condition: "free_advanced_coords"  # If Free Advanced Clone button is available
                       then:
-                        - log: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full"
-                        - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
-                        - click: "{{cancel_button_coords}}" # Click on the Confirm button
-                        - click: [60, 50] # return to the gene bank screen
+                        - log: "Free Advanced Clone button coordinates found"
+                        - click: "{{free_advanced_coords}}" # Click on the Free Advanced Clone button
+                        - delay: 3
+                        - set:
+                            cancel_button_coords: "{{ get_coords_from_image('gene_bank_cancel.png') }}"
+                        - if:
+                            condition: "cancel_button_coords"  # If Confirm button is available
+                            then:
+                              - log: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full"
+                              - send_email: "The Gene Bank farming failed for the {{ instance_name }} instance. capacity is full" # send an email if capacity is full
+                              - click: "{{cancel_button_coords}}" # Click on the Confirm button
+                              - click: [60, 50] # return to the gene bank screen
+                            else:
+                              - click: [60, 50] # return to the gene bank screen
+                              
                       else:
-                        - click: [60, 50] # return to the gene bank screen
-                        
-                else:
-                  - log: "Free Advanced Clone button not found"
-                  #- log: "Free Ordinary Clone button not found, checking for Free Advanced Clone button"
+                        - log: "Free Advanced Clone button not found"
+                        #- log: "Free Ordinary Clone button not found, checking for Free Advanced Clone button"
 
-            - click: [60, 50] # return to the main  game screen
+                  - click: [60, 50] # return to the main  game screen
+                else:
+                  - log: "Gene Bank icon is not available"
+                  - send_email: "Gene Bank farming failed for the {{ instance_name }} instance. Gene Bank icon is not available" 
           else:
-            - log: "Gene Bank icon is not available"
-            - send_email: "Gene Bank farming failed for the {{ instance_name }} instance. Gene Bank icon is not available" 
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Gene_Bank scenario is skipped due to game unavailability and restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
                         
-  - name: Guild_activity_new
-    description: Guild activity - new version
+  - name: Guild_activity
+    description: Guild activity
     steps:
       - set:
           guild_coords: "{{ get_coords_from_image('Guild.png') }}"
@@ -396,323 +490,433 @@ scenarios:
                 else:
                   - log: "Boss war screen not available"
                   
-            - click: [60, 50] # return to the main game menu        
+            - click: [60, 50] # return to the main game menu
+          else:
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Guild_activity_new scenario is skipped due to game unavailability and restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available        
   
   - name: Airship_farming
     description: Airship farming
     steps:
-      #- scroll: [996,352, right,400] # Scroll right to make sure Airship icon is visible
-      - scroll: [996,352, left,400] # Scroll right to make sure Airship icon is visible
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
       - if:
-          condition: "compare_with_text_easyocr(498,254,116,41,'air') or compare_with_text_easyocr(570,256,101,36,'air')" # Check if Guild icon is available - with ad sidebar
+          condition: "guild_coords"  # This is true if coordinates were found, false
           then:
-            - click: [549, 186] # Click on Airship  icon without ad sidebar
-            - click: [610, 198] # Click on Airship  icon with  ad sidebar
-            - delay: 1
-            - log : "Left slot farming"
-            - click: [236, 376] # Click on left slot
-            - scroll: [624,582, up,400] # Scroll up
-            - scroll: [624,582, up,400] # Scroll up
-            - scroll: [624,582, up,400] # Scroll up
-            - scroll: [624,582, up,400] # Scroll up
-            - log : "check last position"
+            - scroll: [996,352, left,400] # Scroll right to make sure Airship icon is visible
+            - set:
+                Airship_coords: "{{ get_coords_from_image('Airship.png') }}"
             - if:
-                condition: compare_with_text_easyocr(905,584,92,32,'Sweep') # Check if Sweep button is available at the last position
+                condition: "Airship_coords"  # This is true if coordinates were found, false
                 then:
-                  - click: [948,601] # Click Sweep button
-                  - delay: 4
-                  - click: [639,485] # Click Claim button
-                  - click: [948,601] # Click Sweep button
-                  - delay: 4
-                  - click: [639,485] # Click Claim button
-                  - click: [60,50] # exit from the Airship reward screen
-                else:
-                  - log : "check last-1 position"
+                  - log: "Airship coordinates found"
+                  - click: [ "{{ Airship_coords[0]}}", "{{ Airship_coords[1]-100 }}" ] # Click on the Airship icon
+                  - delay: 2
+                  - log : "Checking if Dragon_Crusade is on the screen"
+                  - set:
+                      Dragon_Crusade_coords: "{{ get_coords_from_image('Dragon_Crusade.png') }}"
                   - if:
-                      condition: compare_with_text_easyocr(905,489,93,32,'Sweep') # Check if Sweep button is available at the last-1 position
+                      condition: "Dragon_Crusade_coords"  # If Airship farming is available
                       then:
-                        - click: [948, 504] # Click Sweep button
-                        - delay: 4
-                        - click: [639,485] # Click Claim button
-                        - click: [948, 504] # Click Sweep button
-                        - delay: 4
-                        - click: [639,485] # Click Claim button
-                        - click: [60,50] # exit from the Airship reward screen
-                      else:
-                        - log : "check last-2 position"
+                        - log: "Dragon_Crusade_coords  coordinates found"
+                        - click: [ "{{ Dragon_Crusade_coords[0]}}", "{{ Dragon_Crusade_coords[1]+200 }}" ] # Click on the Dragon_Crusade icon
+                        - delay: 2
+                        - scroll: [624,582, up,400] # Scroll up
+                        - scroll: [624,582, up,400] # Scroll up
+                        - scroll: [624,582, up,400] # Scroll up
+                        - scroll: [624,582, up,400] # Scroll up
+                        - set:
+                            lowest_Sweep_coords: "{{ get_all_coords_from_image('Sweep.png') }}"
                         - if:
-                            condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-2 position
+                            condition: "lowest_Sweep_coords" # True if the list is not empty
                             then:
-                              - click: [948, 409] # Click Sweep button
+                              # The list is sorted top-to-bottom, so the last item [-1] is the lowest on screen
+                              - log: "Found {{ len(lowest_Sweep_coords) }} buttons. Clicking the lowest one."
+                              - click: "{{ lowest_Sweep_coords[-1] }}"
                               - delay: 4
-                              - click: [639,485] # Click Claim button
-                              - click: [948, 409] # Click Sweep button
-                              - delay: 4
-                              - click: [639,485] # Click Claim button
-                              - click: [60,50] # exit from the Airship reward screen
-                            else:
-                              - log : "check last-3 position"
+                              - set:
+                                  yellow_claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
                               - if:
-                                  condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-3 position
+                                  condition: "yellow_claim_button_coords" # True if the list is not empty
                                   then:
-                                    - click: [946,408] # Click Sweep button
+                                    - log: "Found {{ len(yellow_claim_button_coords) }} yellow claim buttons. Clicking the  one."
+                                    - click: "{{ yellow_claim_button_coords}}" # Click on the yellow claim button
+                                    #- click: [60, 50] # exit from the Airship reward screen
+                                    - delay: 1
+                                    - log: "click on Sweep button the second time"
+                                    - click: "{{ lowest_Sweep_coords[-1] }}"
                                     - delay: 4
-                                    - click: [639,485] # Click Claim button
-                                    - click: [946,408] # Click Sweep button
-                                    - delay: 4
-                                    - click: [639,485] # Click Claim button
-                                    - click: [60,50] # exit from the Airship reward screen
+                                    - click: "{{ yellow_claim_button_coords}}" # Click on the yellow claim button
+                                    - click: [60, 50] # exit from the Airship reward screen
+                                    - delay: 1
                                   else:
-                                    - if:
-                                        condition: compare_with_text_easyocr(905,204,93,32,'Sweep') # Check if Sweep button is available at the last-4 position
-                                        then:
-                                          - click: [948,218] # Click Sweep button
-                                          - delay: 4
-                                          - click: [639,485] # Click Claim button
-                                          - click: [948,218] # Click Sweep button
-                                          - delay: 4
-                                          - click: [639,485] # Click Claim button
-                                          - click: [60,50] # exit from the Airship reward screen
-                                        else:
-                                          - log : "No Sweep button found in Airship farming"
-            - log : "middle slot farming"
-            - click: [636,373] # Click on middle  slot
-            - scroll: [624,582, up,400] # Scroll up
-            - scroll: [624,582, up,400] # Scroll up
-            - scroll: [624,582, up,400] # Scroll up
-            - scroll: [624,582, up,400] # Scroll up
-            - log : "check last position"
-            - if:
-                condition: compare_with_text_easyocr(905,584,92,32,'Sweep') # Check if Sweep button is available at the last position
-                then:
-                  - click: [948,601] # Click Sweep button
-                  - delay: 4
-                  - click: [639,485] # Click Claim button
-                  - click: [948,601] # Click Sweep button
-                  - delay: 4
-                  - click: [639,485] # Click Claim button
-                  - click: [60,50] # exit from the Airship reward screen
-                else:
-                  - log : "check last-1 position"
+                                    - log: "No yellow claim button found after Sweep"
+                                    - click: [60, 50] # exit from the Airship reward screen
+                            else:
+                              - log: "No Sweep button found in Airship farming"
+                              - click: [60, 50] # exit from the Airship reward screen
+                      else:
+                        - log: "Dragon_Crusade icon is not available. I'm trying to click next one."
+                        - click: [60, 50] # exit from the Airship reward screen
+                  - set:
+                      Steampunk_Relic_coords: "{{ get_coords_from_image('Steampunk_Relic.png') }}"
                   - if:
-                      condition: compare_with_text_easyocr(905,489,93,32,'Sweep') # Check if Sweep button is available at the last-1 position
+                      condition: "Steampunk_Relic_coords"  # If Steampunk_Relic_coords is available
                       then:
-                        - click: [948, 504] # Click Sweep button
-                        - delay: 4
-                        - click: [639,485] # Click Claim button
-                        - click: [948, 504] # Click Sweep button
-                        - delay: 4
-                        - click: [639,485] # Click Claim button
-                        - click: [60,50] # exit from the Airship reward screen
-                      else:
-                        - log : "check last-2 position"
+                        - log: "Steampunk_Relic_coords  coordinates found"
+                        - click: [ "{{ Steampunk_Relic_coords[0]}}", "{{ Steampunk_Relic_coords[1]+200 }}" ] # Click on the Steampunk_Relic icon
+                        - delay: 2
+                        - scroll: [624,582, up,400] # Scroll up 
+                        - scroll: [624,582, up,400] # Scroll up
+                        - scroll: [624,582, up,400] # Scroll up
+                        - scroll: [624,582, up,400] # Scroll up
+                        - set:
+                            lowest_Sweep_coords: "{{ get_all_coords_from_image('Sweep.png') }}"
                         - if:
-                            condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-2 position
+                            condition: "lowest_Sweep_coords" # True if the list is not empty
                             then:
-                              - click: [948, 409] # Click Sweep button
+                              # The list is sorted top-to-bottom, so the last item [-1] is the lowest on screen
+                              # - log: "Found {{ len(lowest_Sweep_coords) }} buttons. Clicking the lowest one."
+                              - click: "{{ lowest_Sweep_coords[-1] }}"
                               - delay: 4
-                              - click: [639,485] # Click Claim button
-                              - click: [948, 409] # Click Sweep button
-                              - delay: 4
-                              - click: [639,485] # Click Claim button
-                              - click: [60,50] # exit from the Airship reward screen
-                            else:
-                              - log : "check last-3 position"
+                              - set:
+                                  yellow_claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
                               - if:
-                                  condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-3 position
+                                  condition: "yellow_claim_button_coords" # True if the list is not empty
                                   then:
-                                    - click: [946,408] # Click Sweep button
+                                    - log: "Found {{ len(yellow_claim_button_coords) }} yellow claim buttons. Clicking the  one."
+                                    - click: "{{ yellow_claim_button_coords}}" # Click on the yellow claim button
+                                    #- click: [60, 50] # exit from the Airship reward screen
+                                    - delay: 1
+                                    - log: "click on Sweep button the second time"
+                                    - click: "{{ lowest_Sweep_coords[-1] }}"
                                     - delay: 4
-                                    - click: [639,485] # Click Claim button
-                                    - click: [946,408] # Click Sweep button
-                                    - delay: 4
-                                    - click: [639,485] # Click Claim button
-                                    - click: [60,50] # exit from the Airship reward screen
+                                    - click: "{{ yellow_claim_button_coords}}" # Click on the yellow claim button
+                                    - click: [60, 50] # exit from the Airship reward screen
+                                    - delay: 1
                                   else:
-                                    - if:
-                                        condition: compare_with_text_easyocr(905,204,93,32,'Sweep') # Check if Sweep button is available at the last-4 position
-                                        then:
-                                          - click: [948,218] # Click Sweep button
-                                          - delay: 4
-                                          - click: [639,485] # Click Claim button
-                                          - click: [948,218] # Click Sweep button
-                                          - delay: 4
-                                          - click: [639,485] # Click Claim button
-                                          - click: [60,50] # exit from the Airship reward screen
-                                        else:
-                                          - log : "No Sweep button found in Airship farming"          
-            - log : "right slot farming"
-            - click: [1050,352] # Click on right  slot
-            - scroll: [624,582, up,400] # Scroll up
-            - scroll: [624,582, up,400] # Scroll up
-            - scroll: [624,582, up,400] # Scroll up
-            - scroll: [624,582, up,400] # Scroll up
-            - log : "check last position"
-            - if:
-                condition: compare_with_text_easyocr(905,584,92,32,'Sweep') # Check if Sweep button is available at the last position
-                then:
-                  - click: [948,601] # Click Sweep button
-                  - delay: 4
-                  - click: [639,485] # Click Claim button
-                  - click: [948,601] # Click Sweep button
-                  - delay: 4
-                  - click: [639,485] # Click Claim button
-                  - click: [60,50] # exit from the Airship reward screen
-                else:
-                  - log : "check last-1 position"
+                                    - log: "No yellow claim button found after Sweep"
+                                    - click: [60, 50] # exit from the Airship reward screen
+                            else:
+                              - log: "No Sweep button found in Airship farming"
+                              - click: [60, 50] # exit from the Airship reward screen
+                      else:
+                        - log: "Steampunk_Relic icon is not available. I'm trying to click next one."
+                        - click: [60, 50] # exit from the Airship reward screen
+                  - set:
+                      Mine_Exploration_coords: "{{ get_coords_from_image('Mine_Exploration.png') }}"
                   - if:
-                      condition: compare_with_text_easyocr(905,489,93,32,'Sweep') # Check if Sweep button is available at the last-1 position
+                      condition: "Mine_Exploration_coords"  # If Airship farming is available
                       then:
-                        - click: [948, 504] # Click Sweep button
-                        - delay: 4
-                        - click: [639,485] # Click Claim button
-                        - click: [948, 504] # Click Sweep button
-                        - delay: 4
-                        - click: [639,485] # Click Claim button
-                        - click: [60,50] # exit from the Airship reward screen
-                      else:
-                        - log : "check last-2 position"
+                        - log: "Mine_Exploration_coords  coordinates found"
+                        - click: [ "{{ Mine_Exploration_coords[0]}}", "{{ Mine_Exploration_coords[1]+200 }}" ] # Click on the Mine_Exploration icon
+                        - delay: 2
+                        - scroll: [624,582, up,400] # Scroll up 
+                        - scroll: [624,582, up,400] # Scroll up
+                        - scroll: [624,582, up,400] # Scroll up
+                        - scroll: [624,582, up,400] # Scroll up
+                        - set:
+                            lowest_Sweep_coords: "{{ get_all_coords_from_image('Sweep.png') }}"
                         - if:
-                            condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-2 position
+                            condition: "lowest_Sweep_coords" # True if the list is not empty
                             then:
-                              - click: [948, 409] # Click Sweep button
+                              # The list is sorted top-to-bottom, so the last item [-1] is the lowest on screen
+                              # - log: "Found {{ len(lowest_Sweep_coords) }} buttons. Clicking the lowest one."
+                              - click: "{{ lowest_Sweep_coords[-1] }}"
                               - delay: 4
-                              - click: [639,485] # Click Claim button
-                              - click: [948, 409] # Click Sweep button
-                              - delay: 4
-                              - click: [639,485] # Click Claim button
-                              - click: [60,50] # exit from the Airship reward screen
-                            else:
-                              - log : "check last-3 position"
+                              - set:
+                                  yellow_claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
                               - if:
-                                  condition: compare_with_text_easyocr(905,394,93,32,'Sweep') # Check if Sweep button is available at the last-3 position
+                                  condition: "yellow_claim_button_coords" # True if the list is not empty
                                   then:
-                                    - click: [946,408] # Click Sweep button
+                                    - log: "Found {{ len(yellow_claim_button_coords) }} yellow claim buttons. Clicking the  one."
+                                    - click: "{{ yellow_claim_button_coords}}" # Click on the yellow claim button
+                                    #- click: [60, 50] # exit from the Airship reward screen
+                                    - delay: 1
+                                    - log: "click on Sweep button the second time"
+                                    - click: "{{ lowest_Sweep_coords[-1] }}"
                                     - delay: 4
-                                    - click: [639,485] # Click Claim button
-                                    - click: [946,408] # Click Sweep button
-                                    - delay: 4
-                                    - click: [639,485] # Click Claim button
-                                    - click: [60,50] # exit from the Airship reward screen
+                                    - click: "{{ yellow_claim_button_coords}}" # Click on the yellow claim button
+                                    - click: [60, 50] # exit from the Airship reward screen
+                                    - delay: 1
                                   else:
-                                    - if:
-                                        condition: compare_with_text_easyocr(905,204,93,32,'Sweep') # Check if Sweep button is available at the last-4 position
-                                        then:
-                                          - click: [948,218] # Click Sweep button
-                                          - delay: 4
-                                          - click: [639,485] # Click Claim button
-                                          - click: [948,218] # Click Sweep button
-                                          - delay: 4
-                                          - click: [639,485] # Click Claim button
-                                          - click: [60,50] # exit from the Airship reward screen
-                                        else:
-                                          - log : "No Sweep button found in Airship farming"  
-            - log : "return to the Game main screen"
-            - click: [60, 50] # return to the Game main screen
+                                    - log: "No yellow claim button found after Sweep"
+                                    - click: [60, 50] # exit from the Airship reward screen
+                            else:
+                              - log: "No Sweep button found in Airship farming"
+                              - click: [60, 50] # exit from the Airship reward screen
+                      else:
+                        - log: "Mine_Exploration icon is not available. Finishing Airship farming."
+                        - click: [60, 50] # exit from the Airship reward screen
+            
+                  - log: "Try to exit from the Airship farming screen"
+                  - click: [60, 50] # return to the main game screen
+                  - set:
+                      Mine_Exploration_coords: "{{ get_coords_from_image('Mine_Exploration.png') }}"
+                  - log : "Checking if Mine_Exploration icon is available"
+                  - if:
+                      condition: "Mine_Exploration_coords"  # This is true if coordinates were found, false
+                      then:                  
+                        - log: "Mine_Exploration_coords icon is available, return to the main game screen"
+                        - click: [60, 50] # return to the main game screen
+                      else:
+                        - log: "It seems we are in the main game screen already, no need to click"
+                else:
+                  - log: "Airship farming is not available, returning to the main game screen"
+                  
+            - log : "End of Airship farming"
           else:
-            - send_email: "Airship farming failed for the {{ instance_name }} instance. No Airship icon is available" # send an email if Airship icon is not available
-      - log : "End of Airship farming"
-      #- click: [60,50] # exit from the Airship reward screen
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Airship_farming scenario is skipped due to game unavailability and restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
+
+  - name: Dangeon_farming_new
+    description: Dangeon farming
+    steps:
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
+      - if:
+          condition: "guild_coords"  # This is true if coordinates were found, false
+          then:
+            - scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
+            - set:
+                Dangeon_coords: "{{ get_coords_from_image('dangeon.png') }}"
+            - if:
+                condition: "Dangeon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Dangeon coordinates found"
+                  - click: [ "{{ Dangeon_coords[0]}}", "{{ Dangeon_coords[1]-150 }}" ] # Click on the Dangeon icon
+                  - delay: 3
+                  - log : "Checking if Sweep farming is available"
+                  - set:
+                      Sweep_button_coords: "{{ get_coords_from_image('Sweep_purple.png') }}"
+                  - if:
+                      condition: "Sweep_button_coords"  # If Dangeon farming is available
+                      then:
+                        - log: "Sweep_button_coords coordinates found"
+                        - click: "{{ Sweep_button_coords }}" # Click on the Sweep button
+                        - delay: 2
+                        - set:
+                            confirm_button_coords: "{{ get_coords_from_image('confirm_purple.png') }}"
+                        - if:
+                            condition: "confirm_button_coords"  # If Confirm button is available
+                            then:
+                              - log: "Confirm button coordinates found"
+                              - click: "{{ confirm_button_coords }}" # Click on the Confirm button
+                              - delay: 2
+                              - set:
+                                  claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                              - if:
+                                  condition: "claim_button_coords"  # If Claim button is available
+                                  then:
+                                    - log: "Claim button coordinates found"
+                                    - click: "{{ claim_button_coords }}" # Click on the Claim button
+                                    - delay: 2
+                                    - set:
+                                        advanced_button_coords: "{{ get_coords_from_image('advanced.png') }}"
+                                    - if:
+                                        condition: "advanced_button_coords"  # If Confirm button is available
+                                        then:
+                                          - click: "{{ advanced_button_coords }}" # Click on the Confirm button
+                                          - delay: 2
+                                          - set:
+                                              battle_red_coords: "{{ get_coords_from_image('battle_red.png') }}"
+                                          - if:
+                                              condition: "battle_red_coords"  # If Golden Chest button is available
+                                              then:
+                                                - log: "Battle Red button coordinates found"
+                                                - click: [ "{{ battle_red_coords[0] + 865 }}", "{{ battle_red_coords[1]-15 }}" ] # Click on the Campaign icon
+                                                - delay: 4
+                                                - set:
+                                                    claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                                                - if:
+                                                    condition: "claim_button_coords"  # If Claim button is available
+                                                    then:
+                                                      - click: "{{ claim_button_coords }}" # Click on the Claim button
+                                                      #- click: [60, 50] # exit from the Dangeon farming screen
+                                                    else:
+                                                      - log: "Claim button is not available in Dangeon farming"
+                                                      #- click: [60, 50] # exit from the Dangeon farming screen
+                                              else:
+                                                - log: "Golden Chest button is not available in Dangeon farming"
+                            else:
+                              - log: "Confirm button is not available in Dangeon farming"
+                      else:
+                        - log: "Sweep button is not available"
+                  - click: [60, 50] # return to the main game screen
+          else:
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Airship_farming scenario is skipped due to game unavailability and restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available      
 
   - name: Dangeon_farming
     description: Dangeon farming
     steps:
       #- scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
-      - scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
-      - click: [975,429] # enter to Dangeon
-      - click: [926,674] # Click Sweep button
-      - click: [765,465] # Click Confirm button
-      - delay: 1
-      - click: [638,587] # Click Claim button
-      - click: [414,38] # Switch to Advanced Dangeon
-      - click: [1198,659] # Initiate reward collection
-      - delay: 3
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
       - if:
-          condition: "compare_with_text_easyocr(588,459,104,45, 'Claim')" # Check if Claim button is available
+          condition: "guild_coords"  # This is true if coordinates were found, false
           then:
-            - click: [638,481] # Click on Claim button
+            - scroll: [996,352, left,400] # Scroll left to make sure Dangeon icon is visible
+            - click: [975,429] # enter to Dangeon
+            - click: [926,674] # Click Sweep button
+            - click: [765,465] # Click Confirm button
+            - delay: 1
+            - click: [638,587] # Click Claim button
+            - click: [414,38] # Switch to Advanced Dangeon
+            - click: [1198,659] # Initiate reward collection
+            - delay: 3
+            - if:
+                condition: "compare_with_text_easyocr(588,459,104,45, 'Claim')" # Check if Claim button is available
+                then:
+                  - click: [638,481] # Click on Claim button
+                else:
+                  - log: "Claim button not found in Dangeon farming"
+                  #- click: [60, 50] # return to the main  game screen
+            - click: [60, 50] # exit main game screen
           else:
-            - log: "Claim button not found in Dangeon farming"
-            #- click: [60, 50] # return to the main  game screen
-      - click: [60, 50] # exit main game screen
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Airship_farming scenario is skipped due to game unavailability and restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
   
   - name: Arena_farming
     description: Arena farming. Fight most left opponent in the list. Good for minor accounts.
     steps:
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
       - if:
-          condition: "compare_with_text_easyocr(260,553,56,23,'Arena') or compare_with_any_image(260,553,56,23,'Arena.png',0.85)" #  Check if Arena icon is available
+          condition: "guild_coords"  # This is true if coordinates were found, false
           then:
-            - click: [272,486] # Click on Arena icon
-            - delay: 1
-            ### General Arena ###
-            - click: [153,359] 
-            - delay: 3
-            - click: [629,560] # Click Match button
-            - delay: 1
-            # Quick battle checkbox is to be checked
-            # TO-DO Add a check if attack is free 
-            # Attack #1
-            - log: "General Arena attack #1"
-            - click: [280,580] # Click the most left opponent in the list
-            - delay: 2
-            - click: [462,615] # Collect rewards
-            - delay: 2
-            - click: [462,615] # Second click if areana league is increased
-            - log: "General Arena attack #2"
-            - click: [280,580] # Click the most left opponent in the list
-            - delay: 2
-            - click: [462,615] # Collect rewards
-            - delay: 2
-            - click: [462,615] # Second click if areana league is increased
-            - log: "General Arena attack #3"
-            - click: [280,580] # Click the most left opponent in the list
-            - delay: 2
-            - click: [462,615] # Collect rewards
-            - delay: 2
-            - click: [462,615] # Second click if areana league is increased
-            - click: [60, 50] # exit General arena screen
-            - delay: 1
-            - click: [60, 50] # exit main arena screen
+            - if:
+                condition: "compare_with_text_easyocr(260,553,56,23,'Arena') or compare_with_any_image(260,553,56,23,'Arena.png',0.85)" #  Check if Arena icon is available
+                then:
+                  - click: [272,486] # Click on Arena icon
+                  - delay: 1
+                  ### General Arena ###
+                  - click: [153,359] 
+                  - delay: 3
+                  - click: [629,560] # Click Match button
+                  - delay: 1
+                  # Quick battle checkbox is to be checked
+                  # TO-DO Add a check if attack is free 
+                  # Attack #1
+                  - log: "General Arena attack #1"
+                  - click: [280,580] # Click the most left opponent in the list
+                  - delay: 2
+                  - click: [462,615] # Collect rewards
+                  - delay: 2
+                  - click: [462,615] # Second click if areana league is increased
+                  - log: "General Arena attack #2"
+                  - click: [280,580] # Click the most left opponent in the list
+                  - delay: 2
+                  - click: [462,615] # Collect rewards
+                  - delay: 2
+                  - click: [462,615] # Second click if areana league is increased
+                  - log: "General Arena attack #3"
+                  - click: [280,580] # Click the most left opponent in the list
+                  - delay: 2
+                  - click: [462,615] # Collect rewards
+                  - delay: 2
+                  - click: [462,615] # Second click if areana league is increased
+                  - click: [60, 50] # exit General arena screen
+                  - delay: 1
+                  - click: [60, 50] # exit main arena screen
 
-            ### Cross server Arena ###
-            - log: "Cross server Arena farming"
-            - click: [474,377] 
-            - delay: 3
-            - click: [629,560] # Click Match button
-            - delay: 1
-            # Quick battle checkbox is to be checked
-            # Attack #1
-            - log: "Cross server Arena attack #1"
-            - click: [280,580] # Click the most left opponent in the list
-            - delay: 2
-            - click: [462,615] # Collect rewards
-            - delay: 2
-            - click: [462,615] # Second click if areana league is increased
-            - log: "Cross server Arena attack #2"
-            - click: [280,580] # Click the most left opponent in the list
-            - delay: 2
-            - click: [462,615] # Collect rewards
-            - delay: 2
-            - click: [462,615] # Second click if areana league is increased
-            - log: "Cross server Arena attack #3"
-            - click: [280,580] # Click the most left opponent in the list
-            - delay: 2
-            - click: [462,615] # Collect rewards
-            - delay: 2
-            - click: [462,615] # Second click if areana league is increased
-            - click: [60, 50] # exit General arena screen
-            - delay: 1
-            - click: [60, 50] # exit main arena screen
-            ### Summit Arena Challenge ###
-            # Placeholder for Summit Arena Challenge farming
-            
-            ### End farming ###
-            - log: "Arena farming completed"
-            - click: [60, 50] # exit main game screen
+                  ### Cross server Arena ###
+                  - log: "Cross server Arena farming"
+                  - click: [474,377] 
+                  - delay: 3
+                  - click: [629,560] # Click Match button
+                  - delay: 1
+                  # Quick battle checkbox is to be checked
+                  # Attack #1
+                  - log: "Cross server Arena attack #1"
+                  - click: [280,580] # Click the most left opponent in the list
+                  - delay: 2
+                  - click: [462,615] # Collect rewards
+                  - delay: 2
+                  - click: [462,615] # Second click if areana league is increased
+                  - log: "Cross server Arena attack #2"
+                  - click: [280,580] # Click the most left opponent in the list
+                  - delay: 2
+                  - click: [462,615] # Collect rewards
+                  - delay: 2
+                  - click: [462,615] # Second click if areana league is increased
+                  - log: "Cross server Arena attack #3"
+                  - click: [280,580] # Click the most left opponent in the list
+                  - delay: 2
+                  - click: [462,615] # Collect rewards
+                  - delay: 2
+                  - click: [462,615] # Second click if areana league is increased
+                  - click: [60, 50] # exit General arena screen
+                  - delay: 1
+                  - click: [60, 50] # exit main arena screen
+                  ### Summit Arena Challenge ###
+                  # Placeholder for Summit Arena Challenge farming
+                  
+                  ### End farming ###
+                  - log: "Arena farming completed"
+                  - click: [60, 50] # exit main game screen
+                else:
+                  - log: "Arena icon is not available"
+                  - send_email: "Arena farming failed for the {{ instance_name }} instance." # send an email if Arena icon is not available
           else:
-            - log: "Arena icon is not available"
-            - send_email: "Arena farming failed for the {{ instance_name }} instance." # send an email if Arena icon is not available
-
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Arena_farming scenario is skipped due to game unavailability and restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Guild icon is not available and game icon coordinates not found. Cannot restart the game." # send an email if Game icon is not available
+      
   - name: Bonus_rewards
     description: Bonus rewards collection
     steps:

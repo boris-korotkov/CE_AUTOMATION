@@ -10,8 +10,8 @@ import ce_interactive
 from ce_workflow_engine import WorkflowEngine
 
 # --- CONFIGURATION ---
-DEFAULT_INSTANCE_NAME = "CE_2024_2"
-DEFAULT_TEST_SCENARIO = "Send_flowers_to_friends"
+DEFAULT_INSTANCE_NAME = "CE_2024_1"
+DEFAULT_TEST_SCENARIO = "Supply_Depot_Farming"
 # ---------------------
 
 def get_coords(prompt="Enter coordinates as X,Y: "):
@@ -43,8 +43,9 @@ def print_menu():
         "6": "Scroll",
         "7": "Get Coordinates by Clicking on Window",
         "8": "Select Region by Dragging on Window",
-        "9": "Get Coordinates from Image (Anchor Finding)", # <-- NEW
-        "10": "Run a Test Scenario" # <-- RENUMBERED
+        "9": "Get Coordinates from Image (Anchor Finding)",
+        "10": "Get Coords from Features (Animated Anchor)", # <-- NEW
+        "11": "Run a Test Scenario" # <-- RENUMBERED
     }
     print("\n" + "="*50)
     print("      Clone Evolution Interactive Tester")
@@ -112,7 +113,6 @@ def main(adb_id, language, instance_name):
                 region = ce_interactive.get_region_from_drag(adb_id)
                 if region: print(f"\n--- REGION CAPTURED ---\nResult: {region[0]},{region[1]},{region[2]},{region[3]}\n-----------------------")
 
-            # --- NEW FUNCTIONALITY ---
             elif choice == '9':
                 img_name = input("Enter template image filename to find: ")
                 threshold = float(input("Enter match threshold [0.0-1.0] (default 0.85): ") or 0.85)
@@ -122,8 +122,18 @@ def main(adb_id, language, instance_name):
                 else:
                     print(f"\n--- RESULT ---\nImage '{img_name}' not found on screen.\n--------------")
 
-            # --- RENUMBERED ---
+            # --- NEW FUNCTIONALITY ---
             elif choice == '10':
+                img_name = input("Enter template image filename to find: ")
+                min_matches = int(input("Enter minimum feature matches required (default 10): ") or 10)
+                coords = ce_actions.get_coords_from_features(adb_id, language, img_name, min_matches)
+                if coords:
+                    print(f"\n--- COORDINATES CAPTURED (from Features) ---\nResult: {coords[0]},{coords[1]}\n--------------------------------------------")
+                else:
+                    print(f"\n--- RESULT ---\nImage '{img_name}' not found on screen using feature matching.\n--------------")
+
+            # --- RENUMBERED ---
+            elif choice == '11':
                 user_input = input(f"Enter scenario name to run (default: {DEFAULT_TEST_SCENARIO}): ").strip()
                 scenario_to_run = user_input or DEFAULT_TEST_SCENARIO
                 if not scenario_to_run: print("\nERROR: No scenario name provided."); continue

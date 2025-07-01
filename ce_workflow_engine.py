@@ -25,15 +25,18 @@ class WorkflowEngine:
             'compare_with_text_easyocr': lambda *args: ce_actions.compare_with_text_easyocr(self.adb_id, self.language, self.context['instance_name'], *args),
             'compare_with_features': lambda *args: ce_actions.compare_with_features(self.adb_id, self.language, self.context['instance_name'], *args),
             'get_coords_from_image': lambda *args: ce_actions.get_coords_from_image(self.adb_id, self.language, *args),
-            'get_all_coords_from_image': lambda *args: ce_actions.get_all_coords_from_image(self.adb_id, self.language, *args)
+            'get_all_coords_from_image': lambda *args: ce_actions.get_all_coords_from_image(self.adb_id, self.language, *args),
+            'get_coords_from_features': lambda *args: ce_actions.get_coords_from_features(self.adb_id, self.language, *args),
+            'get_all_coords_from_features': lambda *args: ce_actions.get_all_coords_from_features(self.adb_id, self.language, *args)
         }
 
     def _render_template(self, template_string):
         """Renders a simple string template."""
         if not isinstance(template_string, str):
             return template_string
-        # The context for rendering includes variables and callable functions
-        full_context = {**self.context, **self.conditional_actions}
+        # The context for rendering includes variables, callable functions, AND safe built-ins like len.
+        # --- THIS IS THE FIX ---
+        full_context = {**self.context, **self.conditional_actions, 'len': len}
         return Template(template_string).render(full_context)
 
     def _render_params(self, params):
@@ -132,3 +135,5 @@ class WorkflowEngine:
         logging.info(f"Executing workflow: {workflow_name} - {target_scenario.get('description', '')}")
         self._process_steps(target_scenario['steps'])
         logging.info(f"Finished workflow: {workflow_name}")
+    
+     
