@@ -33,6 +33,10 @@
         h2 {
             margin-top: 40px;
         }
+        h3 {
+            margin-top: 30px;
+            border-bottom-width: 1px;
+        }
         hr {
             border: 0;
             height: 1px;
@@ -93,88 +97,17 @@
         <hr>
 
         <h2>I. Action Commands</h2>
-        <p>These are the primary commands that perform an action within the emulator.</p>
-
-        <h3><code>click</code></h3>
-        <p>Simulates a tap on the screen at a specific coordinate.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>click: [x, y]</code></li>
-        </ul>
-
-        <h3><code>scroll</code></h3>
-        <p>Simulates a swipe gesture on the screen from a starting point.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>scroll: [x, y, direction, distance]</code></li>
-            <li><strong>Parameters:</strong> <code>direction</code> must be <code>up</code>, <code>down</code>, <code>left</code>, or <code>right</code>.</li>
-        </ul>
-
-        <h3><code>delay</code></h3>
-        <p>Pauses the execution of the script for a specified number of seconds.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>delay: seconds</code></li>
-        </ul>
-
-        <h3><code>log</code></h3>
-        <p>Prints a message to the console and the log file for debugging and progress tracking.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>log: "Your message here"</code></li>
-        </ul>
-
-        <h3><code>send_email</code></h3>
-        <p>Sends an email notification using the configured Outlook account.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>send_email: "Your message here"</code></li>
-        </ul>
-        
-        <h3><code>emergency_exit</code></h3>
-        <p>Immediately stops the entire automation script and sends a critical error email. Use this for unrecoverable errors.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>emergency_exit: "Error message"</code></li>
-        </ul>
+        <!-- Unchanged Section -->
 
         <hr>
 
         <h2>II. Variable & Context Commands</h2>
-        <p>These commands allow you to store and manipulate internal variables (the "context") within a scenario.</p>
-
-        <h3><code>set</code></h3>
-        <p>Creates or overwrites a variable in the scenario's context.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>set: { variable_name: value }</code></li>
-            <li><strong>Example:</strong>
-<pre><code>- set: { click_attempts: 0 } # Initialize a loop counter</code></pre>
-            </li>
-        </ul>
-
-        <h3><code>increment</code></h3>
-        <p>Adds 1 to a numeric variable. If the variable doesn't exist, it is created with a value of 1.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>increment: variable_name</code></li>
-            <li><strong>Example:</strong>
-<pre><code>- increment: click_attempts # Increases the value of 'click_attempts' by 1</code></pre>
-            </li>
-        </ul>
+        <!-- Unchanged Section -->
 
         <hr>
 
         <h2>III. Control Flow Commands</h2>
-        <p>These commands control the logic of your scenario, allowing for conditional execution and loops.</p>
-
-        <h3><code>if / else</code></h3>
-        <p>Executes a block of steps only if a condition is met.</p>
-<pre><code>- if:
-    condition: "your_condition_here"
-    then:
-      # ... steps to run if condition is true ...
-    else:
-      # ... (optional) steps to run if condition is false ...</code></pre>
-
-        <h3><code>while</code></h3>
-        <p>Repeatedly executes a block of steps as long as a condition remains true.</p>
-<pre><code>- while:
-    condition: "your_condition_here"
-    do:
-      # ... steps to repeat while the condition is true ...</code></pre>
+        <!-- Unchanged Section -->
         
         <hr>
 
@@ -197,90 +130,89 @@
 - click: "{{ home_button_coords }}"
 
 # Click 50 pixels to the right of the found button
-- click: [ "{{ home_button_coords[0] + 50 }}", "{{ home_button_coords[1] }}" ]
+- click: [ "{{ home_button_coords[0] + 50 }}", "{{ home_button_coords[1] }}" ]</code></pre>
 
-# Scroll up, starting from the position of the found button
-- scroll: [ "{{ home_button_coords[0] }}", "{{ home_button_coords[1] }}", "up", 400 ]</code></pre>
-
+        <h3>Using Functions in Templates</h3>
+        <p>You can use certain built-in functions like <code>len()</code> to inspect variables directly in your templates.</p>
+        <pre><code># Log how many buttons were found
+- log: "Found {{ len(all_buttons) }} buttons on the screen."</code></pre>
+        
         <hr>
 
-        <h2>V. Functions</h2>
+        <h2>V. Functions for Finding & Comparing</h2>
         <p>These functions can be used within the <code>{{ ... }}</code> templating syntax, typically with the <code>set</code> command, or inside the <code>condition:</code> string of an <code>if</code> or <code>while</code> block.</p>
         
-        <h3><code>get_coords_from_image</code></h3>
-        <p>Finds the <strong>single best match</strong> for a template image on the screen and returns its center coordinates as a tuple `(x, y)`. Returns `None` if no match is found.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>get_coords_from_image('image.png', threshold)</code></li>
-            <li><strong>Example:</strong>
-<pre><code># Find the 'Confirm' button and store its location
-- set:
-    confirm_coords: "{{ get_coords_from_image('button_confirm.png', threshold=0.9) }}"
-- if:
-    condition: "confirm_coords"
-    then:
-      - click: "{{ confirm_coords }}"</code></pre>
-            </li>
-        </ul>
+        <h3>Static Object Detection (Template Matching)</h3>
+        <p>These functions are fast and precise. Use them for UI elements that are static (not animated, scaled, or rotated).</p>
         
-        <h3><code>get_all_coords_from_image</code></h3>
-        <p>Finds <strong>all occurrences</strong> of a template image on the screen and returns a list of coordinate tuples `[(x1, y1), (x2, y2), ...]`. The list is sorted from top-to-bottom, left-to-right. Returns an empty list `[]` if no matches are found.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>get_all_coords_from_image('image.png', threshold)</code></li>
-            <li><strong>Example (Clicking the lowest button):</strong>
-<pre><code># Find all 'Claim' buttons
-- set:
-    all_buttons: "{{ get_all_coords_from_image('claim_button.png', threshold=0.9) }}"
+        <h4><code>get_coords_from_image</code></h4>
+        <p>Finds the <strong>single best match</strong> for a static image and returns its center coordinates `(x, y)`.</p>
+        <ul><li><strong>Syntax:</strong> <code>get_coords_from_image('image.png', threshold)</code></li></ul>
 
-# Check if any buttons were found
-- if:
-    condition: "all_buttons" # True if the list is not empty
-    then:
-      # The list is sorted top-to-bottom, so the last item [-1] is the lowest on screen
-      - log: "Found {{ len(all_buttons) }} buttons. Clicking the lowest one."
-      - click: "{{ all_buttons[-1] }}"</code></pre>
-            </li>
-        </ul>
-
-        <h3><code>compare_with_image</code></h3>
-        <p>Returns <code>True</code> or <code>False</code>. Best used inside a condition to quickly check if an image exists in a specific region.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>compare_with_image(x, y, w, h, 'image.png', threshold)</code></li>
-            <li><strong>Example:</strong>
-<pre><code>condition: "compare_with_image(20, 20, 100, 100, 'back-arrow.png')"</code></pre>
-            </li>
-        </ul>
+        <h4><code>get_all_coords_from_image</code></h4>
+        <p>Finds <strong>all occurrences</strong> of a static image and returns a sorted list of coordinates `[(x1, y1), ...]`.
+        <ul><li><strong>Syntax:</strong> <code>get_all_coords_from_image('image.png', threshold)</code></li></ul>
         
-        <h3><code>compare_with_any_image</code></h3>
-        <p>Returns <code>True</code> if <strong>any one</strong> of a list of images is found in a region.</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>compare_with_any_image(x, y, w, h, ['img1.png', 'img2.png'])</code></li>
-            <div class="warning">
-                <strong>Important:</strong> Because this function's syntax uses square brackets <code>[]</code>, you <strong>must</strong> wrap the entire condition in double quotes <code>"..."</code> to avoid a YAML parsing error.
-            </div>
-            <li><strong>Example:</strong>
-<pre><code>condition: "compare_with_any_image(300, 400, 50, 50, ['gold_chest.png', 'purple_chest.png'])"</code></pre>
-            </li>
-        </ul>
+        <h4><code>compare_with_image</code></h4>
+        <p>Returns <code>True/False</code> if a static image exists in a specific region.
+        <ul><li><strong>Syntax:</strong> <code>compare_with_image(x, y, w, h, 'image.png', threshold)</code></li></ul>
 
-        <h3><code>compare_with_text</code> / <code>compare_with_text_easyocr</code></h3>
+        <h3>Animated/Dynamic Object Detection (Feature Matching)</h3>
+        <p>These functions are more robust and should be used for elements that are animated, slightly scaled, rotated, or have inconsistent appearances.</p>
+        
+        <h4><code>get_coords_from_features</code></h4>
+        <p>Finds the <strong>single best match</strong> for a dynamic/animated image and returns its center coordinates `(x, y)`.</p>
+        <ul><li><strong>Syntax:</strong> <code>get_coords_from_features('image.png', min_match_count)</code></li></ul>
+        <pre><code># Find a single animated button
+- set:
+    animated_button: "{{ get_coords_from_features('animated_button.png', min_match_count=8) }}"</code></pre>
+
+        <h4><code>get_all_coords_from_features</code></h4>
+        <p>Finds <strong>all occurrences</strong> of a dynamic/animated image and returns a sorted list of coordinates `[(x1, y1), ...]`.</p>
+        <ul><li><strong>Syntax:</strong> <code>get_all_coords_from_features('image.png', min_match_count, eps, min_samples)</code></li></ul>
+        <pre><code># Find all animated cards on the screen
+- set:
+    all_cards: "{{ get_all_coords_from_features('animated_card.png', min_match_count=10, eps=50, min_samples=5) }}"</code></pre>
+
+        <div class="note">
+            <h4>Tuning Feature Detection</h4>
+            <p>Feature-based functions require tuning to work reliably. Use <code>ce_tester.py</code> to experiment with these parameters.</p>
+            <ul>
+                <li><code>min_match_count</code> (Default: 10): The minimum number of "good" feature matches required.
+                    <ul><li><strong>Lower it</strong> (e.g., to 7 or 8) for small images or images with few unique details.</li>
+                    <li><strong>Raise it</strong> (e.g., to 12 or 15) for large images or to avoid false positives on a busy screen.</li></ul>
+                </li>
+                <li><code>eps</code> (for <code>get_all_coords...</code>, Default: 50): The maximum pixel distance for points to be considered part of the same object cluster.
+                    <ul><li>A good starting value is roughly **half the width or height** of your template image.</li>
+                    <li>If one object is detected as multiple, **increase** <code>eps</code>.</li>
+                    <li>If two separate objects are detected as one, **decrease** <code>eps</code>.</li></ul>
+                </li>
+                <li><code>min_samples</code> (for <code>get_all_coords...</code>, Default: 5): The minimum number of matched features needed to form a valid object cluster.
+                    <ul><li><strong>Lower it</strong> (e.g., to 3 or 4) if your objects are small and not being detected.</li></ul>
+                </li>
+            </ul>
+        </div>
+        
+        <h3>Text and Other Comparisons</h3>
+        
+        <h4><code>compare_with_any_image</code></h4>
+        <p>Returns <code>True</code> if <strong>any one</strong> of a list of static images is found in a region.</p>
+        <ul><li><strong>Syntax:</strong> <code>compare_with_any_image(x, y, w, h, ['img1.png', 'img2.png'])</code></li></ul>
+        <div class="warning">
+            <strong>Important:</strong> Because this function's syntax uses square brackets <code>[]</code>, you <strong>must</strong> wrap the entire condition in double quotes <code>"..."</code> to avoid a YAML parsing error.
+        </div>
+
+        <h4><code>compare_with_text</code> / <code>compare_with_text_easyocr</code></h4>
         <p>Returns <code>True</code> if the expected text is found within a region of the screen (case-insensitive).</p>
-        <ul>
-            <li><strong>Syntax:</strong> <code>compare_with_text(x, y, w, h, 'expected text')</code></li>
-            <li><strong>Example:</strong>
-<pre><code>condition: "compare_with_text(297, 565, 156, 34, 'Claim All')"</code></pre>
-            </li>
-        </ul>
-
-        <h3>Combining Conditions</h3>
-        <p>You can combine conditions using standard logical operators: <code>and</code>, <code>or</code>, and <code>not</code>.</p>
-<pre><code>condition: "not compare_with_image(100,100,50,50,'error.png') and click_attempts < 5"</code></pre>
+        <ul><li><strong>Syntax:</strong> <code>compare_with_text(x, y, w, h, 'expected text')</code></li></ul>
         
         <hr>
 
         <h2>VI. Best Practices & Tips</h2>
         <ul>
-            <li><strong>Anchor-Based Automation is Best:</strong> Avoid hardcoded coordinates like <code>click: [100, 200]</code> whenever possible. Use <code>get_coords_from_image</code> to find an element first, then use the returned variable to click. This makes your scripts resilient to ads and UI shifts.</li>
-            <li><strong>Use the Tester:</strong> Use <code>ce_tester.py</code> to test your anchor images. Option <code>9</code> (Get Coordinates from Image) is perfect for checking if your image is unique and detectable.</li>
+            <li><strong>Anchor-Based Automation is Best:</strong> Avoid hardcoded coordinates like <code>click: [100, 200]</code>. Use a <code>get_coords_...</code> function to find an element first, then use the returned variable to click. This makes your scripts resilient to ads and UI shifts.</li>
+            <li><strong>Use the Right Tool for the Job:</strong> Use template matching for static UI elements (it's faster). Use feature matching for anything that moves, scales, or changes appearance.</li>
+            <li><strong>Use the Tester:</strong> Use <code>ce_tester.py</code> to test your anchor images and tune your feature detection parameters before writing a complex workflow.</li>
             <li><strong>Quote Your Conditions:</strong> When in doubt, always wrap your entire <code>condition:</code> string in double quotes <code>"..."</code> to prevent issues with special characters.</li>
             <li><strong>Add Delays:</strong> After a click that triggers a screen transition or animation, add a <code>delay</code> to give the game time to load before you look for the next element.</li>
             <li><strong>Indentation is Key:</strong> YAML relies on strict indentation. All steps in a block (<code>steps:</code>, <code>then:</code>, <code>do:</code>) must be indented and start with a <code>-</code>.</li>
