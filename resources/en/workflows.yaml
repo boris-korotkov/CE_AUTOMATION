@@ -993,7 +993,8 @@ scenarios:
                               # 5. This part runs AFTER the while loop is finished
                               - log: "All 5 arena attacks completed. Exiting."
                               - click: [60, 50] # exit Summit arena screen
-                              - delay: 2
+                              - log: "make a 3 sec pause"
+                              - delay: 3
                               - click: [60, 50] # exit Summit arena screen
                             else:
                               - log: "Match button is not available, returning to the guild screen."
@@ -1005,7 +1006,8 @@ scenarios:
                         - log: "Summit Arena icon is not available, continuing without it"
                         - send_email: "Summit Arena Challenge farming failed for the {{ instance_name }} instance. Summit Arena icon is not available" # send an email if Summit Arena icon is not available
                         #- click: [60, 50] # exit cross server arena screen
-                  - log: "Summit Arena farming completed"
+                  - log: "Summit Arena farming completed. Exit to main game screen"
+                  - click: [60, 50] # exit cross server arena screen
                 else:
                   - log: "arena icon is not available, continuing without it"
                   - send_email: "Arena icon is not available for the {{ instance_name }} instance and farming is skipped." # send an email if Game icon is not available
@@ -1030,27 +1032,8 @@ scenarios:
   - name: Bonus_rewards
     description: Bonus rewards collection
     steps:
-      - click: [70, 259] # Bonus icon
-      - click: [90, 296] # Go to daily tasks
 
   - name: Supply_Depot
     description: Supply Depot farming
     steps:
-      - if:
-          condition: "compare_with_text_easyocr(142,301,111,26,'Supply')"
-          then:
-            - click: [194,263] # Enter to Supply Depot
-            - if:
-                condition: "compare_with_text_easyocr(882,637,215,37,'Free')" # If Free refresh button is available
-                then:
-                  - click: [968,656] # Click Free Refresh button
-                  - if:
-                      condition: "compare_with_any_image(427,207,105,105, ['purple.png', 'purple_chest.png'], 0.9)"  # Check item. Row 1 from 1. Column 1 from left 
-                      then:
-                        - click: [641,584] # Buy if resource is needed
-                        - delay: 2
-                        
-                  
-            
-            - click: [60, 50] # return to the main  game sceen
-
+      
