@@ -125,27 +125,22 @@ def main():
                     check_for_pause_or_stop()
                     
                     is_loaded = False
-                    # --- THIS IS THE DUAL VERIFICATION LOGIC BLOCK ---
-                    # Check if at least the region is defined
-                    if check_region_str and (check_image or check_text):
-                        try:
-                            check_region = tuple(map(int, check_region_str.split(',')))
-                            
-                            # Try image check first (more reliable)
-                            if check_image and ce_actions.compare_with_image(adb_id, language, name, *check_region, check_image, check_threshold): #<-- FIX: Added 'name' for instance_name
-                                logging.info("Game load verification successful (Image Match).")
-                                is_loaded = True
-                            # If image fails, try text check
-                            elif check_text and ce_actions.compare_with_text(adb_id, language, name, *check_region, check_text): #<-- FIX: Added 'name' for instance_name
-                                logging.info("Game load verification successful (Text Match).")
-                                is_loaded = True
-                            else:
-                                logging.warning("Game load verification FAILED (Neither image nor text matched).")
-                        except (ValueError, TypeError) as e:
-                            logging.error(f"Invalid format for 'game_load_check_region' in [General] section: {e}. Skipping check.")
-                            is_loaded = True # Skip check if format is wrong
+                    # --- THIS IS THE NEW, IMAGE-ONLY VERIFICATION LOGIC ---
+                    
+                    # Check if the verification image is defined in the config
+                    if check_image:
+                        logging.info(f"Attempting game load verification using image: '{check_image}'...")
+                        
+                        # get_coords_from_image returns coordinates on success, None on failure.
+                        # The 'if' check simply sees if the result is not None.
+                        if ce_actions.get_coords_from_image(adb_id, language, check_image, check_threshold):
+                            logging.info("Game load verification successful (Image Found).")
+                            is_loaded = True
+                        else:
+                            logging.warning(f"Image-based verification FAILED for '{check_image}'.")
                     else:
-                        logging.info("Global game load verification parameters are incomplete. Skipping check.")
+                        # If game_load_check_image is not set in instances.ini, we skip the check
+                        logging.info("Global game load verification image is not configured. Skipping check.")
                         is_loaded = True
                     
                     if is_loaded:
@@ -154,8 +149,9 @@ def main():
                         final_adb_id = adb_id
                         break
                     else:
+                        # This code block now only runs if check_image was set AND the image was not found
                         ce_actions.send_email(subject=f"CE Automation Alert: Instance {name} Failed Verification", body=f"Instance '{name}' failed the game load check on attempt {attempt}.\nThe script will try to relaunch it.")
-                        terminate_instance(process, adb_id) # <-- FIX: Pass the acquired adb_id
+                        terminate_instance(process, adb_id)
                         logging.info("Waiting 15 seconds before next attempt...")
                         time.sleep(15)
                 except Exception as e:
