@@ -1236,6 +1236,11 @@ scenarios:
                                           - { name: "Point 2", click: [ "{{ expedition_coin_coords[0]+290}}", "{{ expedition_coin_coords[1]+430 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+410 }}" ] }
                                           - { name: "Point 3", click: [ "{{ expedition_coin_coords[0]+410}}", "{{ expedition_coin_coords[1]+165 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+215 }}" ] }
                                           - { name: "Point 4", click: [ "{{ expedition_coin_coords[0]+415}}", "{{ expedition_coin_coords[1]+490 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+415 }}" ] }
+                                          - { name: "Point 5", click: [ "{{ expedition_coin_coords[0]+480}}", "{{ expedition_coin_coords[1]+190 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+175 }}" ] }
+                                          - { name: "Point 6", click: [ "{{ expedition_coin_coords[0]+570}}", "{{ expedition_coin_coords[1]+320 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+255 }}" ] }
+                                          - { name: "Point 7", click: [ "{{ expedition_coin_coords[0]+360}}", "{{ expedition_coin_coords[1]+105 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+90 }}" ] }
+                                          - { name: "Point 8", click: [ "{{ expedition_coin_coords[0]+460}}", "{{ expedition_coin_coords[1]+175 }}" ], chest: [ "{{ expedition_coin_coords[0]+435}}", "{{ expedition_coin_coords[1]+140 }}" ] }
+                                          - { name: "Point 9", click: [ "{{ expedition_coin_coords[0]+630}}", "{{ expedition_coin_coords[1]+330 }}" ], chest: [ "{{ expedition_coin_coords[0]+735}}", "{{ expedition_coin_coords[1]+380 }}" ] }
                                     - set:
                                         expedition_counter: 0
                                     - while:
