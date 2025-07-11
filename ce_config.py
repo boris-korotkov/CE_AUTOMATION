@@ -24,9 +24,9 @@ def load_general_config():
         'emulator_boot_time': config.getint('General', 'emulator_boot_time', fallback=45),
         'log_level': config.get('General', 'log_level', fallback='INFO').strip().upper(),
         'save_debug_images': config.getboolean('General', 'save_debug_images', fallback=False),
-        'game_load_check_region': config.get('General', 'game_load_check_region', fallback=None),
+        #'game_load_check_region': config.get('General', 'game_load_check_region', fallback=None),
         'game_load_check_image': config.get('General', 'game_load_check_image', fallback=None),
-        'game_load_check_text': config.get('General', 'game_load_check_text', fallback=None),
+        #'game_load_check_text': config.get('General', 'game_load_check_text', fallback=None),
         'game_load_check_threshold': config.getfloat('General', 'game_load_check_threshold', fallback=0.85)
     }
     return settings

@@ -1026,7 +1026,6 @@ scenarios:
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
                   - send_email: "Arena_farming scenario is skipped for the {{ instance_name }} instance and game was not restarted."
-                  
       
   - name: Expedition1_farming
     description: Expedition1 farming
@@ -1036,161 +1035,6 @@ scenarios:
       - if:
           condition: "guild_coords"  # This is true if coordinates were found, false
           then:
-            - scroll: [150,400, left,400] # Scroll left to make sure Expedition icon is visible
-            - scroll: [150,400, left,400] # Scroll left to make sure Expedition icon is visible
-            - scroll: [150,400, left,400] # Scroll left to make sure Expedition icon is visible
-            - scroll: [150,400, left,400] # Scroll left to make sure Expedition icon is visible
-            - set:
-                expedition_icon_coords: "{{ get_coords_from_image('expedition.png') }}"
-            - if:
-                condition: "expedition_icon_coords"  # This is true if coordinates were found
-                then:
-                  - log: "Expedition icon coordinates found"
-                  - click: [ "{{ expedition_icon_coords[0]}}", "{{ expedition_icon_coords[1]-100 }}" ] # Click on the Expedition icon
-                  - delay: 2
-                  - log : "Checking if Expedition 1 farming is available"
-                  - set:
-                      expedition1_icon_coords: "{{ get_coords_from_image('remote_road.png') }}"
-                  - if:
-                      condition: "expedition1_icon_coords"  # If Expedition1 farming is available
-                      then:
-                        - log: "Expedition1 icon coordinates found"
-                        - click: [ "{{ expedition1_icon_coords[0]}}", "{{ expedition1_icon_coords[1]+200 }}" ] # Click on the Expedition1 icon
-                        - delay: 2
-                        - set:
-                            free_refresh_button_coords: "{{ get_coords_from_image('free_refresh.png') }}"
-                        - if:
-                            condition: "free_refresh_button_coords"  # If free_refresh button is available
-                            then:
-                              - log: "free_refresh button coordinates found"
-                              - click: "{{ free_refresh_button_coords }}" # Click on the free_refresh button
-                              - delay: 2
-                              - set:
-                                  confirm_button_coords: "{{ get_coords_from_image('confirm_purple.png') }}"
-                              - if:
-                                  condition: "confirm_button_coords"  # If Confirm button is available
-                                  then:
-                                    - log: "Confirm button coordinates found"
-                                    - click: "{{ confirm_button_coords }}" # Click on the Confirm button
-                                    - delay: 2
-                                    - set:
-                                        expedition_coin_coords: "{{ get_coords_from_image('expedition_coin.png') }}" # expedition coin coordinates on the top
-                                    - if:
-                                        condition: "expedition_coin_coords"  # If expedition_coin_coords is visible
-                                        then:
-                                          - log: "Expedition coin coordinates found"
-                                          - click: [ "{{ expedition_coin_coords[0]}}", "{{ expedition_coin_coords[1]+200 }}" ] # Click on the 1st expedition point
-                                          - delay: 1
-                                          - set:
-                                              start_button_coords: "{{ get_coords_from_image('start_red.png') }}"
-                                          - if:
-                                              condition: "start_button_coords"  # If Start button is available
-                                              then:
-                                                - log: "Start button coordinates found"
-                                                - click: "{{ start_button_coords }}" # Click on the Start button
-                                                - delay: 2
-                                                - set:
-                                                    confirm_button_coords: "{{ get_coords_from_image('confirm.png') }}"
-                                                - if:
-                                                    condition: "confirm_button_coords"  # If Confirm button is available
-                                                    then:
-                                                      - log: "Confirm button coordinates found"
-                                                      - click: "{{ confirm_button_coords }}" # Click on the Confirm button
-                                                      - delay: 2
-                                                      - click: ["{{ expedition_coin_coords[0]+110}}", "{{ expedition_coin_coords[1]+200 }}" ] # collect a chest from the 1st expedition point
-                                                      - set:
-                                                          claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
-                                                      - if:
-                                                          condition: "claim_button_coords"  # If Claim button is available
-                                                          then:
-                                                            - log: "Claim button coordinates found"
-                                                            - click: "{{ claim_button_coords }}" # Click on the Claim button
-                                                            - delay: 2
-                                                            - click: ["{{ expedition_coin_coords[0]+290}}", "{{ expedition_coin_coords[1]+430 }}" ] # click on the 2nd expedition point
-                                                            - delay: 2
-                                                            - set:
-                                                                start_button_coords: "{{ get_coords_from_image('start_red.png') }}"
-                                                            - if:
-                                                                condition: "start_button_coords"  # If Start button is available
-                                                                then:
-                                                                  - log: "Start button coordinates found"
-                                                                  - click: "{{ start_button_coords }}" # Click on the Start button
-                                                                  - delay: 2
-                                                                  - set:
-                                                                      confirm_button_coords: "{{ get_coords_from_image('confirm.png') }}"
-                                                                  - if:
-                                                                      condition: "confirm_button_coords"  # If Confirm button is available
-                                                                      then:
-                                                                        - log: "Confirm button coordinates found"
-                                                                        - click: "{{ confirm_button_coords }}" # Click on the Confirm button
-                                                                        - delay: 2
-                                                                        - click: ["{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+410 }}" ] # collect a chest from the 2nd expedition point
-                                                                        - set:
-                                                                            claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
-                                                                        - if:
-                                                                            condition: "claim_button_coords"  # If Claim button is available
-                                                                            then:
-                                                                              - log: "Claim button coordinates found"
-                                                                              - click: "{{ claim_button_coords }}" # Click on the Claim button
-                                                                              - delay: 2
-                                                                              - click: ["{{ expedition_coin_coords[0]+230}}", "{{ expedition_coin_coords[1]+165 }}" ] # click on the 3rd expedition point
-                                                                              - delay: 2
-                                                                              - set:
-                                                                                  start_button_coords: "{{ get_coords_from_image('start_red.png') }}"
-                                                                              - if:
-                                                                                  condition: "start_button_coords"  # If Start button is available
-                                                                                  then:
-                                                                                    - log: "Start button coordinates found"
-                                                                                    - click: "{{ start_button_coords }}" # Click on the Start button
-                                                                                    - delay: 2
-                                                                                    - set:
-                                                                                        confirm_button_coords: "{{ get_coords_from_image('confirm.png') }}"
-                                                                                    - if:
-                                                                                        condition: "confirm_button_coords"  # If Confirm button is available
-                                                                                        then:
-                                                                                          - log: "Confirm button coordinates found"
-                                                                                          - click: "{{ confirm_button_coords }}" # Click on the Confirm button
-                                                                                          - delay: 2
-                                                                                          - click: ["{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+210 }}" ] # collect a chest from the 3rd expedition point
-                                                                                          - set:
-                                                                                              claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
-                                                                                          - if:
-                                                                                              condition: "claim_button_coords"  # If Claim button is available
-                                                                                              then:
-                                                                                                - log: "Claim button coordinates found"
-                                                                                                - click: "{{ claim_button_coords }}" # Click on the Claim button
-                                                                                                - delay: 2
-                                                                                                - click: ["{{ expedition_coin_coords[0]+415}}", "{{ expedition_coin_coords[1]+490 }}" ] # click on the 4th expedition point
-                                                                                                - delay: 2
-                                                            
-                                                            
-                                                            
-                                                            
-                
-          else:
-            - log: "Guild icon is not available. I'm trying to restart the game."
-            - set:
-                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
-            - if:
-                condition: "game_icon_coords"  # This is true if coordinates were found, false
-                then:
-                  - log: "Game icon coordinates found, clicking on it to restart the game."
-                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
-                  - delay: 150 # Wait for the game to restart
-                  - log: "Expedition1_farming scenario is skipped due to game unavailability and restarted."
-                  - send_email: "[ERROR] Expedition1_farming scenario is skipped for the {{ instance_name }} instance and game was restarted." 
-                else:
-                  - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "[ERROR] Expedition1_farming scenario is skipped for the {{ instance_name }} instance and game was not restarted." 
-          
-  - name: Expedition1_farming_new
-    description: Expedition1 farming - optimized
-    steps:
-      - set:
-          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
-      - if:
-          condition: "guild_coords"  # This is true if coordinates were found, false
-          then:
             - scroll: [150,400, right,400] # Scroll left to make sure Expedition icon is visible
             - scroll: [150,400, right,400] # Scroll left to make sure Expedition icon is visible
             - scroll: [150,400, right,400] # Scroll left to make sure Expedition icon is visible
@@ -1202,7 +1046,7 @@ scenarios:
                 then:
                   - log: "Expedition icon coordinates found"
                   - click: [ "{{ expedition_icon_coords[0]}}", "{{ expedition_icon_coords[1]-100 }}" ] # Click on the Expedition icon
-                  - delay: 2
+                  - delay: 3
                   - log : "Checking if Expedition 1 farming is available"
                   - set:
                       expedition1_icon_coords: "{{ get_coords_from_image('remote_road.png') }}"
@@ -1211,7 +1055,7 @@ scenarios:
                       then:
                         - log: "Expedition1 icon coordinates found"
                         - click: [ "{{ expedition1_icon_coords[0]}}", "{{ expedition1_icon_coords[1]+200 }}" ] # Click on the Expedition1 icon
-                        - delay: 2
+                        - delay: 3
                         - set:
                             free_refresh_button_coords: "{{ get_coords_from_image('free_refresh.png') }}"
                         - if:
@@ -1219,7 +1063,7 @@ scenarios:
                             then:
                               - log: "free_refresh button coordinates found"
                               - click: "{{ free_refresh_button_coords }}" # Click on the free_refresh button
-                              - delay: 2
+                              - delay: 3
                               - set:
                                   confirm_button_coords: "{{ get_coords_from_image('confirm_purple.png') }}"
                               - if:
@@ -1252,31 +1096,31 @@ scenarios:
                                           - log: "--- Starting Expedition {{ current_point.name }} ---"
 
                                           - click: "{{ current_point.click }}"
-                                          - delay: 1
+                                          - delay: 3
                                           - set:
                                               start_button_coords: "{{ get_coords_from_image('start_red.png') }}"
                                           - if:
                                               condition: "start_button_coords"
                                               then:
                                                 - click: "{{ start_button_coords }}"
-                                                - delay: 2
+                                                - delay: 3
                                                 - set:
                                                     confirm_button_coords: "{{ get_coords_from_image('confirm.png') }}"
                                                 - if:
                                                     condition: "confirm_button_coords"
                                                     then:
                                                       - click: "{{ confirm_button_coords }}"
-                                                      - delay: 2
+                                                      - delay: 3
                                                       # Use the 'chest' coordinates from our data
                                                       - click: "{{ current_point.chest }}"
-                                                      - delay: 1
+                                                      - delay: 3
                                                       - set:
                                                           claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
                                                       - if:
                                                           condition: "claim_button_coords"
                                                           then:
                                                             - click: "{{ claim_button_coords }}"
-                                                            - delay: 2
+                                                            - delay: 3
                                                           else:
                                                             - log: "WARNING: Claim button not found for {{ current_point.name }}."
                                                     else:
@@ -1286,8 +1130,15 @@ scenarios:
 
                                           # 5. INCREMENT THE COUNTER TO MOVE TO THE NEXT POINT
                                           - increment: expedition_counter
-                                                            
-                                                            
+                                  else:
+                                    - log: "Confirm button is not available, continuing without it"
+                            else:
+                              - log: "Expedition1 free refresh button is not available, continuing without it"
+                      else: 
+                        - log: "Expedition1 icon is not available, continuing without it"
+                  - click: [60, 50] # exit Expedition screen
+                else:
+                  - log: "Expedition1 icon is not available, continuing without it"
                                                             
                                                             
                 
@@ -1306,3 +1157,61 @@ scenarios:
                 else:
                   - log: "Game icon coordinates not found, cannot restart the game."
                   - send_email: "[ERROR] Expedition1_farming scenario is skipped for the {{ instance_name }} instance and game was not restarted." 
+
+  - name: Training_Center
+    description: Training Center
+    steps:
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
+      - if:
+          condition: "guild_coords"  # This is true if coordinates were found, false
+          then:
+            - log: "Guild coordinates found"
+            - set:
+                training_center_icon_coords: "{{ get_coords_from_image('training_center.png') }}"
+            - if:
+                condition: "training_center_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Training Center icon coordinates found"
+                  - click: [ "{{ training_center_icon_coords[0]+40 }}", "{{ training_center_icon_coords[1]-115 }}" ] # Click on the Training Center icon
+                  - delay: 5
+                  - set:
+                      arrow_right_coords: "{{ get_coords_from_image('arrow_right.png') }}"
+                  - if:
+                      condition: "arrow_right_coords"  # If Train button is available
+                      then:
+                        - log: "arrow_right_coords coordinates found"
+                        - click: "{{ train_button_coords }}" # Click on the right arrow
+                        - click: "{{ train_button_coords }}" # Click on the right arrow
+                        ### stoppped here
+                        - click: [ "{{ training_center_icon_coords[0]+40 }}", "{{ training_center_icon_coords[1]-115 }}" ] # Click on the Train button
+                        - set:
+                            confirm_button_coords: "{{ get_coords_from_image('confirm_purple.png') }}"
+                        - if:
+                            condition: "confirm_button_coords"  # If Confirm button is available
+                            then:
+                              - log: "Confirm button coordinates found"
+                              - click: "{{ confirm_button_coords }}" # Click on the Confirm button
+                              - delay: 2
+                              - click: [60, 50] # exit Training Center screen
+                            else:
+                              - log: "Confirm button is not available in Training Center farming"
+                      else:
+                        - log: "Train button is not available in Training Center farming"
+                else:
+                  - log: "Training Center icon is not available, continuing without it"
+          else:
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Training_Center scenario is skipped due to game unavailability and restarted."
+                  - send_email: "[ERROR] Training_Center scenario is skipped for the {{ instance_name }} instance and game was restarted."
+                else: 
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "[ERROR] Training_Center scenario is skipped for the {{ instance_name }} instance and game was not restarted."
