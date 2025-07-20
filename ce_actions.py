@@ -63,7 +63,7 @@ def scroll(adb_id, x, y, direction, distance):
     logging.debug("Scroll sent. Pausing for 1 second.")
     time.sleep(1)
 
-def compare_with_image(adb_id, language, instance_name, x, y, w, h, image_name, threshold=0.85):
+def compare_with_image(adb_id, language, instance_name, workflow_name, x, y, w, h, image_name, threshold=0.85):
     logging.debug(f"Comparing screen region ({x},{y},{w},{h}) with image '{image_name}' at threshold {threshold}")
     screenshot_path = take_screenshot(adb_id)
     if not screenshot_path: return False
@@ -79,14 +79,14 @@ def compare_with_image(adb_id, language, instance_name, x, y, w, h, image_name, 
         logging.error(f"OpenCV Error Prevention: Search region ({region_w}x{region_h}) is smaller than template '{image_name}' ({template_w}x{template_h}).")
         return False
     if SAVE_DEBUG_IMAGES:
-        filename = f"{instance_name}_compare_image_({x},{y},{w},{h})_{int(time.time())}.png"
+        filename = f"{instance_name}_{workflow_name}_compare_image_({x},{y},{w},{h}).png"
         cv2.imwrite(os.path.join(TEMP_DIR, filename), region)
     res = cv2.matchTemplate(region, template_img, cv2.TM_CCOEFF_NORMED)
     _, max_val, _, _ = cv2.minMaxLoc(res)
     logging.debug(f"Image match score: {max_val:.2f} (Threshold: {threshold})")
     return max_val >= threshold
 
-def compare_with_text(adb_id, language, instance_name, x, y, w, h, expected_text):
+def compare_with_text(adb_id, language, instance_name, workflow_name,  x, y, w, h, expected_text):
     logging.debug(f"Comparing screen region ({x},{y},{w},{h}) with text '{expected_text}' using Tesseract.")
     screenshot_path = take_screenshot(adb_id)
     if not screenshot_path: return False
@@ -94,7 +94,7 @@ def compare_with_text(adb_id, language, instance_name, x, y, w, h, expected_text
     if screen_img is None: logging.error("Could not read screenshot."); return False
     region = screen_img[y:y+h, x:x+w]
     if SAVE_DEBUG_IMAGES:
-        filename_input = f"{instance_name}_compare_tesseract_input_({x},{y},{w},{h})_{int(time.time())}.png"
+        filename_input = f"{instance_name}_{workflow_name}_tesseract_input_({x},{y},{w},{h}).png"
         cv2.imwrite(os.path.join(TEMP_DIR, filename_input), region)
     scale_factor = 3
     resized = cv2.resize(region, (int(region.shape[1] * scale_factor), int(region.shape[0] * scale_factor)), interpolation=cv2.INTER_LANCZOS4)
@@ -105,7 +105,7 @@ def compare_with_text(adb_id, language, instance_name, x, y, w, h, expected_text
     kernel = np.ones((2,2), np.uint8)
     processed_image = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
     if SAVE_DEBUG_IMAGES:
-        filename_processed = f"{instance_name}_compare_tesseract_processed_({x},{y},{w},{h})_{int(time.time())}.png"
+        filename_processed = f"{instance_name}_{workflow_name}_tesseract_processed_({x},{y},{w},{h}).png"
         cv2.imwrite(os.path.join(TEMP_DIR, filename_processed), processed_image)
     try:
         custom_config = r'--oem 1 --psm 7'
@@ -115,7 +115,7 @@ def compare_with_text(adb_id, language, instance_name, x, y, w, h, expected_text
     except Exception as e:
         logging.error(f"An error occurred during Tesseract OCR: {e}"); return False
 
-def compare_with_any_image(adb_id, language, instance_name, x, y, w, h, image_names, min_match_count=10):
+def compare_with_any_image(adb_id, language, instance_name, workflow_name, x, y, w, h, image_names, min_match_count=10):
     logging.debug(f"Feature-matching screen region ({x},{y},{w},{h}) with ANY of images: {image_names}")
     orb = cv2.ORB_create()
     screenshot_path = take_screenshot(adb_id)
@@ -124,7 +124,7 @@ def compare_with_any_image(adb_id, language, instance_name, x, y, w, h, image_na
     if screen_img is None: logging.error("Could not read screenshot."); return False
     region_of_interest = screen_img[y:y+h, x:x+w]
     if SAVE_DEBUG_IMAGES:
-        filename = f"{instance_name}_compare_any_image_({x},{y},{w},{h})_{int(time.time())}.png"
+        filename = f"{instance_name}_{workflow_name}_compare_any_image_({x},{y},{w},{h}).png"
         cv2.imwrite(os.path.join(TEMP_DIR, filename), region_of_interest)
     keypoints_roi, descriptors_roi = orb.detectAndCompute(region_of_interest, None)
     if descriptors_roi is None: logging.debug("No features found in screen region to compare against."); return False
@@ -144,7 +144,7 @@ def compare_with_any_image(adb_id, language, instance_name, x, y, w, h, image_na
     logging.info("No match found for any provided images using feature matching.")
     return False
 
-def compare_with_features(adb_id, language, instance_name, x, y, w, h, image_name, min_match_count=10):
+def compare_with_features(adb_id, language, instance_name, workflow_name, x, y, w, h, image_name, min_match_count=10):
     logging.debug(f"Comparing screen region ({x},{y},{w},{h}) with image '{image_name}' using feature matching.")
     orb = cv2.ORB_create()
     template_path = os.path.join(RESOURCES_DIR, language, image_name)
@@ -159,7 +159,7 @@ def compare_with_features(adb_id, language, instance_name, x, y, w, h, image_nam
     if screen_img is None: logging.error("Could not read screenshot."); return False
     region_of_interest = screen_img[y:y+h, x:x+w]
     if SAVE_DEBUG_IMAGES:
-        filename = f"{instance_name}_compare_features_({x},{y},{w},{h})_{int(time.time())}.png"
+        filename = f"{instance_name}_{workflow_name}_compare_features_({x},{y},{w},{h}).png"
         cv2.imwrite(os.path.join(TEMP_DIR, filename), region_of_interest)
     keypoints_roi, descriptors_roi = orb.detectAndCompute(region_of_interest, None)
     if descriptors_roi is None: logging.debug("No features found in the screen region."); return False
@@ -174,7 +174,7 @@ def compare_with_features(adb_id, language, instance_name, x, y, w, h, image_nam
         logging.info(f"FAILURE: Not enough feature matches for '{image_name}'.")
         return False
 
-def compare_with_text_easyocr(adb_id, language, instance_name, x, y, w, h, expected_text):
+def compare_with_text_easyocr(adb_id, language, instance_name, workflow_name, x, y, w, h, expected_text):
     reader = initialize_easyocr(language)
     if reader is None: logging.error(f"EasyOCR reader for '{language}' could not be initialized."); return False
     logging.debug(f"Comparing screen region ({x},{y},{w},{h}) with text '{expected_text}' using EasyOCR ({language}).")
@@ -184,7 +184,7 @@ def compare_with_text_easyocr(adb_id, language, instance_name, x, y, w, h, expec
     if screen_img is None: logging.error("Could not read screenshot."); return False
     region = screen_img[y:y+h, x:x+w]
     if SAVE_DEBUG_IMAGES:
-        filename = f"{instance_name}_compare_easyocr_({x},{y},{w},{h})_{int(time.time())}.png"
+        filename = f"{instance_name}_{workflow_name}_compare_easyocr_({x},{y},{w},{h}).png"
         cv2.imwrite(os.path.join(TEMP_DIR, filename), region)
     try:
         results = reader.readtext(region)
@@ -199,7 +199,7 @@ def compare_with_text_easyocr(adb_id, language, instance_name, x, y, w, h, expec
     except Exception as e:
         logging.error(f"An error occurred during EasyOCR processing: {e}"); return False
 
-def get_coords_from_image(adb_id, language, image_name, threshold=0.85):
+def get_coords_from_image(adb_id, language, instance_name, workflow_name, image_name, threshold=0.85):
     """
     Finds a template image on the screen and returns the coordinates of its center.
     Returns (x, y) tuple on success, or None on failure.
@@ -243,7 +243,7 @@ def get_coords_from_image(adb_id, language, image_name, threshold=0.85):
 
 # Add this function to ce_actions.py
 
-def get_all_coords_from_image(adb_id, language, image_name, threshold=0.85):
+def get_all_coords_from_image(adb_id, language, instance_name, workflow_name, image_name, threshold=0.85):
     """
     Finds ALL occurrences of a template image on the screen that meet a threshold.
     Returns a list of (x, y) tuples. The list is empty if no matches are found.
@@ -303,7 +303,8 @@ def get_all_coords_from_image(adb_id, language, image_name, threshold=0.85):
              cv2.putText(screen_img_color, f"({center_x},{center_y})", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     if SAVE_DEBUG_IMAGES and centers:
-        filename = f"DEBUG_all_matches_{image_name.replace('.','_')}_{int(time.time())}.png"
+        image_name_safe = image_name.replace('.','_')
+        filename = f"{instance_name}_{workflow_name}_{image_name_safe}.png"
         cv2.imwrite(os.path.join(TEMP_DIR, filename), screen_img_color)
         logging.debug(f"Saved debug image with all found matches to {filename}")
 
@@ -313,7 +314,7 @@ def get_all_coords_from_image(adb_id, language, image_name, threshold=0.85):
     logging.info(f"Found {len(centers)} occurrences of '{image_name}'. Coords: {centers}")
     return centers
 
-def get_coords_from_features(adb_id, language, image_name, min_match_count=10):
+def get_coords_from_features(adb_id, language, instance_name, workflow_name, image_name, min_match_count=10):
     """
     Finds a template image on the screen using feature matching (ORB) and returns
     the coordinates of its center. Ideal for animated or slightly scaled/rotated elements.
@@ -398,7 +399,8 @@ def get_coords_from_features(adb_id, language, image_name, min_match_count=10):
         if SAVE_DEBUG_IMAGES:
             debug_img = cv2.polylines(cv2.imread(screenshot_path), [np.int32(dst)], True, (0, 255, 0), 3, cv2.LINE_AA)
             cv2.circle(debug_img, (center_x, center_y), 10, (0, 0, 255), -1)
-            filename = f"DEBUG_feature_coords_{image_name.replace('.','_')}_{int(time.time())}.png"
+            # filename = f"DEBUG_feature_coords_{image_name.replace('.','_')}_{int(time.time())}.png"
+            filename = f"{instance_name}_{workflow_name}_feature_coords_{image_name.replace('.','_')}.png"
             cv2.imwrite(os.path.join(TEMP_DIR, filename), debug_img)
             logging.debug(f"Saved feature coordinate debug image to {filename}")
 
@@ -407,7 +409,7 @@ def get_coords_from_features(adb_id, language, image_name, min_match_count=10):
         logging.info(f"FAILURE: Not enough good feature matches for '{image_name}'.")
         return None
 
-def get_all_coords_from_features(adb_id, language, image_name, min_match_count=7, eps=50, min_samples=5):
+def get_all_coords_from_features(adb_id, language, instance_name, workflow_name, image_name, min_match_count=7, eps=50, min_samples=5):
     """
     Finds ALL occurrences of a template image on the screen using feature matching and clustering.
     Ideal for finding multiple instances of animated or scaled/rotated elements.
@@ -493,7 +495,8 @@ def get_all_coords_from_features(adb_id, language, image_name, min_match_count=7
             cv2.putText(screen_img_color, f"Cluster {k}", (center_x, center_y - int(eps)), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
     if SAVE_DEBUG_IMAGES and centers:
-        filename = f"DEBUG_all_feature_matches_{image_name.replace('.','_')}_{int(time.time())}.png"
+        # filename = f"DEBUG_all_feature_matches_{image_name.replace('.','_')}_{int(time.time())}.png"
+        filename = f"{instance_name}_{workflow_name}_all_feature_matches_{image_name.replace('.','_')}.png"
         cv2.imwrite(os.path.join(TEMP_DIR, filename), screen_img_color)
         logging.debug(f"Saved all-feature-matches debug image to {filename}")
 

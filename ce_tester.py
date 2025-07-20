@@ -10,7 +10,7 @@ import ce_interactive
 from ce_workflow_engine import WorkflowEngine
 
 # --- CONFIGURATION ---
-DEFAULT_INSTANCE_NAME = "Adidas"
+DEFAULT_INSTANCE_NAME = "HiddenEnemy"
 DEFAULT_TEST_SCENARIO = "Supply_Depot_Farming"
 # ---------------------
 
@@ -76,26 +76,26 @@ def main(adb_id, language, instance_name):
                 x, y, w, h = get_region()
                 img_name = input("Enter template image filename: ")
                 threshold = float(input("Enter match threshold [0.0-1.0] (default 0.85): ") or 0.85)
-                result = ce_actions.compare_with_image(adb_id, language, instance_name, x, y, w, h, img_name, threshold)
+                result = ce_actions.compare_with_image(adb_id, language, instance_name, "Tester", x, y, w, h, img_name, threshold)
                 print(f"\n--- TEMPLATE MATCH RESULT ---\nMatch found: {result}\n---------------------------")
 
             elif choice == '3':
                 x, y, w, h = get_region()
                 img_name = input("Enter template image filename: ")
                 min_matches = int(input("Enter minimum feature matches required (default 10): ") or 10)
-                result = ce_actions.compare_with_features(adb_id, language, instance_name, x, y, w, h, img_name, min_matches)
+                result = ce_actions.compare_with_features(adb_id, language, instance_name, "Tester", x, y, w, h, img_name, min_matches)
                 print(f"\n--- FEATURE MATCH RESULT ---\nMatch found: {result}\n--------------------------")
 
             elif choice == '4':
                 x, y, w, h = get_region()
                 text = input("Enter the text to search for: ")
-                result = ce_actions.compare_with_text(adb_id, language, instance_name, x, y, w, h, text)
+                result = ce_actions.compare_with_text(adb_id, language, instance_name, "Tester", x, y, w, h, text)
                 print(f"\n--- TESSERACT RESULT ---\nMatch found: {result}\n----------------")
 
             elif choice == '5':
                 x, y, w, h = get_region()
                 text = input("Enter the text to search for: ")
-                result = ce_actions.compare_with_text_easyocr(adb_id, language, instance_name, x, y, w, h, text)
+                result = ce_actions.compare_with_text_easyocr(adb_id, language, instance_name, "Tester", x, y, w, h, text)
                 print(f"\n--- EASYOCR RESULT ---\nMatch found: {result}\n----------------")
 
             elif choice == '6':
@@ -116,7 +116,7 @@ def main(adb_id, language, instance_name):
             elif choice == '9':
                 img_name = input("Enter template image filename to find: ")
                 threshold = float(input("Enter match threshold [0.0-1.0] (default 0.85): ") or 0.85)
-                coords = ce_actions.get_coords_from_image(adb_id, language, img_name, threshold)
+                coords = ce_actions.get_coords_from_image(adb_id, language, instance_name, "Tester", img_name, threshold)
                 if coords:
                     print(f"\n--- COORDINATES CAPTURED (from Image) ---\nResult: {coords[0]},{coords[1]}\n-----------------------------------------")
                 else:
@@ -126,7 +126,7 @@ def main(adb_id, language, instance_name):
             elif choice == '10':
                 img_name = input("Enter template image filename to find: ")
                 min_matches = int(input("Enter minimum feature matches required (default 10): ") or 10)
-                coords = ce_actions.get_coords_from_features(adb_id, language, img_name, min_matches)
+                coords = ce_actions.get_coords_from_features(adb_id, language, instance_name, "Tester", img_name, min_matches)
                 if coords:
                     print(f"\n--- COORDINATES CAPTURED (from Features) ---\nResult: {coords[0]},{coords[1]}\n--------------------------------------------")
                 else:

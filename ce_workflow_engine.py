@@ -24,15 +24,15 @@ class WorkflowEngine:
             'emergency_exit': lambda args: ce_actions.emergency_exit(args)
         }
         self.conditional_actions = {
-            'compare_with_image': lambda *args: ce_actions.compare_with_image(self.adb_id, self.language, self.context['instance_name'], *args),
-            'compare_with_text': lambda *args: ce_actions.compare_with_text(self.adb_id, self.language, self.context['instance_name'], *args),
-            'compare_with_any_image': lambda *args: ce_actions.compare_with_any_image(self.adb_id, self.language, self.context['instance_name'], *args),
-            'compare_with_text_easyocr': lambda *args: ce_actions.compare_with_text_easyocr(self.adb_id, self.language, self.context['instance_name'], *args),
-            'compare_with_features': lambda *args: ce_actions.compare_with_features(self.adb_id, self.language, self.context['instance_name'], *args),
-            'get_coords_from_image': lambda *args: ce_actions.get_coords_from_image(self.adb_id, self.language, *args),
-            'get_all_coords_from_image': lambda *args: ce_actions.get_all_coords_from_image(self.adb_id, self.language, *args),
-            'get_coords_from_features': lambda *args: ce_actions.get_coords_from_features(self.adb_id, self.language, *args),
-            'get_all_coords_from_features': lambda *args: ce_actions.get_all_coords_from_features(self.adb_id, self.language, *args),
+             'compare_with_image': lambda *args: ce_actions.compare_with_image(self.adb_id, self.language, self.context.get('instance_name'), self.context.get('workflow_name'), *args),
+            'compare_with_text': lambda *args: ce_actions.compare_with_text(self.adb_id, self.language, self.context.get('instance_name'), self.context.get('workflow_name'), *args),
+            'compare_with_any_image': lambda *args: ce_actions.compare_with_any_image(self.adb_id, self.language, self.context.get('instance_name'), self.context.get('workflow_name'), *args),
+            'compare_with_text_easyocr': lambda *args: ce_actions.compare_with_text_easyocr(self.adb_id, self.language, self.context.get('instance_name'), self.context.get('workflow_name'), *args),
+            'compare_with_features': lambda *args: ce_actions.compare_with_features(self.adb_id, self.language, self.context.get('instance_name'), self.context.get('workflow_name'), *args),
+            'get_coords_from_image': lambda *args: ce_actions.get_coords_from_image(self.adb_id, self.language, self.context.get('instance_name'), self.context.get('workflow_name'), *args),
+            'get_all_coords_from_image': lambda *args: ce_actions.get_all_coords_from_image(self.adb_id, self.language, self.context.get('instance_name'), self.context.get('workflow_name'), *args),
+            'get_coords_from_features': lambda *args: ce_actions.get_coords_from_features(self.adb_id, self.language, self.context.get('instance_name'), self.context.get('workflow_name'), *args),
+            'get_all_coords_from_features': lambda *args: ce_actions.get_all_coords_from_features(self.adb_id, self.language, self.context.get('instance_name'), self.context.get('workflow_name'), *args),
         }
 
     def _render_template_string(self, template_string):
@@ -136,5 +136,6 @@ class WorkflowEngine:
             logging.error(f"Workflow '{workflow_name}' has no steps."); return
             
         logging.info(f"Executing workflow: {workflow_name} from '{os.path.basename(yaml_path)}' - {target_scenario.get('description', '')}")
+        self.context['workflow_name'] = workflow_name
         self._process_steps(target_scenario['steps'])
         logging.info(f"Finished workflow: {workflow_name}")

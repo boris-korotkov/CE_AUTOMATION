@@ -1078,13 +1078,13 @@ scenarios:
                                         expedition_points_data:
                                           - { name: "Point 1", click: [ "{{ expedition_coin_coords[0]}}",    "{{ expedition_coin_coords[1]+200 }}" ], chest: [ "{{ expedition_coin_coords[0]+110}}", "{{ expedition_coin_coords[1]+200 }}" ] }
                                           - { name: "Point 2", click: [ "{{ expedition_coin_coords[0]+290}}", "{{ expedition_coin_coords[1]+430 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+410 }}" ] }
-                                          - { name: "Point 3", click: [ "{{ expedition_coin_coords[0]+410}}", "{{ expedition_coin_coords[1]+165 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+215 }}" ] }
-                                          - { name: "Point 4", click: [ "{{ expedition_coin_coords[0]+415}}", "{{ expedition_coin_coords[1]+490 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+415 }}" ] }
-                                          - { name: "Point 5", click: [ "{{ expedition_coin_coords[0]+480}}", "{{ expedition_coin_coords[1]+190 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+175 }}" ] }
-                                          - { name: "Point 6", click: [ "{{ expedition_coin_coords[0]+570}}", "{{ expedition_coin_coords[1]+320 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+255 }}" ] }
-                                          - { name: "Point 7", click: [ "{{ expedition_coin_coords[0]+360}}", "{{ expedition_coin_coords[1]+105 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+90 }}" ] }
-                                          - { name: "Point 8", click: [ "{{ expedition_coin_coords[0]+460}}", "{{ expedition_coin_coords[1]+175 }}" ], chest: [ "{{ expedition_coin_coords[0]+435}}", "{{ expedition_coin_coords[1]+140 }}" ] }
-                                          - { name: "Point 9", click: [ "{{ expedition_coin_coords[0]+630}}", "{{ expedition_coin_coords[1]+330 }}" ], chest: [ "{{ expedition_coin_coords[0]+735}}", "{{ expedition_coin_coords[1]+380 }}" ] }
+                                          #- { name: "Point 3", click: [ "{{ expedition_coin_coords[0]+410}}", "{{ expedition_coin_coords[1]+165 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+215 }}" ] }
+                                          #- { name: "Point 4", click: [ "{{ expedition_coin_coords[0]+415}}", "{{ expedition_coin_coords[1]+490 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+415 }}" ] }
+                                          #- { name: "Point 5", click: [ "{{ expedition_coin_coords[0]+480}}", "{{ expedition_coin_coords[1]+190 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+175 }}" ] }
+                                          #- { name: "Point 6", click: [ "{{ expedition_coin_coords[0]+570}}", "{{ expedition_coin_coords[1]+320 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+255 }}" ] }
+                                          #- { name: "Point 7", click: [ "{{ expedition_coin_coords[0]+360}}", "{{ expedition_coin_coords[1]+105 }}" ], chest: [ "{{ expedition_coin_coords[0]+300}}", "{{ expedition_coin_coords[1]+90 }}" ] }
+                                          #- { name: "Point 8", click: [ "{{ expedition_coin_coords[0]+460}}", "{{ expedition_coin_coords[1]+175 }}" ], chest: [ "{{ expedition_coin_coords[0]+435}}", "{{ expedition_coin_coords[1]+140 }}" ] }
+                                          #- { name: "Point 9", click: [ "{{ expedition_coin_coords[0]+630}}", "{{ expedition_coin_coords[1]+330 }}" ], chest: [ "{{ expedition_coin_coords[0]+735}}", "{{ expedition_coin_coords[1]+380 }}" ] }
                                     - set:
                                         expedition_counter: 0
                                     - while:
@@ -1178,28 +1178,316 @@ scenarios:
                   - set:
                       arrow_right_coords: "{{ get_coords_from_image('arrow_right.png') }}"
                   - if:
-                      condition: "arrow_right_coords"  # If Train button is available
+                      condition: "arrow_right_coords"  # If arrow_right icon  is available
                       then:
                         - log: "arrow_right_coords coordinates found"
-                        - click: "{{ train_button_coords }}" # Click on the right arrow
-                        - click: "{{ train_button_coords }}" # Click on the right arrow
-                        ### stoppped here
-                        - click: [ "{{ training_center_icon_coords[0]+40 }}", "{{ training_center_icon_coords[1]-115 }}" ] # Click on the Train button
+                        - click: "{{ arrow_right_coords }}" # Click on the right arrow
+                        - delay: 2
+                        - click: "{{ arrow_right_coords }}" # Click on the right arrow
+                        - delay: 2
+                        - click: "{{ arrow_right_coords }}" # Click on the right arrow
+                        - delay: 2
+                        - click: "{{ arrow_right_coords }}" # Click on the right arrow
+                        - delay: 2
+                        - click: [ "{{ arrow_right_coords[0]-890 }}", "{{ arrow_right_coords[1]}}" ] # Click on the the most left clone
                         - set:
-                            confirm_button_coords: "{{ get_coords_from_image('confirm_purple.png') }}"
+                            add_clone_coords: "{{ get_all_coords_from_image('add_clone.png') }}"
                         - if:
-                            condition: "confirm_button_coords"  # If Confirm button is available
+                            condition: "add_clone_coords"  # If Confirm button is available
                             then:
-                              - log: "Confirm button coordinates found"
-                              - click: "{{ confirm_button_coords }}" # Click on the Confirm button
+                              - log: "Add clone icon coordinates found"
+                              - click: "{{ add_clone_coords[0] }}" # Click on the Confirm button
                               - delay: 2
-                              - click: [60, 50] # exit Training Center screen
+                              - set:
+                                  Devour_button_coords: "{{ get_coords_from_image('Devour_button.png') }}"
+                              - if:
+                                  condition: "Devour_button_coords"  # If Devour button is available
+                                  then:
+                                    - log: "Devour button coordinates found"
+                                    - click: [ "{{ Devour_button_coords[0]-380 }}", "{{ Devour_button_coords[1]-235}}" ] # Click on the the most left clone
+                                    - set:
+                                        clone_in_tavern_coords: "{{ get_coords_from_image('clone_in_tavern.png') }}"
+                                    - if:
+                                        condition: "clone_in_tavern_coords"  # If Confirm button is available
+                                        then:
+                                          - click: [ "{{ Devour_button_coords[0]+355 }}", "{{ Devour_button_coords[1]-235}}" ] # Click on the the most right clone
+                                    - delay: 1
+                                    - click: "{{ Devour_button_coords }}" # Click on the Devour button
+                                    - delay: 1
+                                    - set:
+                                        upgrade_button_coords: "{{ get_coords_from_image('Upgrade_button.png') }}"
+                                    - if:
+                                        condition: "upgrade_button_coords"  # If Confirm button is available
+                                        then:
+                                          - log: "upgrade button coordinates found"
+                                          - click: "{{ upgrade_button_coords }}" # Click on the Confirm button
+                                          - delay: 3
+                                          - set:
+                                              confirm_button_coords: "{{ get_coords_from_image('confirm_yellow.png') }}"
+                                          - if:
+                                              condition: "confirm_button_coords"  # If Confirm button is available
+                                              then:
+                                                - log: "Confirm button coordinates found"
+                                                - click: "{{ confirm_button_coords }}" # Click on the Confirm button
+                                                - delay: 1
+                                              else:
+                                                - log: "Confirm button is not available, continuing without it"
+                                          - click: [60, 50] # exit Training Center screen
+                                          - log: "Training Center farming completed"
+
+                                        else:
+                                          - log: "upgrade button is not available in Training Center farming"
+                                          - click: [60, 50] # exit Training Center screen
                             else:
-                              - log: "Confirm button is not available in Training Center farming"
+                              - log: add_clone_coords is not available in Training Center farming"
+                              - click: [60, 50] # exit Training Center screen
                       else:
-                        - log: "Train button is not available in Training Center farming"
+                        - log: "arrow_right_coords is not available in Training Center farming"
+                        - click: [60, 50] # exit Training Center screen
                 else:
                   - log: "Training Center icon is not available, continuing without it"
+          else:
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Training_Center scenario is skipped due to game unavailability and restarted."
+                  - send_email: "[ERROR] Training_Center scenario is skipped for the {{ instance_name }} instance and game was restarted."
+                else: 
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "[ERROR] Training_Center scenario is skipped for the {{ instance_name }} instance and game was not restarted."
+
+  - name: Taverna
+    description: Taverna farming
+    steps:
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
+      - if:
+          condition: "guild_coords"  # This is true if coordinates were found, false
+          then:
+            - log: "Guild coordinates found"
+            - set:
+                taverna_completed_tasks_coords: "{{ get_coords_from_image('completed_tasks.png') }}"
+            - if:
+                condition: "taverna_completed_tasks_coords"  # This is true if coordinates were
+                then:
+                  - log: "Taverna completed tasks icon coordinates found"
+                  - click: [ "{{ taverna_completed_tasks_coords[0]}}", "{{ taverna_completed_tasks_coords[1]+90 }}" ] # Click on the Taverna completed tasks icon
+                  - delay: 2
+                  - set:
+                      claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                  - if:
+                      condition: "claim_button_coords"  # This is true if coordinates were found, false
+                      then:
+                        - log: "claim_button coordinates found"
+                        - click: "{{ claim_button_coords }}" # Click on the Claim button
+                        - delay: 1
+                      else:
+                        - log: "Claim button is not available, continuing without it"
+                else:
+                  - log: "Taverna completed tasks icon is not available, continuing without it"
+                        
+            - set:
+                tavern_task_counter: 0
+            - while:
+                condition: "tavern_task_counter < 4" 
+                do:
+                  - set:
+                      taverna_icon_coords: "{{ get_coords_from_image('tavern.png') }}"
+                  - if:
+                      condition: "taverna_icon_coords"  # This is true if coordinates were found, false
+                      then:
+                        - log: "Taverna icon coordinates found"
+                        - click: [ "{{ taverna_icon_coords[0]-35 }}", "{{ taverna_icon_coords[1]-75}}" ] # Click on Taverna icon
+                        - delay: 3
+                        - set:
+                            Start_button_coords: "{{ get_all_coords_from_image('start_blue.png') }}"
+                        - if:
+                            condition: "Start_button_coords"  # If Start button is available
+                            then:
+                              - log: "Start button coordinates found"
+                              - click: "{{ Start_button_coords[0] }}" # Click on the Start button
+                              - delay: 2
+                              - set:
+                                  click_to_dispatch_button_coords: "{{ get_coords_from_image('click_to_dispatch.png') }}"
+                              - if:
+                                  condition: "click_to_dispatch_button_coords"  # If Confirm button is available
+                                  then:
+                                    - log: "click_to_dispatch button coordinates found"
+                                    - click: "{{ click_to_dispatch_button_coords }}" # Click on the Confirm button
+                                    - set:
+                                        start_button_coords: "{{ get_coords_from_image('start_red.png') }}" # taverna coin coordinates on the top
+                                    - if:
+                                        condition: "start_button_coords"  # If taverna coin coordinates are
+                                        then:
+                                          - log: "Start button coordinates found"
+                                          - click: "{{ start_button_coords }}" # Click on the Start button
+                                          - click: [60, 50] # exit Taverna screen
+                            else:
+                              - log: "Start button is not available, exit from Taverna farming"
+                              - click: [60, 50] # exit Taverna screen
+                  - increment: tavern_task_counter
+
+          else:
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Training_Center scenario is skipped due to game unavailability and restarted."
+                  - send_email: "[ERROR] Training_Center scenario is skipped for the {{ instance_name }} instance and game was restarted."
+                else: 
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "[ERROR] Training_Center scenario is skipped for the {{ instance_name }} instance and game was not restarted."
+
+  - name: Taverna_new
+    description: Taverna farming -updated version
+    steps:
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
+      - if:
+          condition: "guild_coords"  # This is true if coordinates were found, false
+          then:
+            - log: "Guild coordinates found"
+            - set:
+                taverna_icon_coords: "{{ get_coords_from_image('tavern.png') }}"
+            - if:
+                condition: "taverna_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Taverna icon coordinates found"
+                  - click: [ "{{ taverna_icon_coords[0]-35 }}", "{{ taverna_icon_coords[1]-75}}" ] # Click on Taverna icon
+                  - delay: 3
+                  - set:
+                      taverna_completed_tasks_coords: "{{ get_coords_from_image('completed_tasks.png') }}"
+                  - if:
+                      condition: "taverna_completed_tasks_coords"  # This is true if coordinates were
+                      then:
+                        - log: "Taverna completed tasks icon coordinates found"
+                        - click: [ "{{ taverna_completed_tasks_coords[0]}}", "{{ taverna_completed_tasks_coords[1]+90 }}" ] # Click on the Taverna completed tasks icon
+                        - delay: 2
+                        - set:
+                            claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                        - if:
+                            condition: "claim_button_coords"  # This is true if coordinates were found, false
+                            then:
+                              - log: "claim_button coordinates found"
+                              - click: "{{ claim_button_coords }}" # Click on the Claim button
+                              - delay: 1
+                              - click: [60, 50] # exit Taverna screen
+                            else:
+                              - log: "Claim button is not available, continuing without it"
+                      else:
+                        - log: "Taverna completed tasks icon is not available, continuing without it"
+                        - click: [60, 50] # exit Taverna screen
+                        
+            - set:
+                tavern_task_counter: 0
+            - while:
+                condition: "tavern_task_counter < 4" 
+                do:
+                  - set:
+                      taverna_icon_coords: "{{ get_coords_from_image('tavern.png') }}"
+                  - if:
+                      condition: "taverna_icon_coords"  # This is true if coordinates were found, false
+                      then:
+                        - log: "Taverna icon coordinates found"
+                        - click: [ "{{ taverna_icon_coords[0]-35 }}", "{{ taverna_icon_coords[1]-75}}" ] # Click on Taverna icon
+                        - delay: 3
+                        - set:
+                            Start_button_coords: "{{ get_all_coords_from_image('start_blue.png') }}"
+                        - if:
+                            condition: "Start_button_coords"  # If Start button is available
+                            then:
+                              - log: "Start button coordinates found"
+                              - click: "{{ Start_button_coords[0] }}" # Click on the Start button
+                              - delay: 2
+                              - set:
+                                  click_to_dispatch_button_coords: "{{ get_coords_from_image('click_to_dispatch.png') }}"
+                              - if:
+                                  condition: "click_to_dispatch_button_coords"  # If Confirm button is available
+                                  then:
+                                    - log: "click_to_dispatch button coordinates found"
+                                    - click: "{{ click_to_dispatch_button_coords }}" # Click on the Confirm button
+                                    - set:
+                                        start_button_coords: "{{ get_coords_from_image('start_red.png') }}" # taverna coin coordinates on the top
+                                    - if:
+                                        condition: "start_button_coords"  # If taverna coin coordinates are
+                                        then:
+                                          - log: "Start button coordinates found"
+                                          - click: "{{ start_button_coords }}" # Click on the Start button
+                                          - delay: 2
+                                          - set:
+                                              click_to_dispatch_button_coords: "{{ get_coords_from_image('click_to_dispatch.png') }}" # taverna coin coordinates on the top
+                                          - if:
+                                              condition: "click_to_dispatch_button_coords"  # If click_to_dispatch_button_coords is still visible
+                                              then:
+                                                - log: "click_to_dispatch  button is still on the screen. need to refresh tasks"
+                                                - set:
+                                                    red_x_button_coords: "{{ get_coords_from_image('red_x.png') }}"
+                                                - if:
+                                                    condition: "red_x_button_coords"  # If Confirm button is available
+                                                    then:
+                                                      - log: "red_x_button_coords  coordinates found"
+                                                      - click: "{{ red_x_button_coords }}" # Click on the Confirm button
+                                                      - set:
+                                                          refresh_coords: "{{ get_coords_from_image('refresh.png') }}"
+                                                      - if:
+                                                          condition: "refresh_coords"  # If Confirm button is available
+                                                          then:
+                                                            - log: "refresh button coordinates found"
+                                                            - click: "{{ refresh_coords }}" # Click on the Confirm button
+                                                            - set:
+                                                                Start_button_coords: "{{ get_all_coords_from_image('start_blue.png') }}"
+                                                            - if:
+                                                                condition: "Start_button_coords"  # If Start button is available
+                                                                then:
+                                                                  - log: "Attempt2: Start button coordinates found"
+                                                                  - click: "{{ Start_button_coords[0] }}" # Click on the Start button
+                                                                  - delay: 2
+                                                                  - set:
+                                                                      click_to_dispatch_button_coords: "{{ get_coords_from_image('click_to_dispatch.png') }}"
+                                                                  - if:
+                                                                      condition: "click_to_dispatch_button_coords"  # If Confirm button is available
+                                                                      then:
+                                                                        - log: "Attempt2: click_to_dispatch button coordinates found"
+                                                                        - click: "{{ click_to_dispatch_button_coords }}" # Click on the Confirm button
+                                                                        - set:
+                                                                            start_button_coords: "{{ get_coords_from_image('start_red.png') }}" # taverna coin coordinates on the top
+                                                                        - if:
+                                                                            condition: "start_button_coords"  # If taverna coin coordinates are
+                                                                            then:
+                                                                              - log: "Attempt2: Start button coordinates found"
+                                                                              - click: "{{ start_button_coords }}" # Click on the Start button
+                                                                              - delay: 2
+                                                                              - click: [60, 50] # exit Taverna screen
+                                                                            else:
+                                                                              - log: "Attempt2: Start button is not available, continuing without it"
+                                                          else:
+                                                            - log: "Refresh button is not available, continuing without it"
+                                                    else:
+                                                      - log: "red_x_button_coords button is not available, continueing without it"
+                                                      #- click: [60, 50] # exit Taverna screen
+                                                
+                                              else:
+                                                - log: "click_to_dispatch button is not available. the task was sucessfully deployed"
+                                                - click: [60, 50] # exit Taverna screen
+                                        else:
+                                          - log: "The task was successfully taken. Go to next task"
+                                          - click: [60, 50] # exit Taverna screen
+                            else:
+                              - log: "Start button is not available, exit from Taverna farming"
+                              - click: [60, 50] # exit Taverna screen
+                  - increment: tavern_task_counter
+
           else:
             - log: "Guild icon is not available. I'm trying to restart the game."
             - set:

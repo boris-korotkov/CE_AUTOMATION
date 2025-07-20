@@ -16,24 +16,48 @@ from ce_hotkeys import setup_hotkey_listener
 pause_event = threading.Event()
 stop_event = threading.Event()
 
-def setup_logging(log_level_str='DEBUG'):
-    log_level = getattr(logging, log_level_str, logging.DEBUG)
+def setup_logging(log_level_str='INFO'):
+    # Get the desired log level object (e.g., logging.INFO) from the config string
+    log_level = getattr(logging, log_level_str.upper(), logging.INFO)
+    
+    # Get the root logger
     logger = logging.getLogger()
+    # Set the master gatekeeper level. All handlers will inherit this as their upper limit.
     logger.setLevel(log_level)
-    for handler in logger.handlers[:]: logger.removeHandler(handler)
-    if not os.path.exists('logs'): os.makedirs('logs')
+    
+    # Remove any old handlers to prevent duplicate logging if this function is called again
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+        
+    # Ensure the 'logs' directory exists
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+        
     log_filename = f"logs/CE_robot_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
+    
+    # --- File Handler ---
     file_handler = logging.FileHandler(log_filename)
-    file_handler.setLevel(logging.DEBUG)
+    # Set the file handler's level to match the config
+    file_handler.setLevel(log_level) 
+    
+    # --- Console Handler ---
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.DEBUG)
+    # Set the console handler's level to also match the config
+    console_handler.setLevel(log_level)
+
+    # Create a single formatter and apply it to both handlers
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
+    
+    # Add the configured handlers to the logger
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+    
+    # These initial messages will now respect the log level
     logging.info("Logging setup complete.")
-    logging.info(f"Global log level set to: {log_level_str}")
+    logging.info(f"Log file created at: {log_filename}")
+    logging.info(f"Global log level for all handlers set to: {log_level_str}")
 
 def check_for_pause_or_stop():
     while pause_event.is_set():
@@ -146,7 +170,7 @@ def main():
                     
                     is_loaded = False
                     if check_image:
-                        if ce_actions.get_coords_from_image(adb_id, language, check_image, check_threshold):
+                        if ce_actions.get_coords_from_image(adb_id, language,name, "Startup_Check", check_image, check_threshold):
                             logging.info("Game load verification successful (Image Found).")
                             is_loaded = True
                         else:
