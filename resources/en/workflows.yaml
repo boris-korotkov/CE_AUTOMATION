@@ -958,7 +958,7 @@ scenarios:
                             then:
                               - click: "{{ match_button_coords }}" # Click on the Match button
                               - delay: 2
-                              - log: "Match button coordinates found. Starting 3 attack loops."
+                              - log: "cross_server_matching button coordinates found. Starting 3 attack loops."
                               
                               # 1. Initialize the loop counter
                               - set:
@@ -998,7 +998,7 @@ scenarios:
                               - click: [60, 50] # exit Summit arena screen
                             else:
                               - log: "Match button is not available, returning to the guild screen."
-                              - send_email: "Summit Arena Challenge farming failed for the {{ instance_name }} instance. Match button is not available" # send an email if Match button is not available
+                              - send_email: "Summit Arena Challenge farming failed for the {{ instance_name }} instance. cross_server_matching button is not available" # send an email if Match button is not available
                               - click: [60, 50] # exit Summit arena screen
 
                           ###
@@ -1272,93 +1272,6 @@ scenarios:
           then:
             - log: "Guild coordinates found"
             - set:
-                taverna_completed_tasks_coords: "{{ get_coords_from_image('completed_tasks.png') }}"
-            - if:
-                condition: "taverna_completed_tasks_coords"  # This is true if coordinates were
-                then:
-                  - log: "Taverna completed tasks icon coordinates found"
-                  - click: [ "{{ taverna_completed_tasks_coords[0]}}", "{{ taverna_completed_tasks_coords[1]+90 }}" ] # Click on the Taverna completed tasks icon
-                  - delay: 2
-                  - set:
-                      claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
-                  - if:
-                      condition: "claim_button_coords"  # This is true if coordinates were found, false
-                      then:
-                        - log: "claim_button coordinates found"
-                        - click: "{{ claim_button_coords }}" # Click on the Claim button
-                        - delay: 1
-                      else:
-                        - log: "Claim button is not available, continuing without it"
-                else:
-                  - log: "Taverna completed tasks icon is not available, continuing without it"
-                        
-            - set:
-                tavern_task_counter: 0
-            - while:
-                condition: "tavern_task_counter < 4" 
-                do:
-                  - set:
-                      taverna_icon_coords: "{{ get_coords_from_image('tavern.png') }}"
-                  - if:
-                      condition: "taverna_icon_coords"  # This is true if coordinates were found, false
-                      then:
-                        - log: "Taverna icon coordinates found"
-                        - click: [ "{{ taverna_icon_coords[0]-35 }}", "{{ taverna_icon_coords[1]-75}}" ] # Click on Taverna icon
-                        - delay: 3
-                        - set:
-                            Start_button_coords: "{{ get_all_coords_from_image('start_blue.png') }}"
-                        - if:
-                            condition: "Start_button_coords"  # If Start button is available
-                            then:
-                              - log: "Start button coordinates found"
-                              - click: "{{ Start_button_coords[0] }}" # Click on the Start button
-                              - delay: 2
-                              - set:
-                                  click_to_dispatch_button_coords: "{{ get_coords_from_image('click_to_dispatch.png') }}"
-                              - if:
-                                  condition: "click_to_dispatch_button_coords"  # If Confirm button is available
-                                  then:
-                                    - log: "click_to_dispatch button coordinates found"
-                                    - click: "{{ click_to_dispatch_button_coords }}" # Click on the Confirm button
-                                    - set:
-                                        start_button_coords: "{{ get_coords_from_image('start_red.png') }}" # taverna coin coordinates on the top
-                                    - if:
-                                        condition: "start_button_coords"  # If taverna coin coordinates are
-                                        then:
-                                          - log: "Start button coordinates found"
-                                          - click: "{{ start_button_coords }}" # Click on the Start button
-                                          - click: [60, 50] # exit Taverna screen
-                            else:
-                              - log: "Start button is not available, exit from Taverna farming"
-                              - click: [60, 50] # exit Taverna screen
-                  - increment: tavern_task_counter
-
-          else:
-            - log: "Guild icon is not available. I'm trying to restart the game."
-            - set:
-                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
-            - if:
-                condition: "game_icon_coords"  # This is true if coordinates were found, false
-                then:
-                  - log: "Game icon coordinates found, clicking on it to restart the game."
-                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
-                  - delay: 150 # Wait for the game to restart
-                  - log: "Training_Center scenario is skipped due to game unavailability and restarted."
-                  - send_email: "[ERROR] Training_Center scenario is skipped for the {{ instance_name }} instance and game was restarted."
-                else: 
-                  - log: "Game icon coordinates not found, cannot restart the game."
-                  - send_email: "[ERROR] Training_Center scenario is skipped for the {{ instance_name }} instance and game was not restarted."
-
-  - name: Taverna_new
-    description: Taverna farming -updated version
-    steps:
-      - set:
-          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
-      - if:
-          condition: "guild_coords"  # This is true if coordinates were found, false
-          then:
-            - log: "Guild coordinates found"
-            - set:
                 taverna_icon_coords: "{{ get_coords_from_image('tavern.png') }}"
             - if:
                 condition: "taverna_icon_coords"  # This is true if coordinates were found, false
@@ -1503,3 +1416,130 @@ scenarios:
                 else: 
                   - log: "Game icon coordinates not found, cannot restart the game."
                   - send_email: "[ERROR] Training_Center scenario is skipped for the {{ instance_name }} instance and game was not restarted."
+
+  - name: Guild_instances
+    description: Guild_instances - add to guild farming later
+    steps:
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
+      - if:
+          condition: "guild_coords"  # This is true if coordinates were found, false
+          then:
+            - log: "Guild coordinates found"
+            - click: "{{guild_coords}}" # Click on the Guild icon
+            - delay: 3
+            # 1. Initialize the loop counter
+            - set:
+                instance_attack_counter: 0
+                
+            # 2. Start the while loop, which will run as long as the counter is less than 3
+            - while:
+                condition: "instance_attack_counter < 3"
+                do:
+                  - log: "--- Starting Guild Instamce  Attack #{{ instance_attack_counter + 1 }} ---"
+                  - set:
+                      guild_instances_coords: "{{ get_coords_from_image('guild_instances.png') }}"
+                  - if:
+                      condition: "guild_instances_coords"  # This is true if coordinates were found, false
+                      then:
+                        - log: "guild_instances_coords icon coordinates found"
+                        - click: [ "{{ guild_instances_coords[0]-5 }}", "{{ guild_instances_coords[1]-50}}" ] # Click on Taverna icon
+                        - delay: 2
+                        - set:
+                            suppression_coords: "{{ get_coords_from_image('suppression.png') }}"
+                        - if:
+                            condition: "suppression_coords"  # If suppression button is available
+                            then:
+                              - log: "suppression button coordinates found"
+                              - click: [ "{{ suppression_coords[0] + 20 }}", "{{ suppression_coords[1]-70 }}" ] # Click the guild instance
+                              - delay: 2
+                              - set:
+                                  attack_red_coords: "{{ get_coords_from_image('attack_red.png') }}"
+                              - if:
+                                  condition: "attack_red_coords"  # If Confirm button is available
+                                  then:
+                                    - log: "attack_red_coords  found"
+                                    - click: "{{ attack_red_coords }}" # Click on the Confirm button
+                                    - delay: 2
+                                    - set:
+                                        auto_green_coords: "{{ get_coords_from_image('auto_green.png') }}"
+                                    - if:
+                                        condition: "auto_green_coords"  # If Start button is available
+                                        then:
+                                          - log: "auto_green_coords found"
+                                          - click: "{{ auto_green_coords }}" # Click on the Start button
+                                          - delay: 1
+                                          - set:
+                                              start_red_coords: "{{ get_coords_from_image('start_red.png') }}"
+                                          - if:
+                                              condition: "start_red_coords"  # If Claim button is available
+                                              then:
+                                                - log: "start_red_coords found"
+                                                - click: "{{ start_red_coords }}" # Click on the Claim button
+                                                - delay: 5
+                                                - set:
+                                                    click_attempts: 0
+                                                - set:
+                                                    claim_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                                                - while:
+                                                    condition: "not claim_coords and click_attempts < 10" 
+                                                    do:
+                                                      - log: "Claim button not visible. Attempt #{{ click_attempts + 1 }}"
+                                                      - set:
+                                                          end_battle_button_coords: "{{ get_coords_from_image('end_boss_battle.png') }}"
+                                                      - if:
+                                                          condition: "end_battle_button_coords"  # If End Boss Battle button is available
+                                                          then:
+                                                            - click: "{{end_battle_button_coords}}" # click on fight finish button until Claim button appears
+                                                            - delay: 2
+                                                          else:
+                                                            - log: "WARNING: Neither 'Claim' nor 'End Battle' button is visible. Waiting..."
+                                                            - delay: 2
+                                                      - increment: click_attempts
+                                                      - set:
+                                                          claim_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                                                
+                                                - if:
+                                                    condition: "claim_coords"
+                                                    then:
+                                                      - log: "Success! Claim button is now visible. Clicking it."
+                                                      - click: "{{ claim_coords }}"
+                                                      - set:
+                                                          confirm_button_coords: "{{ get_coords_from_image('confirm.png') }}"
+                                                      - click: "{{confirm_button_coords}}" # click Confirm button to finish the boss  battle
+                                                      - delay: 2
+                                                      - click: [60, 50] # exist from instance battle screen
+                                                      - log: "instance guild attack #{{ instance_attack_counter + 1 }} is completed successfully."
+                                                      
+                                                    else:
+                                                      # This block runs if the loop finished because it hit 10 attempts.
+                                                      - log: "ERROR: Claim button did not appear after 10 attempts."
+                                                      - send_email: "[ERROR] Guild instance Farming: Failed to find reward claim button after 10 attempts. Exit to main game screen" # send an email if Claim button is not available
+                                                      - click: [60, 50] # exist from instance battle screen
+                                                      - click: [60, 50] # exist to the main game screen
+                                                      # - emergency_exit: "Guild instance Farming: Failed to find reward claim button after 10 attempts."
+                                              else:
+                                                - log: "Claim button is not available, continuing without it"
+                                        else:
+                                          - log: "Start button is not available, continuing without it"
+                                  else:
+                                    - log: "Confirm button is not available, continuing without it"
+                            else:
+                              - log: "Suppression icon is not available, continuing without it"
+                  - increment: instance_attack_counter
+            - click: [60, 50] # return to main game screen
+          else:
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Guild_instances scenario is skipped due to game unavailability and restarted."
+                  - send_email: "[ERROR] Guild_instances scenario is skipped for the {{ instance_name }} instance and game was restarted."
+                else: 
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "[ERROR] Guild_instances scenario is skipped for the {{ instance_name }} instance and game was not restarted."

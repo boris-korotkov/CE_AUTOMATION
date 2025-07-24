@@ -214,25 +214,48 @@ def get_coords_from_image(adb_id, language, instance_name, workflow_name, image_
         logging.error(f"Template image not found: {template_path}")
         return None
 
-    screen_img = cv2.imread(screenshot_path, cv2.IMREAD_GRAYSCALE)
+    # Load the screenshot in color for drawing debug shapes
+    screen_img_color = cv2.imread(screenshot_path)
+    if screen_img_color is None:
+        logging.error("Could not read screenshot image file.")
+        return None
+        
+    # Convert to grayscale for matching
+    screen_img_gray = cv2.cvtColor(screen_img_color, cv2.COLOR_BGR2GRAY)
     template_img = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
 
-    if screen_img is None or template_img is None:
-        logging.error("Could not read screenshot or template image for coordinate finding.")
+    if template_img is None:
+        logging.error("Could not read template image for coordinate finding.")
         return None
 
-    # Get the dimensions of the template
     template_h, template_w = template_img.shape
-
-    # Perform template matching
-    res = cv2.matchTemplate(screen_img, template_img, cv2.TM_CCOEFF_NORMED)
-    _, max_val, _, max_loc = cv2.minMaxLoc(res)
+    res = cv2.matchTemplate(screen_img_gray, template_img, cv2.TM_CCOEFF_NORMED)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
     logging.debug(f"Coordinate search for '{image_name}' match score: {max_val:.2f} (Threshold: {threshold})")
 
+    # --- NEW DEBUGGING BLOCK ---
+    if SAVE_DEBUG_IMAGES:
+        # Draw a rectangle around the location of the BEST match, regardless of threshold
+        top_left = max_loc
+        bottom_right = (top_left[0] + template_w, top_left[1] + template_h)
+        
+        # Draw a green rectangle if it's a success, red if it's a failure
+        color = (0, 255, 0) if max_val >= threshold else (0, 0, 255)
+        cv2.rectangle(screen_img_color, top_left, bottom_right, color, 2)
+        
+        # Put the match score text above the box
+        score_text = f"Score: {max_val:.2f}"
+        cv2.putText(screen_img_color, score_text, (top_left[0], top_left[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+        
+        # Save the debug image
+        image_name_safe = image_name.replace('.','_')
+        filename = f"{instance_name}_{workflow_name}_{image_name_safe}.png"
+        cv2.imwrite(os.path.join(TEMP_DIR, filename), screen_img_color)
+        logging.debug(f"Saved get_coords debug image to {filename}")
+    # --- END OF NEW BLOCK ---
+
     if max_val >= threshold:
-        # max_loc is the top-left corner of the match
-        # Calculate the center of the found region
         center_x = max_loc[0] + template_w // 2
         center_y = max_loc[1] + template_h // 2
         logging.info(f"Found '{image_name}' at coordinates: ({center_x}, {center_y})")
