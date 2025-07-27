@@ -1764,6 +1764,62 @@ scenarios:
 
                               - set:
                                   top_claim_button: "{{ get_coords_from_image('claim_green_bonus.png') }}"
+                        
+                        - click: [ "{{ daily_bonus_coords[0]+215}}", "{{ daily_bonus_coords[1]-105 }}" ] # Click on 20 tasks reward chest
+                        - delay: 2
+                        - set:
+                            claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                        - if:
+                            condition: "claim_button_coords"  # If Claim button is available
+                            then:
+                              - log: "claim_button coordinates found"
+                              - click: "{{ claim_button_coords }}" # Click on the Claim button
+                            else:
+                              - log: "Claim button is not available, continuing without it"
+                        - click: [ "{{ daily_bonus_coords[0]+385}}", "{{ daily_bonus_coords[1]-105 }}" ] # Click on 40 tasks reward chest
+                        - delay: 2
+                        - set:
+                            claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                        - if:
+                            condition: "claim_button_coords"  # If Claim button is available
+                            then:
+                              - log: "claim_button coordinates found"
+                              - click: "{{ claim_button_coords }}" # Click on the Claim button
+                            else:
+                              - log: "Claim button is not available, continuing without it"
+                        - click: [ "{{ daily_bonus_coords[0]+545}}", "{{ daily_bonus_coords[1]-105 }}" ] # Click on 60 tasks reward chest
+                        - delay: 2
+                        - set:
+                            claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                        - if:
+                            condition: "claim_button_coords"  # If Claim button is available
+                            then:
+                              - log: "claim_button coordinates found"
+                              - click: "{{ claim_button_coords }}" # Click on the Claim button
+                            else:
+                              - log: "Claim button is not available, continuing without it"
+                        - click: [ "{{ daily_bonus_coords[0]+720}}", "{{ daily_bonus_coords[1]-105 }}" ] # Click on 80 tasks reward chest
+                        - delay: 2
+                        - set:
+                            claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                        - if:
+                            condition: "claim_button_coords"  # If Claim button is available
+                            then:
+                              - log: "claim_button coordinates found"
+                              - click: "{{ claim_button_coords }}" # Click on the Claim button
+                            else:
+                              - log: "Claim button is not available, continuing without it"
+                        - click: [ "{{ daily_bonus_coords[0]+885}}", "{{ daily_bonus_coords[1]-105 }}" ] # Click on 100 tasks reward chest
+                        - delay: 2
+                        - set:
+                            claim_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                        - if:
+                            condition: "claim_button_coords"  # If Claim button is available
+                            then:
+                              - log: "claim_button coordinates found"
+                              - click: "{{ claim_button_coords }}" # Click on the Claim button
+                            else:
+                              - log: "Claim button is not available, continuing without it"
                       else:
                         - log: "Daily Bonus icon is not available, continuing without it"
                   - click: [60, 50] # exit daily bonus screen
@@ -1886,3 +1942,160 @@ scenarios:
                   - log: "Game icon coordinates not found, cannot restart the game."
                   - send_email: "Dangeon_farming scenario is skipped for the {{ instance_name }} instance and game was not restarted."  
 
+  - name: Supply_Depot
+    description:  Supply Depot farming
+    steps:
+      - set:
+          guild_coords: "{{ get_coords_from_image('Guild.png') }}"
+      - if:
+          condition: "guild_coords"  # This is true if coordinates were found, false
+          then:
+            - set:
+                supply_depot_coords: "{{ get_coords_from_image('supply_depot.png') }}"
+            - if:
+                condition: "supply_depot_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "supply_depot_coords found"
+                  - click: [ "{{ supply_depot_coords[0]}}", "{{ supply_depot_coords[1]-45 }}" ] # Click on the Bonus icon
+                  - delay: 3 # Wait for the Supply Depot screen to open
+                  - set:
+                      free_refresh_yellow_coords: "{{ get_coords_from_image('free_refresh_yellow.png') }}"
+                  - if:
+                      condition: "free_refresh_yellow_coords"  # This is true if coordinates were found, false
+                      then:
+                        - log: "Free refresh button is available, clicking on it"
+                        - click: "{{ free_refresh_yellow_coords }}" # Click on the Free refresh button
+                        - set:
+                            arena_ticket_coords: "{{ get_coords_from_image('arena_ticket.png') }}"
+                        - if:
+                            condition: "arena_ticket_coords"  # This is true if coordinates were found, false
+                            then:
+                              - log: "Arena ticket coordinates found, clicking on it"
+                              - click: "{{ arena_ticket_coords }}" # Click on the Arena ticket
+                              - set:
+                                  buy_button_coords: "{{ get_coords_from_image('buy_green.png') }}"
+                              - if:
+                                  condition: "buy_button_coords"  # If Claim button is available
+                                  then:
+                                    - log: "Buy button coordinates found"
+                                    - click: "{{ buy_button_coords }}" # Click on the Claim button
+                                    - delay: 2
+                                    - set:
+                                        claim_yellow_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                                    - if:
+                                        condition: "claim_yellow_button_coords"  # If Claim button is available
+                                        then:
+                                          - log: "Claim button coordinates found"
+                                          - click: "{{ claim_yellow_button_coords }}" # Click on the Claim button
+                                        else:
+                                          - log: "Claim button is not available, continuing without it"
+                                  else:
+                                    - log: "buy  button is not available, continuing without it"
+                            else:
+                              - log: "Arena ticket is not available, continuing without it"
+                        - set:
+                            casino_tokens_coords: "{{ get_coords_from_image('casino_tokens.png') }}"
+                        - if:
+                            condition: "casino_tokens_coords"  # This is true if coordinates were found, false
+                            then:
+                              - log: "Casino tokens coordinates found, clicking on it"
+                              - click: "{{ casino_tokens_coords }}" # Click on the Casino tokens
+                              - set:
+                                  buy_button_coords: "{{ get_coords_from_image('buy_green.png') }}"
+                              - if:
+                                  condition: "buy_button_coords"  # If Claim button is available
+                                  then:
+                                    - log: "Buy button coordinates found"
+                                    - click: "{{ buy_button_coords }}" # Click on the Claim button
+                                    - delay: 2
+                                    - set:
+                                        claim_yellow_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                                    - if:
+                                        condition: "claim_yellow_button_coords"  # If Claim button is available
+                                        then:
+                                          - log: "Claim button coordinates found"
+                                          - click: "{{ claim_yellow_button_coords }}" # Click on the Claim button
+                                        else:
+                                          - log: "Claim button is not available, continuing without it"
+                                  else:
+                                    - log: "buy  button is not available, continuing without it"
+                            else:
+                              - log: "Casino tokens are not available, continuing without it"
+                        - set:
+                            grey_scroll_coords: "{{ get_coords_from_image('grey_scroll.png') }}"
+                        - if:
+                            condition: "grey_scroll_coords"  # This is true if coordinates were found, false
+                            then:
+                              - log: "Grey scroll coordinates found, clicking on it"
+                              - click: "{{ grey_scroll_coords }}" # Click on the Grey scroll
+                              - set:
+                                  buy_button_coords: "{{ get_coords_from_image('buy_green.png') }}"
+                              - if:
+                                  condition: "buy_button_coords"  # If Claim button is available
+                                  then:
+                                    - log: "Buy button coordinates found"
+                                    - click: "{{ buy_button_coords }}" # Click on the Claim button
+                                    - delay: 2
+                                    - set:
+                                        claim_yellow_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                                    - if:
+                                        condition: "claim_yellow_button_coords"  # If Claim button is available
+                                        then:
+                                          - log: "Claim button coordinates found"
+                                          - click: "{{ claim_yellow_button_coords }}" # Click on the Claim button
+                                        else:
+                                          - log: "Claim button is not available, continuing without it"
+                                  else:
+                                    - log: "buy  button is not available, continuing without it"
+                            else:
+                              - log: "Grey scroll is not available, continuing without it"
+                        - set:
+                            bullet_1_coords: "{{ get_coords_from_image('1_bullet.png') }}"
+                        - if:
+                            condition: "bullet_1_coords"  # This is true if coordinates were found, false
+                            then:
+                              - log: "bullet_1_coords found, clicking on it"
+                              - click: "{{ bullet_1_coords }}" # Click on the 1 bullet
+                              - set:
+                                  buy_button_coords: "{{ get_coords_from_image('buy_green.png') }}"
+                              - if:
+                                  condition: "buy_button_coords"  # If Claim button is available
+                                  then:
+                                    - log: "Buy button coordinates found"
+                                    - click: "{{ buy_button_coords }}" # Click on the Claim button
+                                    - delay: 2
+                                    - set:
+                                        claim_yellow_button_coords: "{{ get_coords_from_image('claim_yellow.png') }}"
+                                    - if:
+                                        condition: "claim_yellow_button_coords"  # If Claim button is available
+                                        then:
+                                          - log: "Claim button coordinates found"
+                                          - click: "{{ claim_yellow_button_coords }}" # Click on the Claim button
+                                        else:
+                                          - log: "Claim button is not available, continuing without it"
+                                  else:
+                                    - log: "buy  button is not available, continuing without it"
+                            else:
+                              - log: "1 bullet is not available, continuing without it"
+
+                      else:
+                        - log: "Free refresh button is not available, continuing without it"
+                  - click: [60, 50] # exit to the main game screen
+
+
+
+          else:
+            - log: "Guild icon is not available. I'm trying to restart the game."
+            - set:
+                game_icon_coords: "{{ get_coords_from_image('clone_evolution.png') }}"
+            - if:
+                condition: "game_icon_coords"  # This is true if coordinates were found, false
+                then:
+                  - log: "Game icon coordinates found, clicking on it to restart the game."
+                  - click: "{{ game_icon_coords }}" # Click on the Game icon to restart the game
+                  - delay: 150 # Wait for the game to restart
+                  - log: "Airship_farming scenario is skipped due to game unavailability and restarted."
+                  - send_email: "Dangeon_farming scenario is skipped for the {{ instance_name }} instance and game was restarted."
+                else:
+                  - log: "Game icon coordinates not found, cannot restart the game."
+                  - send_email: "Dangeon_farming scenario is skipped for the {{ instance_name }} instance and game was not restarted."
