@@ -78,17 +78,34 @@ def connect_adb_to_instance(instance_name, logger=logging):
         logger.error(f"ADB connection failed for {adb_id}: {e}")
     return None
 
+def load_workflow_sets():
+    """Loads all defined workflow sets from the [Workflows] section."""
+    logging.info("Loading workflow sets from the INI file.")
+    workflow_sets = {}
+    if config.has_section("Workflows"):
+        for key, val in config.items("Workflows"):
+            # Split the comma-separated string into a clean list of workflow names
+            workflows = [s.strip() for s in val.split(',') if s.strip()]
+            workflow_sets[key] = workflows
+    logging.info(f"Loaded {len(workflow_sets)} workflow sets.")
+    return workflow_sets
+
 def load_run_order():
     logging.info("Loading run order from [RunOrder] section.")
-    order_list, start_instance = [], None
+    order_list, start_instance, active_set = [], None, None # Add active_set
     if config.has_section("RunOrder"):
         order_str = config.get("RunOrder", "order", fallback="").strip()
         if order_str: order_list = [name.strip() for name in order_str.split(',') if name.strip()]
         start_instance = config.get("RunOrder", "start_from", fallback=None)
         if start_instance: start_instance = start_instance.strip()
+        # Get the new active_set key
+        active_set = config.get("RunOrder", "active_set", fallback=None)
+        if active_set: active_set = active_set.strip()
+
     logging.info(f"Run order: {order_list}")
     logging.info(f"Starting from: {start_instance if start_instance else 'the beginning'}")
-    return order_list, start_instance
+    logging.info(f"Active workflow set: {active_set if active_set else 'None'}")
+    return order_list, start_instance, active_set # Return the new value
 
 def load_hotkey_config():
     hotkeys = {'pause_resume': 'ctrl+p', 'emergency_stop': 'ctrl+h'}

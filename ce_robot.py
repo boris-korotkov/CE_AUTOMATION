@@ -6,7 +6,7 @@ import threading
 import argparse
 import yaml
 from datetime import datetime
-from ce_config import load_instances, load_emulator_type, connect_adb_to_instance, load_run_order, load_general_config, load_hotkey_config
+from ce_config import load_instances, load_emulator_type, connect_adb_to_instance, load_run_order, load_general_config, load_hotkey_config, load_workflow_sets
 from ce_launcher import launch_instance, terminate_instance
 from ce_workflow_engine import WorkflowEngine
 import ce_actions
@@ -17,46 +17,22 @@ pause_event = threading.Event()
 stop_event = threading.Event()
 
 def setup_logging(log_level_str='INFO'):
-    # Get the desired log level object (e.g., logging.INFO) from the config string
     log_level = getattr(logging, log_level_str.upper(), logging.INFO)
-    
-    # Get the root logger
     logger = logging.getLogger()
-    # Set the master gatekeeper level. All handlers will inherit this as their upper limit.
     logger.setLevel(log_level)
-    
-    # Remove any old handlers to prevent duplicate logging if this function is called again
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
-        
-    # Ensure the 'logs' directory exists
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
-        
+    for handler in logger.handlers[:]: logger.removeHandler(handler)
+    if not os.path.exists('logs'): os.makedirs('logs')
     log_filename = f"logs/CE_robot_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"
-    
-    # --- File Handler ---
     file_handler = logging.FileHandler(log_filename)
-    # Set the file handler's level to match the config
-    file_handler.setLevel(log_level) 
-    
-    # --- Console Handler ---
+    file_handler.setLevel(log_level)
     console_handler = logging.StreamHandler(sys.stdout)
-    # Set the console handler's level to also match the config
     console_handler.setLevel(log_level)
-
-    # Create a single formatter and apply it to both handlers
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
-    
-    # Add the configured handlers to the logger
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
-    
-    # These initial messages will now respect the log level
     logging.info("Logging setup complete.")
-    logging.info(f"Log file created at: {log_filename}")
     logging.info(f"Global log level for all handlers set to: {log_level_str}")
 
 def check_for_pause_or_stop():
@@ -95,12 +71,15 @@ def main():
         logging.info(f"Preferred emulator type: {emulator_type}")
         
         all_instances = load_instances()
-        
+        all_workflow_sets = load_workflow_sets()
+
         if args.instance_names:
             execution_list = args.instance_names
             logging.info(f"Processing instances specified on command line: {execution_list}")
+            # When instances are specified, we still need to know which workflow set to use
+            _, _, active_set = load_run_order()
         else:
-            run_order, start_from = load_run_order()
+            run_order, start_from, active_set = load_run_order()
             if not run_order:
                 logging.info("No specific run order found. Processing all defined instances.")
                 execution_list = list(all_instances.keys())
@@ -116,6 +95,26 @@ def main():
         
         logging.info(f"Final execution list: {execution_list}")
 
+        # Determine the final list of workflows to run for ALL instances
+        workflows_to_run = []
+        if args.workflow_file:
+            if not os.path.exists(args.workflow_file):
+                logging.error(f"Custom workflow file not found at path: {args.workflow_file}")
+                sys.exit(1)
+            try:
+                with open(args.workflow_file, 'r') as f:
+                    data = yaml.safe_load(f)
+                    workflows_to_run = [s['name'] for s in data.get('scenarios', [])]
+                logging.info(f"Using custom workflow file: '{args.workflow_file}' with workflows: {workflows_to_run}")
+            except Exception as e:
+                logging.error(f"Could not load/parse custom workflow file '{args.workflow_file}': {e}. Aborting.")
+                sys.exit(1)
+        elif active_set and active_set in all_workflow_sets:
+            workflows_to_run = all_workflow_sets[active_set]
+            logging.info(f"Using '{active_set}' workflow set: {workflows_to_run}")
+        else:
+            logging.warning(f"No valid 'active_set' configured in [RunOrder] or no workflows found. No default workflows will be run.")
+
         for name in execution_list:
             check_for_pause_or_stop()
             if name not in all_instances:
@@ -125,22 +124,6 @@ def main():
             details = all_instances[name]
             command = details.get(f"{emulator_type}_command")
             language = details.get("language")
-
-            workflows_to_run = []
-            if args.workflow_file:
-                if not os.path.exists(args.workflow_file):
-                    logging.error(f"Custom workflow file not found at path: {args.workflow_file}")
-                    sys.exit(1)
-                try:
-                    with open(args.workflow_file, 'r') as f:
-                        data = yaml.safe_load(f)
-                        workflows_to_run = [s['name'] for s in data.get('scenarios', [])]
-                    logging.info(f"Using custom workflow file: '{args.workflow_file}' with workflows: {workflows_to_run}")
-                except Exception as e:
-                    logging.error(f"Could not load/parse custom workflow file '{args.workflow_file}': {e}. Skipping instance.")
-                    continue
-            else:
-                workflows_to_run = details.get("workflows", [])
             
             if not command:
                 logging.warning(f"Skipping instance '{name}' - No command found for emulator type '{emulator_type}'.")
@@ -160,7 +143,6 @@ def main():
                     check_for_pause_or_stop()
                     adb_id = connect_adb_to_instance(name, logger=logging)
                     
-                    # --- THIS IS THE CORRECTED LINE ---
                     if not adb_id:
                         terminate_instance(process, adb_id)
                         time.sleep(15)
@@ -170,7 +152,7 @@ def main():
                     
                     is_loaded = False
                     if check_image:
-                        if ce_actions.get_coords_from_image(adb_id, language,name, "Startup_Check", check_image, check_threshold):
+                        if ce_actions.get_coords_from_image(adb_id, language, name, "Startup_Check", check_image, check_threshold):
                             logging.info("Game load verification successful (Image Found).")
                             is_loaded = True
                         else:

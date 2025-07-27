@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CE Automation - Command Reference</title>
+    <title>CE Automation - User Manual & Command Reference</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -95,69 +95,154 @@
 </head>
 <body>
     <div class="container">
-        <h1>CE Automation - Workflow Command Reference</h1>
-        <p>This document provides a complete reference for all commands and functions available for use in your <code>workflows.yaml</code> files.</p>
+        <h1>CE Automation - User Manual & Command Reference</h1>
+        <p>This document provides a complete guide for configuring and writing automation workflows for the CE Automation script.</p>
 
         <hr>
 
-        <h2>I. Action Commands</h2>
-        <!-- Unchanged Section -->
-        <h3><code>click</code></h3><p>Simulates a tap on the screen at a specific coordinate.</p><ul><li><strong>Syntax:</strong> <code>click: [x, y]</code></li></ul>
-        <h3><code>scroll</code></h3><p>Simulates a swipe gesture on the screen from a starting point.</p><ul><li><strong>Syntax:</strong> <code>scroll: [x, y, direction, distance]</code></li><li><strong>Parameters:</strong> <code>direction</code> must be <code>up</code>, <code>down</code>, <code>left</code>, or <code>right</code>.</li></ul>
-        <h3><code>delay</code></h3><p>Pauses the execution of the script for a specified number of seconds.</p><ul><li><strong>Syntax:</strong> <code>delay: seconds</code></li></ul>
-        <h3><code>log</code></h3><p>Prints a message to the console and the log file for debugging and progress tracking.</p><ul><li><strong>Syntax:</strong> <code>log: "Your message here"</code></li></ul>
-        <h3><code>send_email</code></h3><p>Sends an email notification using the configured Outlook account.</p><ul><li><strong>Syntax:</strong> <code>send_email: "Your message here"</code></li></ul>
-        <h3><code>emergency_exit</code></h3><p>Immediately stops the entire automation script and sends a critical error email. Use this for unrecoverable errors.</p><ul><li><strong>Syntax:</strong> <code>emergency_exit: "Error message"</code></li></ul>
+        <h2>I. Running the Robot</h2>
+        <p>You can run the main script, <code>ce_robot.py</code>, in several ways from your command line. Open a terminal, navigate to the project directory, and use one of the following commands.</p>
+
+        <h3>Standard Mode</h3>
+        <p>Runs the script according to the settings in <code>instances.ini</code>, using the <code>[RunOrder]</code> and <code>[Workflows]</code> sections.</p>
+        <pre><code>python ce_robot.py</code></pre>
+
+        <h3>Targeted Instance(s) Mode</h3>
+        <p>Runs the script for one or more specific instances, ignoring the <code>[RunOrder]</code> section.</p>
+        <pre><code># Run only for the 'Adidas' instance
+python ce_robot.py Adidas
+
+# Run for 'Adidas' and 'CE_2024_1' in that order
+python ce_robot.py Adidas CE_2024_1</code></pre>
+
+        <h3>Custom Workflow File Mode</h3>
+        <p>Uses a specific YAML file for the run instead of the default. This is perfect for testing or running special, one-off tasks. The path should be relative to the script's location.</p>
+        <pre><code># Use a special workflow file for the standard run order
+python ce_robot.py -wf "resources/en/special_tasks.yaml"
+
+# Combine with targeted instances
+python ce_robot.py Adidas -wf "resources/en/test_expedition.yaml"</code></pre>
+
         <hr>
 
-        <h2>II. Variable & Context Commands</h2>
-        <!-- Unchanged Section -->
-        <h3><code>set</code></h3><p>Creates or overwrites a variable in the scenario's context.</p><ul><li><strong>Syntax:</strong> <code>set: { variable_name: value }</code></li><li><strong>Example:</strong> <pre><code>- set: { click_attempts: 0 } # Initialize a loop counter</code></pre></li></ul>
-        <h3><code>increment</code></h3><p>Adds 1 to a numeric variable. If the variable doesn't exist, it is created with a value of 1.</p><ul><li><strong>Syntax:</strong> <code>increment: variable_name</code></li><li><strong>Example:</strong> <pre><code>- increment: click_attempts # Increases the value of 'click_attempts' by 1</code></pre></li></ul>
-        <hr>
+        <h2>II. Core Concepts & Configuration</h2>
         
-        <h2>III. Control Flow Commands</h2>
-        <!-- Unchanged Section -->
-        <h3><code>if / else</code></h3><p>Executes a block of steps only if a condition is met.</p><pre><code>- if:
-    condition: "your_condition_here"
-    then:
-      # ... steps to run if condition is true ...
-    else:
-      # ... (optional) steps to run if condition is false ...</code></pre>
-        <h3><code>while</code></h3><p>Repeatedly executes a block of steps as long as a condition remains true.</p><pre><code>- while:
-    condition: "your_condition_here"
-    do:
-      # ... steps to repeat while the condition is true ...</code></pre>
-        <hr>
+        <h3>The Workflow File</h3>
+        <p>All automation logic is written in YAML files (e.g., <code>workflows.yaml</code>). A file contains one or more <strong>scenarios</strong>. A scenario is a named sequence of <strong>steps</strong> that the robot executes in order.</p>
 
-        <h2>IV. Dynamic Actions & Templating</h2>
-        <p>The real power of the engine comes from using variables and functions to make your actions dynamic. This is done using the Jinja2 templating syntax: <code>{{ ... }}</code>.</p>
-        <div class="note"><strong>The Golden Rule:</strong> To use a variable or perform a calculation as a parameter for an action, you <strong>must</strong> wrap it in quotes and curly braces: <code>"{{ your_variable }}"</code> or <code>"{{ your_variable[0] + 10 }}"</code>.</div>
-        <h3>Dynamic <code>set</code></h3><p>Store the result of a function call in a variable.</p><pre><code># Find the 'Home' button and store its coordinates in the 'home_button_coords' variable
+        <h3>Centralized Workflows in <code>instances.ini</code></h3>
+        <p>To avoid duplicating workflow lists for every instance, you can define them centrally in <code>instances.ini</code>.</p>
+        <ol>
+            <li><strong>Remove</strong> the <code>workflows = ...</code> line from your individual instance sections (e.g., <code>[Adidas]</code>).</li>
+            <li><strong>Add a <code>[Workflows]</code> section</strong> to define named sets of tasks (e.g., `daily_tasks`).</li>
+            <li><strong>Add an <code>active_set</code> key</strong> to your <code>[RunOrder]</code> section to choose which set to run.</li>
+        </ol>
+        <pre><code>[Workflows]
+daily_tasks = Daily_rewards, Campaign_farming, Guild_activity
+weekend_event = Weekend_Boss_Event, Special_Arena
+
+[RunOrder]
+order = Adidas, CE_2024_1
+active_set = daily_tasks</code></pre>
+
+        <h3>Anchor-Based Automation</h3>
+        <p>This is the most important concept for creating reliable scripts. Instead of using fixed, hardcoded coordinates that can break when ads appear or the UI shifts, you should find a visual "anchor" on the screen first, and then perform actions relative to it.</p>
+        <pre><code># The Brittle Way (Avoid This)
+- click: [850, 690] # Fails if the Guild button moves
+
+# The Robust Way (Use This)
 - set:
-    home_button_coords: "{{ get_coords_from_image('home_button.png') }}"</code></pre>
-        <h3>Dynamic <code>click</code> and <code>scroll</code></h3><p>Use variables to define where to click or scroll. This is the key to creating robust, anchor-based automation.</p><pre><code># Click the coordinates stored in the 'home_button_coords' variable
-- click: "{{ home_button_coords }}"
+    guild_button_coords: "{{ get_coords_from_image('guild_button.png') }}"
+- if:
+    condition: "guild_button_coords"
+    then:
+      - click: "{{ guild_button_coords }}"</code></pre>
 
-# Click 50 pixels to the right of the found button
-- click: [ "{{ home_button_coords[0] + 50 }}", "{{ home_button_coords[1] }}" ]</code></pre>
-        <h3>Using Functions in Templates</h3><p>You can use certain built-in functions like <code>len()</code> to inspect variables directly in your templates.</p><pre><code># Log how many buttons were found
-- log: "Found {{ len(all_buttons) }} buttons on the screen."</code></pre>
         <hr>
 
-        <h2>V. Functions for Finding & Comparing</h2>
-        <p>These functions can be used within the <code>{{ ... }}</code> templating syntax, typically with the <code>set</code> command, or inside the <code>condition:</code> string of an <code>if</code> or <code>while</code> block.</p>
+        <h2>III. YAML Workflow Commands</h2>
+        
+        <h3>Action Commands</h3>
+        <p>These commands perform a direct action in the emulator.</p>
+
+        <h4><code>click</code></h4>
+        <p>Simulates a tap on the screen.</p>
+        <pre><code># Click a static, hardcoded coordinate
+- click: [100, 250]</code></pre>
+
+        <h4><code>scroll</code></h4>
+        <p>Simulates a swipe gesture.</p>
+        <pre><code># Scroll up from the middle of the screen by 400 pixels
+- scroll: [540, 700, "up", 400]</code></pre>
+
+        <h4><code>delay</code></h4>
+        <p>Pauses the script. Essential for waiting for screens to load.</p>
+        <pre><code># Wait 3.5 seconds for an animation to finish
+- delay: 3.5</code></pre>
+        
+        <h4><code>log</code></h4>
+        <p>Prints a message to the console and log file.</p>
+        <pre><code># Log the current progress
+- log: "Starting attack #{{ attempt_counter }} in the Arena."</code></pre>
+        
+        <h4><code>send_email</code></h4>
+        <p>Sends a notification email to the address in <code>instances.ini</code>.</p>
+        <pre><code># Send a notification that a rare event has started
+- send_email: "The 'Galactic Conquest' event is now active!"</code></pre>
+
+        <h4><code>emergency_exit</code></h4>
+        <p>Immediately stops the entire program. Use for unrecoverable errors.</p>
+        <pre><code># Stop the script if a critical element is not found
+- emergency_exit: "Could not find the 'Home' button. State is unrecoverable."</code></pre>
+
+        <h3>Variable & Context Commands</h3>
+        <p>These commands manage the script's internal memory (context).</p>
+
+        <h4><code>set</code></h4>
+        <p>Creates or updates a variable.</p>
+        <pre><code># Initialize a counter variable to 0
+- set:
+    attack_counter: 0</code></pre>
+
+        <h4><code>increment</code></h4>
+        <p>Adds 1 to a numeric variable.</p>
+        <pre><code># Increment the counter after an attack
+- increment: attack_counter</code></pre>
+        
+        <h3>Control Flow Commands</h3>
+        <p>These commands control the script's logic.</p>
+
+        <h4><code>if / then / else</code></h4>
+        <p>Executes steps conditionally.</p>
+        <pre><code>- if:
+    condition: "attack_counter < 5"
+    then:
+      - log: "Still have attacks left. Continuing."
+    else:
+      - log: "No attacks left. Exiting Arena."</code></pre>
+        
+        <h4><code>while / do</code></h4>
+        <p>Executes steps in a loop as long as a condition is true.</p>
+        <pre><code>- while:
+    condition: "get_coords_from_image('claim_reward.png')"
+    do:
+      - log: "Found a reward to claim. Clicking it."
+      - click: "{{ get_coords_from_image('claim_reward.png') }}"
+      - delay: 2</code></pre>
+        
+        <hr>
+
+        <h2>IV. Functions for Finding & Comparing</h2>
+        <p>These functions are the "eyes" of the robot. They can be used with <code>set</code> to store a result, or directly inside a <code>condition</code> string.</p>
         
         <h3>Static Object Detection (Template Matching)</h3>
-        <p>These functions are fast and precise. Use them for UI elements that are static (not animated, scaled, or rotated).</p>
+        <p>Fast and precise. Use for UI elements that are static (not animated).</p>
         
-        <h4><code>get_coords_from_image</code></h4>
+        <h4><code>get_coords_from_image('image.png', threshold)</code></h4>
         <p>Finds the <strong>single best match</strong> for a static image and returns its center coordinates `(x, y)`.</p>
-        <ul><li><strong>Syntax:</strong> <code>get_coords_from_image('image.png', threshold)</code></li></ul>
 
-        <h4><code>get_all_coords_from_image</code></h4>
-        <p>Finds <strong>all occurrences</strong> of a static image and returns a <strong>sorted list</strong> of coordinates `[(x1, y1), ...]`. The list is sorted from top-to-bottom, then left-to-right.</p>
-        <ul><li><strong>Syntax:</strong> <code>get_all_coords_from_image('image.png', threshold)</code></li></ul>
+        <h4><code>get_all_coords_from_image('image.png', threshold)</code></h4>
+        <p>Finds <strong>all occurrences</strong> of a static image and returns a <strong>sorted list</strong> of coordinates `[(x1, y1), ...]`, from top-to-bottom, left-to-right.</p>
         <div class="note">
             <h4>Targeting Specific Occurrences</h4>
             <p>Because the returned list is sorted, you can reliably target specific items:</p>
@@ -174,20 +259,15 @@
       - log: "Clicking the lowest of {{ len(all_buttons) }} buttons."
       - click: "{{ all_buttons[-1] }}"</code></pre>
         </div>
-
-        <h4><code>compare_with_image</code></h4>
-        <p>Returns <code>True/False</code> if a static image exists in a specific region.</p>
-        <ul><li><strong>Syntax:</strong> <code>compare_with_image(x, y, w, h, 'image.png', threshold)</code></li></ul>
-
-        <h3>Animated/Dynamic Object Detection (Feature Matching)</h3>
-        <p>These functions are more robust and should be used for elements that are animated, slightly scaled, rotated, or have inconsistent appearances.</p>
         
-        <h4><code>get_coords_from_features</code></h4>
+        <h3>Animated/Dynamic Object Detection (Feature Matching)</h3>
+        <p>More robust. Use for elements that are animated, scaled, or rotated.</p>
+        
+        <h4><code>get_coords_from_features('image.png', min_match_count)</code></h4>
         <p>Finds the <strong>single best match</strong> for a dynamic/animated image and returns its center coordinates `(x, y)`.</p>
-        <ul><li><strong>Syntax:</strong> <code>get_coords_from_features('image.png', min_match_count)</code></li></ul>
 
-        <h4><code>get_all_coords_from_features</code></h4>
-        <p>Finds <strong>all occurrences</strong> of a dynamic/animated image and returns a <strong>sorted list</strong> of coordinates `[(x1, y1), ...]`.</p>
+        <h4><code>get_all_coords_from_features(...)</code></h4>
+        <p>Finds <strong>all occurrences</strong> of a dynamic/animated image and returns a sorted list of coordinates.</p>
         <ul><li><strong>Syntax:</strong> <code>get_all_coords_from_features('image.png', min_match_count, eps, min_samples)</code></li></ul>
         <div class="note">
             <h4>Targeting Specific Occurrences</h4>
@@ -203,33 +283,20 @@
         </div>
         <div class="warning">
             <h4>Tuning Feature Detection</h4>
-            <p>Feature-based functions require tuning to work reliably. Use <code>ce_tester.py</code> to experiment with these parameters.</p>
+            <p>Feature-based functions require tuning. Use <code>ce_tester.py</code> to experiment.</p>
             <ul>
-                <li><code>min_match_count</code>: Minimum "good" feature matches required. Lower it (e.g., to 7) for small images; raise it (e.g., to 15) to avoid false positives.</li>
-                <li><code>eps</code> (for <code>get_all_coords...</code>): Max pixel distance for points to be in the same object cluster. A good start is half the template's width/height. Increase if one object is detected as many; decrease if many objects are detected as one.</li>
-                <li><code>min_samples</code> (for <code>get_all_coords...</code>): Min features needed to form a cluster. Lower it (e.g., to 3) if small objects aren't detected.</li>
+                <li><code>min_match_count</code>: Minimum good feature matches required. Lower for small/simple images; raise to avoid false positives.</li>
+                <li><code>eps</code>: Max pixel distance for points to be in the same object. A good start is half the template's width/height.</li>
+                <li><code>min_samples</code>: Min features needed to form a valid object cluster. Lower for small objects.</li>
             </ul>
         </div>
         
         <h3>Text and Other Comparisons</h3>
-        <h4><code>compare_with_any_image</code></h4>
-        <p>Returns <code>True</code> if <strong>any one</strong> of a list of static images is found in a region.</p>
-        <ul><li><strong>Syntax:</strong> <code>compare_with_any_image(x, y, w, h, ['img1.png', 'img2.png'])</code></li></ul>
-        
-        <h4><code>compare_with_text</code> / <code>compare_with_text_easyocr</code></h4>
-        <p>Returns <code>True</code> if the expected text is found within a region of the screen (case-insensitive).</p>
-        <ul><li><strong>Syntax:</strong> <code>compare_with_text(x, y, w, h, 'expected text')</code></li></ul>
-        
-        <hr>
-
-        <h2>VI. Best Practices & Tips</h2>
+        <p>These functions are for use inside a <code>condition:</code> string and return <code>True/False</code>.</p>
         <ul>
-            <li><strong>Anchor-Based Automation is Best:</strong> Avoid hardcoded coordinates like <code>click: [100, 200]</code>. Use a <code>get_coords_...</code> function to find an element first, then use the returned variable to click. This makes your scripts resilient to ads and UI shifts.</li>
-            <li><strong>Use the Right Tool for the Job:</strong> Use template matching (<code>..._image</code>) for static UI elements (it's faster). Use feature matching (<code>..._features</code>) for anything that moves, scales, or changes appearance.</li>
-            <li><strong>Use the Tester:</strong> Use <code>ce_tester.py</code> to test your anchor images and tune your feature detection parameters before writing a complex workflow.</li>
-            <li><strong>Quote Your Conditions:</strong> When in doubt, always wrap your entire <code>condition:</code> string in double quotes <code>"..."</code> to prevent issues with special characters, especially if they contain <code>[</code> or <code>]</code>.</li>
-            <li><strong>Add Delays:</strong> After a click that triggers a screen transition or animation, add a <code>delay</code> to give the game time to load before you look for the next element.</li>
-            <li><strong>Indentation is Key:</strong> YAML relies on strict indentation. All steps in a block (<code>steps:</code>, <code>then:</code>, <code>do:</code>) must be indented and start with a <code>-</code>.</li>
+            <li><code>compare_with_image(x, y, w, h, 'image.png', threshold)</code></li>
+            <li><code>compare_with_any_image(x, y, w, h, ['img1.png', 'img2.png'])</code></li>
+            <li><code>compare_with_text(x, y, w, h, 'expected text')</code></li>
         </ul>
     </div>
 </body>
