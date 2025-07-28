@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автоматизация CE - Руководство пользователя и справочник команд</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            border-bottom-width: 3px;
+        }
+        h2 {
+            margin-top: 40px;
+        }
+        h3 {
+            margin-top: 30px;
+            border-bottom-width: 1px;
+        }
+        h4 {
+            border-bottom-style: none;
+            margin-top: 20px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #dee2e6;
+            margin: 40px 0;
+        }
+        code {
+            background-color: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            color: inherit;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        strong {
+            color: #34495e;
+        }
+        .note {
+            background-color: #e7f3ff;
+            border-left: 5px solid #0d6efd;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Автоматизация CE - Руководство пользователя и справочник команд</h1>
+        <p>Этот документ представляет собой полное руководство по настройке и написанию сценариев автоматизации для скрипта CE Automation.</p>
+
+        <hr>
+
+        <h2>I. Основные концепции и конфигурация</h2>
+        
+        <h3>Файл сценариев (Workflow)</h3>
+        <p>Вся логика автоматизации описывается в YAML-файлах (например, <code>workflows.yaml</code>). Файл содержит один или несколько <strong>сценариев</strong>. Сценарий — это именованная последовательность <strong>шагов</strong>, которые робот выполняет по порядку.</p>
+
+        <h3>Автоматизация на основе якорей (Anchor-Based Automation)</h3>
+        <p>Это важнейшая концепция для создания надежных скриптов. Вместо использования фиксированных, жестко заданных координат, которые могут сломаться при появлении рекламы или сдвиге интерфейса, следует сначала найти визуальный "якорь" на экране, а затем выполнять действия относительно него.</p>
+        <pre><code># Хрупкий способ (избегайте этого)
+- click: [850, 690] # Не сработает, если кнопка "Гильдия" сместится
+
+# Надежный способ (используйте этот)
+- set:
+    guild_button_coords: "{{ get_coords_from_image('guild_button.png') }}"
+- if:
+    condition: "guild_button_coords"
+    then:
+      - click: "{{ guild_button_coords }}"</code></pre>
+
+        <hr>
+
+        <h2>II. Команды для YAML-сценариев</h2>
+        
+        <h3>Команды действий</h3>
+        <p>Эти команды выполняют прямое действие в эмуляторе.</p>
+
+        <h4><code>click</code></h4>
+        <p>Симулирует нажатие на экран.</p>
+        <pre><code># Клик по статичным, жёстко заданным координатам
+- click: [100, 250]</code></pre>
+
+        <h4><code>scroll</code></h4>
+        <p>Симулирует жест прокрутки (свайп).</p>
+        <pre><code># Прокрутить вверх от центра нижней части экрана на 400 пикселей
+- scroll: [540, 700, "up", 400]</code></pre>
+
+        <h4><code>delay</code></h4>
+        <p>Приостанавливает выполнение скрипта. Необходимо для ожидания загрузки экранов.</p>
+        <pre><code># Подождать 3.5 секунды, пока закончится анимация
+- delay: 3.5</code></pre>
+        
+        <h4><code>log</code></h4>
+        <p>Выводит сообщение в консоль и лог-файл.</p>
+        <pre><code># Залогировать текущий прогресс
+- log: "Начинаю атаку №{{ attempt_counter }} на Арене."</code></pre>
+        
+        <h4><code>send_email</code></h4>
+        <p>Отправляет уведомление на email, указанный в <code>instances.ini</code>.</p>
+        <pre><code># Отправить уведомление о начале редкого события
+- send_email: "Событие 'Галактическое завоевание' началось!"</code></pre>
+
+        <h4><code>emergency_exit</code></h4>
+        <p>Немедленно останавливает всю программу. Используйте для невосстановимых ошибок.</p>
+        <pre><code># Остановить скрипт, если критический элемент не найден
+- emergency_exit: "Не удалось найти кнопку 'Домой'. Состояние невосстановимо."</code></pre>
+
+        <h3>Команды для переменных и контекста</h3>
+        <p>Эти команды управляют внутренней памятью скрипта (контекстом).</p>
+
+        <h4><code>set</code></h4>
+        <p>Создает или перезаписывает переменную.</p>
+        <pre><code># Инициализировать переменную-счетчик значением 0
+- set:
+    attack_counter: 0</code></pre>
+
+        <h4><code>increment</code></h4>
+        <p>Увеличивает числовую переменную на 1.</p>
+        <pre><code># Увеличить счетчик после атаки
+- increment: attack_counter</code></pre>
+        
+        <h3>Команды управления потоком</h3>
+        <p>Эти команды управляют логикой вашего сценария.</p>
+
+        <h4><code>if / then / else</code></h4>
+        <p>Выполняет шаги в зависимости от условия.</p>
+        <pre><code>- if:
+    condition: "attack_counter < 5"
+    then:
+      - log: "Атаки еще остались. Продолжаю."
+    else:
+      - log: "Атаки закончились. Выхожу с Арены."</code></pre>
+        
+        <h4><code>while / do</code></h4>
+        <p>Выполняет шаги в цикле, пока условие истинно.</p>
+        <pre><code>- while:
+    condition: "get_coords_from_image('claim_reward.png')"
+    do:
+      - log: "Найдена награда для сбора. Нажимаю."
+      - click: "{{ get_coords_from_image('claim_reward.png') }}"
+      - delay: 2</code></pre>
+        
+        <hr>
+
+        <h2>III. Функции для поиска и сравнения</h2>
+        <p>Эти функции — "глаза" робота. Их можно использовать с командой <code>set</code> для сохранения результата или напрямую в строке <code>condition</code>.</p>
+        
+        <h3>Поиск статичных объектов (Сопоставление по шаблону)</h3>
+        <p>Быстрые и точные функции. Используйте их для элементов интерфейса, которые являются статичными (не анимированы, не масштабируются и не вращаются).</p>
+        
+        <h4><code>get_coords_from_image('image.png', threshold)</code></h4>
+        <p>Находит <strong>единственное лучшее совпадение</strong> для статичного изображения и возвращает координаты его центра `(x, y)`.</p>
+
+        <h4><code>get_all_coords_from_image('image.png', threshold)</code></h4>
+        <p>Находит <strong>все вхождения</strong> статичного изображения и возвращает <strong>отсортированный список</strong> координат `[(x1, y1), ...]`, отсортированный сверху вниз, затем слева направо.</p>
+        <div class="note">
+            <h4>Выбор конкретных объектов</h4>
+            <p>Поскольку возвращаемый список отсортирован, вы можете надежно выбирать конкретные элементы:</p>
+            <ul>
+                <li><strong>Самый верхний элемент:</strong> Используйте индекс <code>[0]</code>.</li>
+                <li><strong>Самый нижний элемент:</strong> Используйте индекс <code>[-1]</code>.</li>
+            </ul>
+            <pre><code># Найти все кнопки "Забрать" и нажать на самую нижнюю
+- set:
+    all_buttons: "{{ get_all_coords_from_image('claim_button.png') }}"
+- if:
+    condition: "all_buttons"
+    then:
+      - log: "Нажимаю на самую нижнюю из {{ len(all_buttons) }} кнопок."
+      - click: "{{ all_buttons[-1] }}"</code></pre>
+        </div>
+        
+        <h3>Поиск анимированных/динамических объектов (Сопоставление по признакам)</h3>
+        <p>Более надежные функции. Используйте их для элементов, которые анимированы, немного масштабируются, вращаются или имеют меняющийся внешний вид.</p>
+        
+        <h4><code>get_coords_from_features('image.png', min_match_count)</code></h4>
+        <p>Находит <strong>единственное лучшее совпадение</strong> для динамического/анимированного изображения и возвращает координаты его центра `(x, y)`.</p>
+
+        <h4><code>get_all_coords_from_features(...)</code></h4>
+        <p>Находит <strong>все вхождения</strong> динамического/анимированного изображения и возвращает отсортированный список координат.</p>
+        <ul><li><strong>Синтаксис:</strong> <code>get_all_coords_from_features('image.png', min_match_count, eps, min_samples)</code></li></ul>
+        <div class="warning">
+            <h4>Настройка распознавания по признакам</h4>
+            <p>Функции на основе признаков требуют настройки для надежной работы. Используйте <code>ce_tester.py</code> для экспериментов с этими параметрами.</p>
+            <ul>
+                <li><code>min_match_count</code>: Минимальное количество "хороших" совпадений признаков. <strong>Уменьшайте</strong> (например, до 7) для маленьких изображений; <strong>увеличивайте</strong> (например, до 15) чтобы избежать ложных срабатываний.</li>
+                <li><code>eps</code>: Максимальное расстояние в пикселях между точками, чтобы они считались частью одного объекта. Хорошее начальное значение — примерно половина ширины/высоты вашего шаблона.</li>
+                <li><code>min_samples</code>: Минимальное количество признаков, необходимое для формирования валидного кластера (объекта). <strong>Уменьшайте</strong> (например, до 3), если маленькие объекты не обнаруживаются.</li>
+            </ul>
+        </div>
+        
+        <h3>Сравнение текста и другие проверки</h3>
+        <p>Эти функции используются внутри строки <code>condition:</code> и возвращают <code>True/False</code>.</p>
+        <ul>
+            <li><code>compare_with_image(x, y, w, h, 'image.png', threshold)</code></li>
+            <li><code>compare_with_any_image(x, y, w, h, ['img1.png', 'img2.png'])</code></li>
+            <li><code>compare_with_text(x, y, w, h, 'ожидаемый текст')</code></li>
+        </ul>
+    </div>
+</body>
+</html>
