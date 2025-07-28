@@ -23,6 +23,15 @@ While this framework can be adapted for any mobile game, the current implementat
 *   **Interactive Tester Script:** A powerful command-line tool (`ce_tester.py`) for debugging, finding coordinates, and testing image recognition on the fly.
 *   **Hotkeys & Notifications:** Supports global hotkeys to pause/resume or stop the script, and can send email notifications for critical events.
 
+## Demo Video
+
+Watch a short video demonstrating the bot running its daily tasks on a game instance.
+
+➡️ **[Download Demo Video (fromsmash.com)](https://fromsmash.com/CE-Automation-demo)**
+
+> [!NOTE]
+> This download link expires on **August 04, 2025**. If the link is no longer working, please open an issue on this repository to request an updated demo video.
+
 ## Technology Stack
 *   **Language:** Python 3
 *   **Computer Vision:** OpenCV, NumPy
@@ -117,7 +126,7 @@ You will be presented with a menu of options to find coordinates, test image mat
 ## Creating Workflows
 Automation logic is defined in YAML files (e.g., `resources/en/workflows.yaml`).
 
-**For a complete command reference and guide to writing workflows, please see the [User Manual & Command Reference](USER_MANUAL.html).**
+**For a complete command reference and guide to writing workflows, please see the [User Manual & Command Reference](USER_MANUAL.md).**
 
 ---
 
@@ -132,13 +141,11 @@ You can package the script into a single `.exe` file using **PyInstaller**. This
 2.  **Run the PyInstaller command:**
     This command packages the main script and correctly includes your necessary resource files and configurations. Run it from your project's root directory.
     ```bash
-    pyinstaller --noconsole --onefile --name "CE_Robot" ^
+    pyinstaller --onefile --name "CE_Robot" ^
     --add-data "instances.ini;." ^
-    --add-data "workflows.yaml;." ^
     --add-data "resources;resources" ^
     ce_robot.py
     ```
-    *   `--noconsole`: Prevents the command prompt from opening when you run the `.exe`.
     *   `--onefile`: Packages everything into a single executable.
     *   `--add-data`: This is critical. It tells PyInstaller to bundle your configuration and resource files.
     *   The final `.exe` will be located in the `dist` folder.

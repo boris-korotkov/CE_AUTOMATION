@@ -8,3 +8,9 @@ logs/
 
 # Exclude log files
 *.log
+# Exclude compiled Python files
+*.pyc
+# Exclude IDE specific files
+.idea/
+# Exclude executable files
+*.exe
