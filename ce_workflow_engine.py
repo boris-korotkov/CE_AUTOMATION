@@ -4,6 +4,7 @@ import os
 import time
 from jinja2 import Template, Environment
 import ce_actions
+from datetime import datetime
 
 # Setup a Jinja2 environment that includes the 'len' function
 jinja_env = Environment()
@@ -19,7 +20,10 @@ class WorkflowEngine:
             'click': lambda args: ce_actions.click(self.adb_id, *args),
             'delay': lambda args: time.sleep(args),
             'scroll': lambda args: ce_actions.scroll(self.adb_id, *args),
-            'send_email': lambda args: ce_actions.send_email("CE Automation Notification", self._render_template_string(args)),
+            'send_email': lambda args: ce_actions.send_email(
+                subject=f"CE Automation Notification - {datetime.now().strftime('%Y-%m-%d')}",
+                body=self._render_template_string(args)
+            ),
             'log': lambda args: logging.info(f"[WORKFLOW] {self._render_template_string(args)}"),
             'emergency_exit': lambda args: ce_actions.emergency_exit(args)
         }
@@ -41,6 +45,8 @@ class WorkflowEngine:
             return template_string
         template = jinja_env.from_string(template_string)
         full_context = {**self.context, **self.conditional_actions}
+        full_context['current_date'] = datetime.now().strftime("%Y-%m-%d")
+        
         return template.render(full_context)
     
     def _render_params(self, params):

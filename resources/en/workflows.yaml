@@ -1267,6 +1267,10 @@ scenarios:
           condition: "guild_coords"  # This is true if coordinates were found, false
           then:
             - log: "Guild coordinates found"
+            - scroll: [150,400, right,400] # Scroll left to make sure Expedition icon is visible
+            - scroll: [150,400, right,400] # Scroll left to make sure Expedition icon is visible
+            - scroll: [150,400, right,400] # Scroll left to make sure Expedition icon is visible
+            - scroll: [150,400, right,400] # Scroll left to make sure Expedition icon is visible
             - set:
                 taverna_icon_coords: "{{ get_coords_from_image('tavern.png') }}"
             - if:

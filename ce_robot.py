@@ -109,7 +109,7 @@ def main():
             except Exception as e:
                 logging.error(f"Could not load/parse custom workflow file '{args.workflow_file}': {e}. Aborting.")
                 sys.exit(1)
-        elif active_set and active_set in all_workflow_sets:
+        elif active_set and active_set.lower() in all_workflow_sets:
             workflows_to_run = all_workflow_sets[active_set]
             logging.info(f"Using '{active_set}' workflow set: {workflows_to_run}")
         else:
